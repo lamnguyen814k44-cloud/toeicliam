@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOEIC Master Pro - Earn & Learn</title>
+    
     <!-- React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -11,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Firebase SDKs (Compat Version for Stability) -->
+    <!-- Firebase SDKs (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
@@ -19,47 +20,26 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
-        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
         .rotate-y-0 { transform: rotateY(0deg); }
-        
         .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 1rem;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-
         .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            80% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); }
-        }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
         .animate-popIn { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        .player-active {
-            border: 2px solid #FBBF24; /* yellow-400 */
-            background-color: #FFFBEB; /* yellow-50 */
-            transform: scale(1.05);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
     </style>
 </head>
 <body>
@@ -67,7 +47,7 @@
 
     <script type="text/babel">
         // --- 1. CẤU HÌNH FIREBASE ---
-        const firebaseConfigManual = {
+        const firebaseConfig = {
             apiKey: "AIzaSyCM_gVrI8Yfg-eghdzMT5aIKx_vh9eNavc",
             authDomain: "toeic-game.firebaseapp.com",
             projectId: "toeic-game",
@@ -77,20 +57,6 @@
             measurementId: "G-4TTN534GNR"
         };
 
-        let firebaseConfig;
-        let isEnvConfig = false;
-
-        if (typeof __firebase_config !== 'undefined') {
-            try {
-                firebaseConfig = JSON.parse(__firebase_config);
-                isEnvConfig = true;
-            } catch (e) {
-                firebaseConfig = firebaseConfigManual;
-            }
-        } else {
-            firebaseConfig = firebaseConfigManual;
-        }
-        
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -98,14 +64,11 @@
         const app = firebase.apps.length ? firebase.app() : null;
         const auth = app ? firebase.auth() : null;
         const db = app ? firebase.firestore() : null;
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        const googleProvider = auth ? new firebase.auth.GoogleAuthProvider() : null;
         
-        const appId = (typeof __app_id !== 'undefined') ? __app_id : 'toeic-master-live-v1';
+        const appId = 'toeic-master-live-v1';
 
         // --- DATA ---
-        const systemApiKey = ""; 
-        const getApiKey = () => localStorage.getItem('user_gemini_api_key') || (systemApiKey.length > 10 ? systemApiKey : null);
-
         const rawDataString = `
 Contracts|Abide by|/ə’baid/|Tuân thủ, tuân theo|Parties must abide by the terms.|Follow, Obey|Violate
 Contracts|Agreement|/ə’gri:mənt/|Hợp đồng, giao kèo|Signed the agreement.|Contract, Deal|Disagreement
@@ -224,25 +187,50 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
 
         const toeicData = parseData(rawDataString);
 
-        // --- GLOBAL SOUND HELPER ---
+        // --- GLOBAL SOUND HELPER (WEB AUDIO API) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
         const playSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
+
             const now = audioCtx.currentTime;
+
             if (type === 'flip') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.05); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05); osc.start(now); osc.stop(now + 0.05);
+                // Tiếng tách nhẹ
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
             } else if (type === 'match') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.4); osc.start(now); osc.stop(now + 0.4);
+                // Tiếng Ting (Thành công)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
             } else if (type === 'miss') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.2); osc.start(now); osc.stop(now + 0.2);
+                // Tiếng Bụp (Sai)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
             }
         };
 
         // --- COMPONENTS ---
+
         const SpeakerButton = ({ text, lang = 'US', className = "" }) => {
             const speak = (e) => {
                 e.stopPropagation();
@@ -251,51 +239,83 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
                     const utterance = new SpeechSynthesisUtterance(text);
                     const voices = window.speechSynthesis.getVoices();
                     let voice = null;
-                    if (lang === 'US') { voice = voices.find(v => v.lang === 'en-US' && !v.name.includes('UK')); } 
-                    else { voice = voices.find(v => v.lang === 'en-GB' || v.name.includes('UK')); }
-                    if (voice) utterance.voice = voice; else utterance.lang = lang === 'US' ? 'en-US' : 'en-GB';
+                    if (lang === 'US') {
+                        voice = voices.find(v => v.lang === 'en-US' && !v.name.includes('UK'));
+                    } else {
+                        voice = voices.find(v => v.lang === 'en-GB' || v.name.includes('UK'));
+                    }
+                    if (voice) utterance.voice = voice;
+                    else utterance.lang = lang === 'US' ? 'en-US' : 'en-GB';
                     utterance.rate = 0.9;
                     window.speechSynthesis.speak(utterance);
                 }
             };
-            return ( <button onClick={speak} className={`inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all border ${className} ${lang === 'US' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'}`} title={lang === 'US' ? 'Giọng Mỹ (US)' : 'Giọng Anh (UK)'}> <i className="fas fa-volume-up"></i> {lang} </button> );
-        };
 
-        const LinkedWordList = ({ text, jumpToWord, colorClass = "text-gray-600" }) => {
-            if (!text || text === "N/A") return <span className="text-gray-400">N/A</span>;
-            const words = text.split(',').map(w => w.trim());
-            return ( <span> {words.map((w, i) => { const exists = toeicData.some(item => item.word.toLowerCase() === w.toLowerCase()); return ( <React.Fragment key={i}> {i > 0 && ", "} {exists ? ( <button onClick={(e) => { e.stopPropagation(); jumpToWord(w); }} className={`${colorClass} hover:underline font-semibold cursor-pointer`}>{w}</button> ) : ( <span className={colorClass}>{w}</span> )} </React.Fragment> ); })} </span> );
+            return (
+                <button 
+                    onClick={speak} 
+                    className={`inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all border ${className} 
+                    ${lang === 'US' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'}`}
+                    title={lang === 'US' ? 'Giọng Mỹ (US)' : 'Giọng Anh (UK)'}
+                >
+                    <i className="fas fa-volume-up"></i> {lang}
+                </button>
+            );
         };
 
         const WordItem = ({ item, isLearned, isDetailOpen, isHighlighted, toggleLearned, toggleDetails }) => (
             <div id={`word-${item.id}`} className={`p-4 rounded-lg border transition-all ${isHighlighted ? 'ring-2 ring-yellow-400 bg-yellow-50' : 'bg-white border-slate-200'} ${isLearned ? 'bg-emerald-50' : ''}`}>
                 <div className="flex justify-between">
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1"> <span className="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1 rounded">{item.topic}</span> </div>
-                        <div className="flex items-center gap-2 flex-wrap"> <h3 className="text-lg font-bold text-slate-800">{item.word}</h3> <div className="flex gap-1"> <SpeakerButton text={item.word} lang="US" /> <SpeakerButton text={item.word} lang="UK" /> </div> </div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1 rounded">{item.topic}</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-lg font-bold text-slate-800">{item.word}</h3>
+                            <div className="flex gap-1">
+                                <SpeakerButton text={item.word} lang="US" />
+                                <SpeakerButton text={item.word} lang="UK" />
+                            </div>
+                        </div>
                         <p className="text-xs text-slate-500 font-mono mt-1">{item.ipa}</p>
                     </div>
                     <button onClick={() => toggleLearned(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center border ${isLearned ? 'bg-emerald-500 text-white' : 'text-gray-300'}`}><i className="fas fa-check"></i></button>
                 </div>
                 <div className="mt-2 pt-2 border-t border-slate-100">
                     <p className="font-medium text-sm text-slate-800">{item.meaning}</p>
-                    <button onClick={() => toggleDetails(item.id)} className="text-xs text-indigo-500 font-semibold mt-1"> {isDetailOpen ? 'Thu gọn' : 'Chi tiết'} <i className={`fas fa-chevron-${isDetailOpen ? 'up' : 'down'}`}></i> </button>
-                    {isDetailOpen && ( <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded"> <p><strong>Ví dụ:</strong> "{item.example}"</p> </div> )}
+                    <button onClick={() => toggleDetails(item.id)} className="text-xs text-indigo-500 font-semibold mt-1">
+                        {isDetailOpen ? 'Thu gọn' : 'Chi tiết'} <i className={`fas fa-chevron-${isDetailOpen ? 'up' : 'down'}`}></i>
+                    </button>
+                    {isDetailOpen && (
+                        <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">
+                            <p><strong>Ví dụ:</strong> "{item.example}"</p>
+                        </div>
+                    )}
                 </div>
             </div>
         );
 
-        const WordListView = ({ data, learnedWords, toggleLearned, showDetails, toggleDetails, highlightedId }) => ( <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"> {data.map(item => ( <WordItem key={item.id} item={item} isLearned={learnedWords.has(item.id)} isDetailOpen={showDetails === item.id} isHighlighted={highlightedId === item.id} toggleLearned={toggleLearned} toggleDetails={toggleDetails} /> ))} </div> );
+        const WordListView = ({ data, learnedWords, toggleLearned, showDetails, toggleDetails, highlightedId }) => (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {data.map(item => (
+                    <WordItem key={item.id} item={item} isLearned={learnedWords.has(item.id)} isDetailOpen={showDetails === item.id} isHighlighted={highlightedId === item.id} toggleLearned={toggleLearned} toggleDetails={toggleDetails} />
+                ))}
+            </div>
+        );
 
         const FlashcardView = ({ data, learnedWords, toggleLearned }) => {
             const [index, setIndex] = React.useState(0);
             const [isFlipped, setIsFlipped] = React.useState(false);
+
             React.useEffect(() => { setIndex(0); setIsFlipped(false); }, [data.length]);
+
             const next = () => { setIsFlipped(false); setTimeout(() => setIndex(prev => (prev + 1) % data.length), 150); };
             const prev = () => { setIsFlipped(false); setTimeout(() => setIndex(prev => (prev - 1 + data.length) % data.length), 150); };
+
             if (data.length === 0) return <div className="text-center p-10 text-gray-400">Không có dữ liệu</div>;
             const item = data[index];
             const isLearned = learnedWords.has(item.id);
+
             return (
                 <div className="flex flex-col items-center h-full justify-center py-4">
                     <div className="perspective-1000 w-full max-w-sm h-80 cursor-pointer group" onClick={() => setIsFlipped(!isFlipped)}>
@@ -306,25 +326,33 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
                                 <h2 className="text-4xl font-black text-slate-800 mb-2">{item.word}</h2>
                                 <span className="text-lg text-slate-500 font-mono mb-4 bg-slate-50 px-2 rounded">{item.ipa}</span>
                                 <div className="text-xs text-slate-400 animate-pulse mt-4 flex items-center gap-1"><i className="fas fa-sync-alt"></i> Chạm để lật</div>
-                                <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}> <SpeakerButton text={item.word} lang="US" /> <SpeakerButton text={item.word} lang="UK" /> </div>
+                                <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
+                                    <SpeakerButton text={item.word} lang="US" />
+                                    <SpeakerButton text={item.word} lang="UK" />
+                                </div>
                             </div>
                             <div className="card-face rotate-y-180 bg-slate-800 text-white">
                                 <h3 className="text-2xl font-bold mb-2 text-yellow-400 px-4">{item.meaning}</h3>
                                 <p className="text-sm italic opacity-90 mb-4 px-6 text-slate-300">"{item.example}"</p>
-                                <div className="flex gap-4 absolute bottom-6"> <button onClick={(e) => { e.stopPropagation(); toggleLearned(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition ${isLearned ? 'bg-green-500 text-white shadow-lg shadow-green-500/50' : 'bg-white/10 hover:bg-white/30'}`}><i className="fas fa-check"></i></button> </div>
+                                <div className="flex gap-4 absolute bottom-6">
+                                    <button onClick={(e) => { e.stopPropagation(); toggleLearned(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition ${isLearned ? 'bg-green-500 text-white shadow-lg shadow-green-500/50' : 'bg-white/10 hover:bg-white/30'}`}><i className="fas fa-check"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-6 mt-6"> <button onClick={prev} className="px-5 py-2 bg-white shadow-md rounded-full hover:bg-indigo-50 text-indigo-900 transition"><i className="fas fa-arrow-left"></i></button> <button onClick={next} className="px-5 py-2 bg-white shadow-md rounded-full hover:bg-indigo-50 text-indigo-900 transition"><i className="fas fa-arrow-right"></i></button> </div>
+                    <div className="flex items-center gap-6 mt-6">
+                        <button onClick={prev} className="px-5 py-2 bg-white shadow-md rounded-full hover:bg-indigo-50 text-indigo-900 transition"><i className="fas fa-arrow-left"></i></button>
+                        <button onClick={next} className="px-5 py-2 bg-white shadow-md rounded-full hover:bg-indigo-50 text-indigo-900 transition"><i className="fas fa-arrow-right"></i></button>
+                    </div>
                 </div>
             );
         };
-        
-        // --- NEW FEATURES: LEADERBOARD & GAME ---
+
         const LeaderboardModal = ({ isOpen, onClose, user, coins }) => {
             const [leaders, setLeaders] = React.useState([]);
             const [name, setName] = React.useState('');
             const [isSaving, setIsSaving] = React.useState(false);
+
             React.useEffect(() => {
                 if (isOpen) {
                     if (!db) return;
@@ -344,11 +372,18 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
                     }
                 }
             }, [isOpen, user]);
+
             const fetchLeaders = async () => {
                 if (!db) return;
                 const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
-                colRef.onSnapshot((snapshot) => { const data = []; snapshot.forEach(doc => data.push(doc.data())); data.sort((a, b) => b.coins - a.coins); setLeaders(data.slice(0, 10)); });
+                colRef.onSnapshot((snapshot) => {
+                    const data = [];
+                    snapshot.forEach(doc => data.push(doc.data()));
+                    data.sort((a, b) => b.coins - a.coins);
+                    setLeaders(data.slice(0, 10));
+                });
             };
+
             const saveProfile = async () => {
                 if (!name.trim() || !user || !db) return;
                 setIsSaving(true);
@@ -358,18 +393,37 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
                     alert("Đã lưu tên thành công!");
                 } catch (e) { alert("Lỗi lưu tên."); } finally { setIsSaving(false); }
             };
+
             if (!isOpen) return null;
+
             return (
                 <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="p-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white flex justify-between items-center"> <h2 className="text-xl font-black flex items-center gap-2"><i className="fas fa-trophy"></i> Bảng Xếp Hạng</h2> <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition"><i className="fas fa-times"></i></button> </div>
+                        <div className="p-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white flex justify-between items-center">
+                            <h2 className="text-xl font-black flex items-center gap-2"><i className="fas fa-trophy"></i> Bảng Xếp Hạng</h2>
+                            <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition"><i className="fas fa-times"></i></button>
+                        </div>
                         <div className="p-5 overflow-y-auto flex-1">
                             {!db && <div className="p-3 mb-4 bg-red-100 text-red-700 text-xs rounded border border-red-200">Bạn chưa cấu hình Firebase.</div>}
                             <div className="bg-indigo-50 p-4 rounded-xl mb-6 border border-indigo-100">
                                 <h3 className="font-bold text-indigo-900 mb-2 text-sm uppercase">Hồ sơ của bạn</h3>
-                                <div className="flex gap-2"> <input type="text" className="flex-1 border rounded px-3 py-2 text-sm" placeholder="Tên hiển thị..." value={name} onChange={(e) => setName(e.target.value)} disabled={!db} /> <button onClick={saveProfile} disabled={isSaving || !db} className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700 disabled:opacity-50">{isSaving ? '...' : 'Lưu'}</button> </div>
+                                <div className="flex gap-2">
+                                    <input type="text" className="flex-1 border rounded px-3 py-2 text-sm" placeholder="Tên hiển thị..." value={name} onChange={(e) => setName(e.target.value)} disabled={!db} />
+                                    <button onClick={saveProfile} disabled={isSaving || !db} className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700 disabled:opacity-50">{isSaving ? '...' : 'Lưu'}</button>
+                                </div>
                             </div>
-                            <div className="space-y-3"> {leaders.map((leader, index) => ( <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${leader.userId === user?.uid ? 'bg-yellow-50 border-yellow-300' : 'bg-white border-slate-100'}`}> <div className="flex items-center gap-3"> <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-400 text-white' : index === 1 ? 'bg-gray-300 text-white' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</div> <div><div className="font-bold text-slate-800 text-sm">{leader.displayName || 'Ẩn danh'}</div>{leader.userId === user?.uid && <span className="text-[10px] text-indigo-500 font-bold bg-indigo-100 px-1.5 rounded">Bạn</span>}</div> </div> <div className="font-black text-indigo-600 flex items-center gap-1">{leader.coins.toLocaleString()} <i className="fas fa-coins text-yellow-500 text-xs"></i></div> </div> ))} {leaders.length === 0 && <p className="text-center text-gray-400 text-sm">{db ? "Chưa có dữ liệu." : "Vui lòng kết nối Firebase."}</p>} </div>
+                            <div className="space-y-3">
+                                {leaders.map((leader, index) => (
+                                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${leader.userId === user?.uid ? 'bg-yellow-50 border-yellow-300' : 'bg-white border-slate-100'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-400 text-white' : index === 1 ? 'bg-gray-300 text-white' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</div>
+                                            <div><div className="font-bold text-slate-800 text-sm">{leader.displayName || 'Ẩn danh'}</div>{leader.userId === user?.uid && <span className="text-[10px] text-indigo-500 font-bold bg-indigo-100 px-1.5 rounded">Bạn</span>}</div>
+                                        </div>
+                                        <div className="font-black text-indigo-600 flex items-center gap-1">{leader.coins.toLocaleString()} <i className="fas fa-coins text-yellow-500 text-xs"></i></div>
+                                    </div>
+                                ))}
+                                {leaders.length === 0 && <p className="text-center text-gray-400 text-sm">{db ? "Chưa có dữ liệu." : "Vui lòng kết nối Firebase."}</p>}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -394,108 +448,33 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
             const [onlineStatus, setOnlineStatus] = React.useState('idle'); 
             const [inputRoomId, setInputRoomId] = React.useState('');
 
-            React.useEffect(() => { if (gameMode && gameMode !== 'pvp_online') startLevel(); }, [level, gameMode]);
-
-            React.useEffect(() => {
-                if (gameMode === 'pvp_online' && roomId && db) {
-                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
-                    const unsubscribe = roomRef.onSnapshot((doc) => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            if (isHost && onlineStatus === 'waiting' && data.guestId) setOnlineStatus('playing');
-                            if (data.status === 'playing') {
-                                setCards(data.board || []); setFlippedIndices(data.flipped || []); setMatchedIndices(data.matched || []); setScores(data.scores || { host: 0, guest: 0 });
-                                setCurrentPlayer(data.turn === data.hostId ? 1 : 2); setProcessing(data.processing || false);
-                                if ((data.matched || []).length === (data.board || []).length && (data.board || []).length > 0) {
-                                    const s = data.scores; const winner = s.host > s.guest ? 1 : (s.guest > s.host ? 2 : 'draw'); setPvPWinner(winner);
-                                }
-                            }
-                        }
-                    });
-                    return () => unsubscribe();
+            // Functions defined before use
+            const speak = (text) => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'en-US';
+                    window.speechSynthesis.speak(u);
                 }
-            }, [gameMode, roomId, isHost, onlineStatus]);
-
-            const createRoom = async () => {
-                if (!user || !db) return alert("Vui lòng đăng nhập để chơi Online!");
-                const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
-                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
-                const selectedItems = shuffledData.slice(0, 8); 
-                let cardSet = [];
-                selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
-                cardSet.sort(() => Math.random() - 0.5);
-                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
-                await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
-                setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting');
             };
 
-            const joinRoom = async () => {
-                if (!user || !db) return alert("Vui lòng đăng nhập!");
-                if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
-                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
-                const doc = await roomRef.get();
-                if (!doc.exists) return alert("Phòng không tồn tại!");
-                if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
-                await roomRef.update({ guestId: user.uid, status: 'playing' });
-                setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing');
-            };
-
-            const handleOnlineCardClick = async (index) => {
-                const amIHost = isHost;
-                if (processing) return; 
-                const isMyTurn = (amIHost && currentPlayer === 1) || (!amIHost && currentPlayer === 2);
-                if (!isMyTurn) return; 
-                if (flippedIndices.includes(index) || matchedIndices.includes(index)) return;
+            const handleCardClick = (index) => {
+                if (gameMode === 'pvp_online') {
+                    handleOnlineCardClick(index);
+                    return;
+                }
+                if (processing || flippedIndices.includes(index) || matchedIndices.includes(index)) return;
+                
                 playSound('flip');
-                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
                 const newFlipped = [...flippedIndices, index];
-                await roomRef.update({ flipped: newFlipped });
+                setFlippedIndices(newFlipped);
+                setAiMemory(prev => ({ ...prev, [index]: cards[index].itemId }));
+                
                 if (newFlipped.length === 2) {
-                    await roomRef.update({ processing: true });
-                    const card1 = cards[newFlipped[0]];
-                    const card2 = cards[newFlipped[1]];
-                    const isMatch = card1.itemId === card2.itemId;
-                    if (isMatch) {
-                        setTimeout(async () => {
-                            playSound('match');
-                            const wordToSpeak = card1.type === 'word' ? card1.content : card2.content;
-                            speak(wordToSpeak);
-                            const newMatched = [...matchedIndices, ...newFlipped];
-                            const newScores = { ...scores };
-                            if (amIHost) newScores.host += 100; else newScores.guest += 100;
-                            await roomRef.update({ matched: newMatched, flipped: [], scores: newScores, processing: false });
-                        }, 600);
-                    } else {
-                        setTimeout(async () => {
-                            playSound('miss');
-                            const doc = await roomRef.get();
-                            const currentData = doc.data();
-                            const nextTurn = currentData.turn === currentData.hostId ? currentData.guestId : currentData.hostId;
-                            await roomRef.update({ flipped: [], processing: false, turn: nextTurn });
-                        }, 1000);
-                    }
+                    setProcessing(true);
+                    checkForMatch(newFlipped);
                 }
             };
-
-            React.useEffect(() => {
-                if (gameMode === 'ai' && currentPlayer === 2 && !levelComplete && !pvpWinner && !processing) {
-                    const aiTurnTimer = setTimeout(() => { performAiTurn(); }, 1200); 
-                    return () => clearTimeout(aiTurnTimer);
-                }
-            }, [currentPlayer, gameMode, processing, levelComplete, pvpWinner]);
-
-            const startLevel = () => {
-                setLevelComplete(false); setMatchedIndices([]); setFlippedIndices([]); setPvPWinner(null); setAiMemory({});
-                if (level === 1) { setCurrentPlayer(1); setScores({ 1: 0, 2: 0 }); }
-                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
-                const pairCount = (gameMode === 'ai') ? 8 : 6;
-                const selectedItems = shuffledData.slice(0, pairCount);
-                let cardSet = [];
-                selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
-                setCards(cardSet.sort(() => Math.random() - 0.5));
-            };
-
-            const speak = (text) => { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; window.speechSynthesis.speak(u); } };
 
             const performAiTurn = () => {
                 const memoryIndices = Object.keys(aiMemory).map(Number).filter(idx => !matchedIndices.includes(idx));
@@ -510,16 +489,6 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
                     if (matchInMemory !== undefined) secondIdx = matchInMemory; else { const remaining = allAvailable.filter(i => i !== firstIdx); secondIdx = remaining[Math.floor(Math.random() * remaining.length)]; }
                 }
                 handleCardClick(firstIdx); setTimeout(() => { handleCardClick(secondIdx); }, 800);
-            };
-
-            const handleCardClick = (index) => {
-                if (gameMode === 'pvp_online') { handleOnlineCardClick(index); return; }
-                if (processing || flippedIndices.includes(index) || matchedIndices.includes(index)) return;
-                playSound('flip');
-                const newFlipped = [...flippedIndices, index];
-                setFlippedIndices(newFlipped);
-                setAiMemory(prev => ({ ...prev, [index]: cards[index].itemId }));
-                if (newFlipped.length === 2) { setProcessing(true); checkForMatch(newFlipped); }
             };
 
             const checkForMatch = ([idx1, idx2]) => {
@@ -560,6 +529,119 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
                 }
             };
 
+            const handleOnlineCardClick = async (index) => {
+                const amIHost = isHost;
+                if (processing) return; 
+                const isMyTurn = (amIHost && currentPlayer === 1) || (!amIHost && currentPlayer === 2);
+                if (!isMyTurn) return; 
+                if (flippedIndices.includes(index) || matchedIndices.includes(index)) return;
+                playSound('flip');
+                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
+                const newFlipped = [...flippedIndices, index];
+                await roomRef.update({ flipped: newFlipped });
+                if (newFlipped.length === 2) {
+                    await roomRef.update({ processing: true });
+                    const card1 = cards[newFlipped[0]];
+                    const card2 = cards[newFlipped[1]];
+                    const isMatch = card1.itemId === card2.itemId;
+                    if (isMatch) {
+                        setTimeout(async () => {
+                            playSound('match');
+                            const wordToSpeak = card1.type === 'word' ? card1.content : card2.content;
+                            speak(wordToSpeak);
+                            const newMatched = [...matchedIndices, ...newFlipped];
+                            const newScores = { ...scores };
+                            if (amIHost) newScores.host += 100; else newScores.guest += 100;
+                            await roomRef.update({ matched: newMatched, flipped: [], scores: newScores, processing: false });
+                        }, 600);
+                    } else {
+                        setTimeout(async () => {
+                            playSound('miss');
+                            const doc = await roomRef.get();
+                            const currentData = doc.data();
+                            const nextTurn = currentData.turn === currentData.hostId ? currentData.guestId : currentData.hostId;
+                            await roomRef.update({ flipped: [], processing: false, turn: nextTurn });
+                        }, 1000);
+                    }
+                }
+            };
+
+            // Init Game
+            React.useEffect(() => { if (gameMode && gameMode !== 'pvp_online') startLevel(); }, [level, gameMode]);
+
+            // Online Sync
+            React.useEffect(() => {
+                if (gameMode === 'pvp_online' && roomId && db) {
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
+                    const unsubscribe = roomRef.onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (isHost && onlineStatus === 'waiting' && data.guestId) setOnlineStatus('playing');
+                            if (data.status === 'playing') {
+                                setCards(data.board || []); setFlippedIndices(data.flipped || []); setMatchedIndices(data.matched || []); setScores(data.scores || { host: 0, guest: 0 });
+                                setCurrentPlayer(data.turn === data.hostId ? 1 : 2); setProcessing(data.processing || false);
+                                if ((data.matched || []).length === (data.board || []).length && (data.board || []).length > 0) {
+                                    const s = data.scores; const winner = s.host > s.guest ? 1 : (s.guest > s.host ? 2 : 'draw'); setPvPWinner(winner);
+                                }
+                            }
+                        }
+                    }, (error) => {
+                        console.error("Lỗi đồng bộ:", error);
+                        if (onlineStatus !== 'idle') alert("Mất kết nối với phòng chơi! Kiểm tra mạng hoặc Quyền truy cập Firestore.");
+                    });
+                    return () => unsubscribe();
+                }
+            }, [gameMode, roomId, isHost, onlineStatus]);
+
+            // AI Turn Logic
+            React.useEffect(() => {
+                if (gameMode === 'ai' && currentPlayer === 2 && !levelComplete && !pvpWinner && !processing) {
+                    const aiTurnTimer = setTimeout(() => { performAiTurn(); }, 1200); 
+                    return () => clearTimeout(aiTurnTimer);
+                }
+            }, [currentPlayer, gameMode, processing, levelComplete, pvpWinner]);
+
+            const startLevel = () => {
+                setLevelComplete(false); setMatchedIndices([]); setFlippedIndices([]); setPvPWinner(null); setAiMemory({});
+                if (level === 1) { setCurrentPlayer(1); setScores({ 1: 0, 2: 0 }); }
+                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
+                const pairCount = (gameMode === 'ai' || gameMode === 'pvp_online') ? 8 : 6;
+                const selectedItems = shuffledData.slice(0, pairCount);
+                let cardSet = [];
+                selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
+                setCards(cardSet.sort(() => Math.random() - 0.5));
+            };
+
+            const createRoom = async () => {
+                if (!user || !db) return alert("Vui lòng đăng nhập để chơi Online!");
+                try {
+                    const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const shuffledData = [...allData].sort(() => Math.random() - 0.5);
+                    const selectedItems = shuffledData.slice(0, 8); 
+                    let cardSet = [];
+                    selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
+                    cardSet.sort(() => Math.random() - 0.5);
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
+                    await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
+                    setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting');
+                } catch (error) { console.error("Lỗi tạo phòng:", error); alert("Không thể tạo phòng. Lỗi: " + error.code + ". Hãy chắc chắn bạn đã BẬT Firestore ở chế độ Test Mode."); }
+            };
+
+            const joinRoom = async () => {
+                if (!user || !db) return alert("Vui lòng đăng nhập!");
+                if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
+                try {
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
+                    const doc = await roomRef.get();
+                    if (!doc.exists) return alert("Phòng không tồn tại!");
+                    if (doc.data().hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình! Hãy dùng trình duyệt khác/Tab ẩn danh để test.");
+                    if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+                    await roomRef.update({ guestId: user.uid, status: 'playing' });
+                    setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing');
+                } catch (error) { console.error("Lỗi vào phòng:", error); alert("Lỗi kết nối phòng: " + error.message); }
+            };
+
+            // RENDER FUNCTIONS
             if (!gameMode) {
                 return (
                     <div className="flex flex-col items-center justify-center h-[500px] gap-6 animate-fadeIn">
@@ -674,7 +756,6 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
 
             const logout = async () => {
                 await auth.signOut();
-                // onAuthStateChanged will handle re-signing in anonymously
             };
 
             React.useEffect(() => {
