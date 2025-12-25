@@ -52,6 +52,12 @@
             100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
         }
         .coin-float { animation: coinUp 0.8s ease-out forwards; pointer-events: none; }
+
+        .topic-chip.selected {
+            background-color: #4F46E5; /* Indigo 600 */
+            color: white;
+            border-color: #4338ca;
+        }
     </style>
 </head>
 <body>
@@ -85,359 +91,127 @@
 
         // --- DATA ---
         const rawDataString = `
-Contracts|Abide by|/ə'baid/|Tuân thủ, tuân theo (quy định, điều khoản)|Parties must abide by the terms.|Follow, Obey|Violate
-Contracts|Agreement|/ə'gri:mənt/|Hợp đồng, thỏa thuận giữa các bên|Signed the agreement.|Contract, Deal|Disagreement
-Contracts|Agree|/ə'gri:/|Đồng ý, tán thành với ý kiến hoặc đề xuất|I agree with the plan.|Consent, Concur|Disagree
-Contracts|Assurance|/ə'ʃuərəns/|Sự đảm bảo, cam kết chắc chắn về điều gì đó|Gave assurance of quality.|Guarantee, Pledge|Doubt
-Contracts|Cancellation|/,kænse'leiʃn/|Sự hủy bỏ (hợp đồng, đơn hàng)|Flight cancellation.|Annulment|Confirmation
-Contracts|Determine|/di'tə:min/|Quyết định, xác định rõ ràng điều gì đó|Determine the cause.|Decide, Ascertain|Hesitate
-Contracts|Engage|/in'geidʤ/|Tham gia, cam kết vào một hoạt động hoặc hợp đồng|Engage in business.|Participate|Withdraw
-Contracts|Establish|/is'tæbliʃ/|Thiết lập, thành lập (công ty, quy định)|Establish a company.|Set up, Found|Destroy
-Contracts|Obligate|/'ɔbligeit/|Bắt buộc, ràng buộc về mặt pháp lý hoặc đạo đức|Legally obligated.|Compel, Force|Free
-Contracts|Party|/'pɑ:ti/|Bên (tham gia trong hợp đồng hoặc thỏa thuận)|Both parties agreed.|Side, Faction|N/A
-Contracts|Provision|/prə'viʒn/|Điều khoản, quy định cụ thể trong hợp đồng|Contract provision.|Clause, Stipulation|Removal
-Contracts|Resolve|/ri'zɔlv/|Giải quyết, tìm ra giải pháp cho vấn đề|Resolve the issue.|Solve, Settle|Complicate
-Contracts|Specific|/spi'sifik/|Cụ thể, rõ ràng, riêng biệt|Specific instructions.|Particular, Precise|General
-Marketing|Attract|/ə'trækt/|Thu hút, lôi cuốn (khách hàng, sự chú ý)|Attract customers.|Lure, Draw|Repel
-Marketing|Compare|/kəm'peə/|So sánh để tìm điểm khác biệt hoặc giống nhau|Compare prices.|Contrast|Ignore
-Marketing|Competition|/,kɔmpi'tiʃn/|Sự cạnh tranh giữa các doanh nghiệp|Market competition.|Rivalry|Cooperation
-Marketing|Consume|/kən'sju:m/|Tiêu thụ, sử dụng hết (sản phẩm, tài nguyên)|Consume energy.|Use, Devour|Produce
-Marketing|Convince|/kən'vins/|Thuyết phục ai đó tin hoặc làm điều gì|Convince the client.|Persuade|Discourage
-Marketing|Currently|/ˈkʌrəntli/|Hiện tại, vào thời điểm này|Currently unavailable.|Presently, Now|Formerly
-Marketing|Fad|/fæd/|Mốt nhất thời, trào lưu tạm thời|Just a passing fad.|Trend, Craze|Tradition
-Marketing|Inspiration|/,inspə'reiʃn/|Cảm hứng, nguồn động lực sáng tạo|Source of inspiration.|Motivation|Discouragement
-Marketing|Market|/'mɑ:kit/|Thị trường; tiếp thị sản phẩm|Target market.|Trade, Sell|Buy
-Marketing|Persuasion|/pə'sweiʤn/|Sự thuyết phục, khả năng làm người khác tin theo|Power of persuasion.|Influence|Force
-Marketing|Productive|/prəˈdʌktɪv/|Có năng suất, hiệu quả cao|Productive meeting.|Efficient|Unproductive
-Marketing|Satisfaction|/,sætis'fækʃn/|Sự hài lòng, thỏa mãn của khách hàng|Customer satisfaction.|Contentment|Dissatisfaction
-Warranties|Characteristic|/,kæriktə'ristik/|Đặc điểm, đặc tính riêng biệt|Key characteristic.|Trait, Feature|Uncharacteristic
-Warranties|Consequence|/'kɔnsikwəns/|Hậu quả, kết quả của một hành động|Face the consequences.|Result, Outcome|Cause
-Warranties|Consider|/kən'sidə/|Cân nhắc, xem xét kỹ lưỡng|Consider the offer.|Think about|Ignore
-Warranties|Cover|/'kʌvə/|Bao gồm, chi trả (trong bảo hành, bảo hiểm)|Warranty covers repairs.|Include, Insure|Exclude
-Warranties|Expiration|/,ekspaiə'reiʃn/|Sự hết hạn, thời điểm kết thúc hiệu lực|Expiration date.|Termination|Start
-Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Frequently asked.|Often|Rarely
-Warranties|Imply|/im'plai/|Ngụ ý, ám chỉ một cách gián tiếp|Imply a threat.|Suggest|State
-Warranties|Promise|/'prɔmis/|Lời hứa, cam đoan sẽ làm điều gì đó|Keep a promise.|Vow, Pledge|Deny
-Warranties|Protect|/prə'tekt/|Bảo vệ, che chở khỏi nguy hiểm hoặc hư hại|Protect data.|Guard, Shield|Attack
-Warranties|Reputation|/,repju:'teiʃn/|Danh tiếng, uy tín của cá nhân hoặc tổ chức|Good reputation.|Fame, Status|Infamy
-Warranties|Require|/ri'kwaiə/|Yêu cầu, đòi hỏi phải có điều gì đó|Require assistance.|Need, Demand|Optional
-Warranties|Variety|/və'raiəti/|Sự đa dạng, nhiều loại khác nhau|Variety of choices.|Diversity|Uniformity
-Planning|Address|/ə'dres/|Giải quyết, xử lý (vấn đề); trình bày|Address the problem.|Deal with|Ignore
-Planning|Avoid|/ə'vɔid/|Tránh, né tránh điều gì đó|Avoid mistakes.|Evade, Shun|Confront
-Planning|Demonstrate|/'demənstreit/|Chứng minh, minh họa cách thức hoặc sự thật|Demonstrate how.|Show, Prove|Hide
-Planning|Develop|/di'veləp/|Phát triển, cải thiện dần dần|Develop skills.|Grow, Evolve|Stagnate
-Planning|Evaluate|/i'væljueit/|Đánh giá, xem xét giá trị hoặc chất lượng|Evaluate performance.|Assess, Judge|Neglect
-Planning|Gather|/'gæðə/|Thu thập, tập hợp lại một nơi|Gather data.|Collect|Disperse
-Planning|Offer|/'ɔfə/|Đề nghị, đưa ra (cơ hội, sản phẩm)|Make an offer.|Propose|Refuse
-Planning|Primarily|/'praimərili/|Chủ yếu, trước hết về mặt quan trọng|Primarily responsible.|Mainly|Secondarily
-Planning|Risk|/rɪsk/|Rủi ro, nguy cơ có thể xảy ra tổn thất|Financial risk.|Danger, Hazard|Safety
-Planning|Strategy|/ˈstrætədʒi/|Chiến lược, kế hoạch dài hạn để đạt mục tiêu|Marketing strategy.|Plan, Tactic|Improvisation
-Planning|Strong|/strɔɳ/|Mạnh mẽ, vững chắc, có ảnh hưởng lớn|Strong leadership.|Powerful|Weak
-Planning|Substitution|/,sʌbsti'tju:ʃn/|Sự thay thế, việc dùng cái khác thay cho cái ban đầu|Product substitution.|Replacement|Retention
-Conferences|Accommodate|/ə'kɔmədeit/|Cung cấp chỗ ở; đáp ứng nhu cầu|Accommodate guests.|House, Fit|Reject
-Conferences|Arrangement|/ə'reindʤmənt/|Sự sắp xếp, chuẩn bị trước|Travel arrangement.|Preparation|Disorder
-Conferences|Association|/ə,sousi'eiʃn/|Hiệp hội, tổ chức có mục đích chung|Trade association.|Organization|Separation
-Conferences|Attend|/ə'tend/|Tham dự, có mặt tại sự kiện|Attend the conference.|Present at|Miss
-Conferences|Get in touch|/tʌtʃ/|Liên lạc, liên hệ với ai đó|Get in touch soon.|Contact|Ignore
-Conferences|Hold|/hould/|Tổ chức, giữ (sự kiện, cuộc họp)|Hold a meeting.|Conduct|Cancel
-Conferences|Location|/lou'keiʃn/|Vị trí, địa điểm diễn ra sự kiện|Prime location.|Place, Site|N/A
-Conferences|Overcrowded|/əʊvəˈkraʊdɪd/|Đông nghịt, quá tải người|Overcrowded room.|Congested|Empty
-Conferences|Register|/'redʤistə/|Đăng ký tham gia chính thức|Register online.|Enroll, Sign up|Withdraw
-Conferences|Select|/si'lekt/|Chọn lựa cẩn thận từ nhiều lựa chọn|Select a winner.|Choose, Pick|Reject
-Conferences|Session|/'seʃn/|Phiên họp, buổi làm việc|Morning session.|Meeting|Break
-Conferences|Take part in|/pɑ:t/|Tham gia, tham dự vào hoạt động|Take part in discussion.|Participate|Avoid
-Computers|Access|/ˈækses/|Truy cập, quyền sử dụng hệ thống|Access denied.|Enter|Exit
-Computers|Allocate|/ˈæləkeɪt/|Phân bổ, phân phối tài nguyên|Allocate memory.|Assign|Withhold
-Computers|Compatible|/kəm'pætəbl/|Tương thích, có thể hoạt động cùng nhau|Compatible software.|Consistent|Incompatible
-Computers|Delete|/di'li:t/|Xóa bỏ vĩnh viễn (dữ liệu, file)|Delete files.|Erase, Remove|Restore
-Computers|Display|/dis'plei/|Hiển thị trên màn hình|Display screen.|Show, Exhibit|Hide
-Computers|Duplicate|/'dju:plikit/|Sao chép, tạo bản sao giống hệt|Duplicate copy.|Copy, Replicate|Original
-Computers|Failure|/'feiljə/|Sự hỏng hóc, thất bại trong hoạt động|System failure.|Breakdown|Success
-Computers|Figure out|/'figjə/|Tìm hiểu, giải quyết hoặc hiểu ra điều gì|Figure out why.|Solve|Misunderstand
-Computers|Ignore|/ig'nɔ:/|Bỏ qua, không chú ý đến|Ignore warnings.|Disregard|Heed
-Computers|Search|/sə:tʃ/|Tìm kiếm thông tin trên hệ thống|Search online.|Seek, Hunt|Find
-Computers|Shut down|/ʃʌt daʊn/|Tắt máy, ngừng hoạt động hệ thống|Shut down PC.|Turn off|Start up
-Computers|Warning|/'wɔ:niɳ/|Cảnh báo về nguy hiểm hoặc vấn đề|Warning sign.|Caution, Alert|Approval
-Office Tech|Affordable|/əˈfɔːd/|Có giá phải chăng, có khả năng chi trả được|Affordable price.|Cheap, Reasonable|Expensive
-Office Tech|As needed|/ni:did/|Khi cần thiết, theo nhu cầu phát sinh|Update as needed.|When necessary|Always
-Office Tech|Be in charge of|/tʃɑ:dʤ/|Chịu trách nhiệm, phụ trách công việc|In charge of sales.|Responsible for|Subordinate to
-Office Tech|Capacity|/kə'pæsiti/|Sức chứa, dung lượng; năng lực|Storage capacity.|Volume, Size|Incapacity
-Office Tech|Durable|/ˈdjʊərəbl/|Bền, có độ bền cao, sử dụng lâu dài|Durable material.|Long-lasting|Fragile
-Office Tech|Initiative|/i'niʃiətiv/|Sáng kiến, tính chủ động trong công việc|Take initiative.|Drive|Apathy
-Office Tech|Physically|/ˈfɪzɪkli/|Về mặt vật lý, thể chất|Physically fit.|Bodily|Mentally
-Office Tech|Provider|/prə'vaidə/|Nhà cung cấp dịch vụ hoặc sản phẩm|Service provider.|Supplier|Consumer
-Office Tech|Recur|/ri'kə:/|Tái diễn, xảy ra lại nhiều lần|Error recurs.|Repeat|Cease
-Office Tech|Reduction|/ri'dʌkʃn/|Sự giảm bớt, cắt giảm (chi phí, số lượng)|Cost reduction.|Decrease|Increase
-Office Tech|Stay on top of|/tɔp/|Nắm bắt tình hình, theo dõi sát sao|Stay on top of work.|Keep up with|Fall behind
-Office Tech|Stock|/stɒk/|Hàng dự trữ, hàng tồn kho|In stock.|Inventory|Debt
-Procedures|Appreciation|/ə,pri:ʃi'eiʃn/|Sự đánh giá cao, lòng biết ơn|Show appreciation.|Gratitude|Ingratitude
-Procedures|Be made of|/meid/|Được làm bằng (vật liệu gì)|Made of steel.|Consist of|N/A
-Procedures|Bring in|/briɳ/|Tuyển dụng; đưa vào, mang lại (lợi nhuận)|Bring in experts.|Hire, Introduce|Remove
-Procedures|Casually|/ˈkæʒuəli/|Một cách bình thường, không trang trọng, xuề xòa|Dress casually.|Informally|Formally
-Procedures|Code|/koud/|Quy định, quy tắc; mã số|Dress code.|Rule, Law|N/A
-Procedures|Expose|/iks'pouz/|Phơi bày, vạch trần sự thật|Expose the truth.|Reveal|Hide
-Procedures|Glimpse|/glimps/|Cái nhìn thoáng qua, chớp nhoáng|Catch a glimpse.|Glance, Peek|Stare
-Procedures|Out of|/aut/|Hết, cạn kiệt, không còn (hàng, tiền)|Out of stock.|Lacking|Full of
-Procedures|Outdated|/aut'deitid/|Lỗi thời, không còn phù hợp với thời đại|Outdated system.|Obsolete|Modern
-Procedures|Practice|/'præktis/|Thực hành; thói quen, tập quán trong công việc|Practice daily.|Habit, Custom|Theory
-Procedures|Reinforce|/,ri:in'fɔ:s/|Tăng cường, củng cố (quy định, kỹ năng)|Reinforce rules.|Strengthen|Weaken
-Procedures|Verbally|/'və:bəli/|Bằng lời nói, bằng miệng (không viết)|Agreed verbally.|Orally|Written
-Electronics|Answering machine|/ˈɑːnsərɪŋ məˈʃiːn/|Máy trả lời tự động ghi lại tin nhắn khi chủ nhân vắng mặt|Check the answering machine for messages.|Voicemail system|N/A
-Electronics|Automation|/ˌɔːtəˈmeɪʃn/|Tự động hóa, việc sử dụng máy móc thay con người|Factory automation increases efficiency.|Mechanization|Manual operation
-Electronics|Bandwidth|/ˈbændwɪdθ/|Băng thông, khả năng truyền dữ liệu của mạng|High bandwidth allows faster downloads.|Data capacity|N/A
-Electronics|Battery|/ˈbætəri/|Pin, ắc quy cung cấp điện cho thiết bị|My phone battery is almost dead.|Power cell|N/A
-Electronics|Capacity|/kəˈpæsəti/|Dung lượng lưu trữ hoặc khả năng chứa đựng|This hard drive has 1TB capacity.|Storage space, Volume|Incapacity
-Electronics|Circuitry|/ˈsɜːrkɪtri/|Hệ thống mạch điện trong thiết bị điện tử|The circuitry was damaged by water.|Electronic circuits|N/A
-Electronics|Disk drive|/dɪsk draɪv/|Ổ đĩa, thiết bị đọc và ghi dữ liệu trên đĩa|Save the file to the external disk drive.|Hard drive, Storage device|N/A
-Electronics|Duplicate|/ˈduːplɪkeɪt/|Sao chép, tạo bản sao giống hệt nguyên bản|Please duplicate this CD for backup.|Copy, Replicate|Original
-Electronics|Earbuds|/ˈɪəbʌdz/|Tai nghe nhỏ đặt vào trong tai|She uses wireless earbuds during workouts.|Earphones, In-ear headphones|Speakers
-Electronics|Fehler|/ˈfeɪljər/|Sự hỏng hóc, lỗi hoặc thất bại của hệ thống|System failure caused data loss.|Breakdown, Malfunction|Success
-Electronics|Jack|/dʒæk/|Ổ cắm để kết nối thiết bị điện tử|Plug headphones into the audio jack.|Socket, Port|N/A
-Electronics|Minimal|/ˈmɪnɪməl/|Tối thiểu, ở mức độ nhỏ nhất có thể|The device requires minimal maintenance.|Minimum, Smallest|Maximum
-Electronics|Multitask|/ˌmʌltiˈtæsk/|Đa nhiệm, thực hiện nhiều tác vụ cùng lúc|This computer can multitask efficiently.|Do multiple tasks|Single-task
-Electronics|Optical|/ˈɑːptɪkl/|Quang học, liên quan đến ánh sáng và thị giác|Optical fibers transmit data using light.|Visual, Light-based|Electrical
-Electronics|Physically|/ˈfɪzɪkli/|Về mặt vật lý, thực tế hữu hình|The drive was physically damaged.|Bodily, Materially|Virtually
-Electronics|Reception|/rɪˈsepʃn/|Sự tiếp nhận tín hiệu (radio, TV, điện thoại)|Poor reception affects call quality.|Signal strength|Transmission
-Electronics|Shut down|/ʃʌt daʊn/|Tắt máy, ngừng hoạt động hoàn toàn|Shut down the computer before leaving.|Turn off, Power off|Start up, Boot up
-Electronics|Tablet|/ˈtæblət/|Máy tính bảng, thiết bị cảm ứng di động|She takes notes on her tablet.|iPad, Touchscreen device|Desktop
-Electronics|Transmit|/trænzˈmɪt/|Truyền tải (dữ liệu, tín hiệu) từ nơi này sang nơi khác|Satellites transmit signals worldwide.|Send, Broadcast|Receive
-Electronics|USB|/ˌjuː es ˈbiː/|Cổng kết nối chuẩn cho máy tính và thiết bị|Connect the printer via USB cable.|Universal Serial Bus|N/A
-Electronics|Voltage|/ˈvoʊltɪdʒ/|Điện áp, lực điện đo bằng volt|This device requires 220V voltage.|Electric potential|N/A
-Electronics|Warranty|/ˈwɔːrənti/|Bảo hành, cam kết sửa chữa miễn phí trong thời hạn|The laptop comes with a 2-year warranty.|Guarantee|N/A
-Correspondence|Acknowledge|/əkˈnɑːlɪdʒ/|Thừa nhận, xác nhận đã nhận được thông tin|Please acknowledge receipt of this email.|Confirm, Recognize|Deny
-Correspondence|Attachment|/əˈtætʃmənt/|File đính kèm trong email|The contract is in the attachment.|Enclosure, Appendix|N/A
-Correspondence|Courier|/ˈkʊriər/|Người chuyển phát nhanh hoặc dịch vụ giao hàng|Send the documents by courier.|Messenger, Delivery service|Recipient
-Correspondence|Delay|/dɪˈleɪ/|Sự chậm trễ, hoãn lại so với dự kiến|Apologize for the delay in response.|Postponement, Holdup|Promptness
-Correspondence|Envelope|/ˈenvəloʊp/|Phong bì dùng để đựng thư|Put the letter in an envelope.|Wrapper, Cover|N/A
-Correspondence|Fax|/fæks/|Máy fax hoặc hành động gửi văn bản qua fax|Please fax the signed agreement.|Facsimile, Telefax|N/A
-Correspondence|Forward|/ˈfɔːrwərd/|Chuyển tiếp (email, thư) cho người khác|Forward this email to the manager.|Send on, Redirect|Hold, Keep
-Correspondence|Greet|/ɡriːt/|Chào hỏi, gửi lời chào trong thư tín|Begin by greeting the recipient formally.|Welcome, Salute|Ignore
-Correspondence|Heading|/ˈhedɪŋ/|Tiêu đề, phần đầu của văn bản hoặc thư|Use a clear heading for each section.|Title, Header|Footer
-Correspondence|Letterhead|/ˈletərhed/|Tiêu đề có in sẵn logo, địa chỉ công ty trên giấy|Use company letterhead for official letters.|Stationery header|N/A
-Correspondence|Mention|/ˈmenʃn/|Đề cập, nhắc đến điều gì đó trong văn bản|He mentioned the meeting in his email.|Refer to, Cite|Omit
-Correspondence|Postage|/ˈpoʊstɪdʒ/|Cước phí bưu điện để gửi thư|Calculate postage for international mail.|Mailing cost, Stamp fee|N/A
-Correspondence|Prompt|/prɑːmpt/|Nhanh chóng, kịp thời không chậm trễ|Thank you for your prompt reply.|Quick, Immediate|Delayed
-Correspondence|Recipient|/rɪˈsɪpiənt/|Người nhận thư hoặc email|Address the letter to the correct recipient.|Receiver, Addressee|Sender
-Correspondence|Reply|/rɪˈplaɪ/|Trả lời, hồi âm lại thư hoặc email|Please reply at your earliest convenience.|Respond, Answer|Ignore
-Correspondence|Salutation|/ˌsæljuˈteɪʃn/|Lời chào đầu thư (Dear Sir/Madam)|Use an appropriate salutation.|Greeting, Opening|Closing
-Correspondence|Send|/send/|Gửi đi (thư, email, hàng hóa)|Send the invoice by email.|Dispatch, Mail|Receive
-Correspondence|Subject line|/ˈsʌbdʒɪkt laɪn/|Dòng tiêu đề ngắn gọn của email|Write a clear subject line.|Email header, Topic|Body
-Correspondence|To whom it may concern|/tuː huːm ɪt meɪ kənˈsɜːrn/|Kính gửi (dùng khi không biết tên người nhận)|Begin with "To whom it may concern."|Generic salutation|Personal greeting
-Correspondence|Urgent|/ˈɜːrdʒənt/|Khẩn cấp, cần xử lý ngay lập tức|Mark the email as urgent.|Pressing, Critical|Unimportant
-Job Ads & Recruiting|Abundant|/əˈbʌndənt/|Dồi dào, có nhiều ứng viên hoặc cơ hội việc làm|Job opportunities are abundant this year.|Plentiful, Ample|Scarce
-Job Ads & Recruiting|Accomplishment|/əˈkɑːmplɪʃmənt/|Thành tích, điều đã đạt được trong sự nghiệp|List your accomplishments on the resume.|Achievement, Success|Failure
-Job Ads & Recruiting|Applicant|/ˈæplɪkənt/|Người nộp đơn xin việc|We received 50 applicants for the position.|Candidate, Job seeker|Employer
-Job Ads & Recruiting|Bring together|/brɪŋ təˈɡeðər/|Tập hợp, quy tụ nhiều người hoặc tài năng|Bring together a talented team.|Assemble, Unite|Separate
-Job Ads & Recruiting|Candidate|/ˈkændɪdeɪt/|Ứng viên được xem xét cho vị trí hoặc chức vụ|The candidate impressed the interviewers.|Applicant, Nominee|Employer
-Job Ads & Recruiting|Come up with|/kʌm ʌp wɪð/|Nghĩ ra, đưa ra (ý tưởng, giải pháp)|Come up with creative marketing ideas.|Think of, Devise|Ignore
-Job Ads & Recruiting|Commensurate|/kəˈmensərət/|Tương xứng, cân đối với (kinh nghiệm, trình độ)|Salary commensurate with experience.|Proportional, Equivalent|Disproportionate
-Job Ads & Recruiting|Match|/mætʃ/|Phù hợp, kết nối đúng người với công việc|Match candidates to suitable positions.|Pair, Fit|Mismatch
-Job Ads & Recruiting|Profile|/ˈproʊfaɪl/|Hồ sơ năng lực, bộ đặc điểm của ứng viên lý tưởng|He doesn't fit the job profile.|Characteristics, Description|N/A
-Job Ads & Recruiting|Qualifications|/ˌkwɑːlɪfɪˈkeɪʃnz/|Trình độ, bằng cấp và kỹ năng cần thiết cho công việc|List your qualifications clearly.|Credentials, Requirements|Disqualifications
-Job Ads & Recruiting|Recruit|/rɪˈkruːt/|Tuyển dụng, thu hút người tham gia tổ chức|The company recruits top graduates.|Hire, Enlist|Dismiss
-Job Ads & Recruiting|Submit|/səbˈmɪt/|Nộp, gửi (hồ sơ, đơn xin việc)|Submit your resume online.|Send in, Present|Withdraw
-Applying & Interviewing|Ability|/əˈbɪləti/|Khả năng, năng lực thực hiện công việc|Demonstrate your leadership ability.|Capability, Skill|Inability
-Applying & Interviewing|Background|/ˈbækɡraʊnd/|Quá trình học tập và làm việc trước đây|Tell me about your educational background.|History, Experience|Foreground
-Applying & Interviewing|Candidate|/ˈkændɪdeɪt/|Ứng viên tham gia phỏng vấn|The candidate arrived on time.|Applicant, Interviewee|Interviewer
-Applying & Interviewing|Confident|/ˈkɑːnfɪdənt/|Tự tin, tin tưởng vào khả năng bản thân|She appeared confident during the interview.|Self-assured, Certain|Insecure
-Applying & Interviewing|Cover letter|/ˈkʌvər ˈletər/|Thư xin việc đi kèm hồ sơ giới thiệu bản thân|Attach a cover letter with your resume.|Application letter|N/A
-Applying & Interviewing|Employment|/ɪmˈplɔɪmənt/|Việc làm, công ăn việc làm|Seeking full-time employment.|Job, Work|Unemployment
-Applying & Interviewing|Follow up|/ˈfɑːloʊ ʌp/|Theo dõi, liên hệ lại sau khi nộp đơn hoặc phỏng vấn|Follow up with a thank-you email.|Check back, Contact again|Ignore
-Applying & Interviewing|Impression|/ɪmˈpreʃn/|Ấn tượng, cảm nhận ban đầu về ai đó|Make a good first impression.|Perception, Impact|N/A
-Applying & Interviewing|Inquire|/ɪnˈkwaɪər/|Hỏi thăm, tìm hiểu thông tin|Inquire about the job opening.|Ask, Investigate|Answer
-Applying & Interviewing|Negotiate|/nɪˈɡoʊʃieɪt/|Thương lượng, đàm phán về lương hoặc điều kiện|Negotiate salary and benefits.|Discuss, Bargain|Accept
-Applying & Interviewing|Prepare|/prɪˈper/|Chuẩn bị trước cho phỏng vấn hoặc sự kiện|Prepare answers to common questions.|Get ready, Plan|Neglect
-Applying & Interviewing|Reference|/ˈrefrəns/|Người tham chiếu xác nhận năng lực của bạn|Provide three professional references.|Recommendation, Referral|N/A
-Applying & Interviewing|Resume|/ˈrezəmeɪ/|Sơ yếu lý lịch liệt kê kinh nghiệm và kỹ năng|Update your resume regularly.|CV, Curriculum Vitae|N/A
-Applying & Interviewing|Strength|/streŋθ/|Điểm mạnh, thế mạnh của ứng viên|Discuss your strengths and weaknesses.|Advantage, Asset|Weakness
-Hiring & Training|Conduct|/kənˈdʌkt/|Tiến hành, thực hiện (đào tạo, họp)|Conduct training sessions for new hires.|Carry out, Perform|Neglect
-Hiring & Training|Develop|/dɪˈveləp/|Phát triển kỹ năng hoặc chương trình đào tạo|Develop employee skills through workshops.|Improve, Enhance|Stagnate
-Hiring & Training|Effectively|/ɪˈfektɪvli/|Một cách hiệu quả, đạt kết quả tốt|Train employees effectively.|Efficiently, Successfully|Ineffectively
-Hiring & Training|Evaluate|/ɪˈvæljueɪt/|Đánh giá hiệu suất hoặc kết quả đào tạo|Evaluate employee performance annually.|Assess, Appraise|Ignore
-Hiring & Training|Hire|/ˈhaɪər/|Tuyển dụng, thuê người làm việc|We plan to hire 10 new employees.|Employ, Recruit|Fire
-Hiring & Training|Mentor|/ˈmentɔːr/|Người cố vấn, hướng dẫn nhân viên mới|Assign a mentor to each trainee.|Coach, Advisor|Student
-Hiring & Training|Onboarding|/ˈɑːnbɔːrdɪŋ/|Quá trình đưa nhân viên mới vào làm việc|Onboarding takes two weeks.|Orientation, Integration|Offboarding
-Hiring & Training|Orientation|/ˌɔːriənˈteɪʃn/|Định hướng, giới thiệu công ty cho nhân viên mới|Attend orientation on your first day.|Introduction, Training|N/A
-Hiring & Training|Probation|/proʊˈbeɪʃn/|Thời gian thử việc trước khi chính thức|Complete a 3-month probation period.|Trial period, Evaluation|Permanent status
-Hiring & Training|Retain|/rɪˈteɪn/|Giữ chân nhân viên, duy trì lực lượng lao động|Retain talented employees with benefits.|Keep, Maintain|Lose
-Hiring & Training|Skill|/skɪl/|Kỹ năng, khả năng thực hiện công việc cụ thể|Improve technical skills through training.|Ability, Expertise|Inability
-Hiring & Training|Train|/treɪn/|Đào tạo, huấn luyện nhân viên|Train staff on new software.|Teach, Instruct|Ignore
-Salaries & Benefits|Basis|/ˈbeɪsɪs/|Cơ sở, nền tảng để tính toán hoặc quyết định điều gì|Salary is paid on a monthly basis.|Foundation, Base|N/A
-Salaries & Benefits|Benefit|/ˈbenɪfɪt/|Phúc lợi, lợi ích ngoài lương như bảo hiểm, nghỉ phép|The company offers excellent health benefits.|Advantage, Perk|Disadvantage
-Salaries & Benefits|Bonus|/ˈboʊnəs/|Tiền thưởng thêm ngoài lương cơ bản|Employees receive a year-end bonus.|Incentive, Extra payment|Penalty
-Salaries & Benefits|Compensate|/ˈkɑːmpenseɪt/|Bồi thường, đền bù cho thiệt hại hoặc công sức|The company compensates for overtime work.|Reimburse, Pay|Withhold
-Salaries & Benefits|Compensation|/ˌkɑːmpenˈseɪʃn/|Toàn bộ tiền lương và phúc lợi nhận được|Total compensation includes salary and benefits.|Remuneration, Payment|N/A
-Salaries & Benefits|Deduct|/dɪˈdʌkt/|Khấu trừ, trừ đi một phần từ lương|Taxes are deducted from monthly salary.|Subtract, Withhold|Add
-Salaries & Benefits|Dental|/ˈdentl/|Liên quan đến răng, bảo hiểm nha khoa|We provide dental insurance coverage.|Tooth-related|N/A
-Salaries & Benefits|Eligible|/ˈelɪdʒəbl/|Đủ điều kiện, được phép hưởng quyền lợi|Full-time employees are eligible for benefits.|Qualified, Entitled|Ineligible
-Salaries & Benefits|Flex time|/fleks taɪm/|Thời gian làm việc linh hoạt theo nhu cầu|Employees enjoy flex time arrangements.|Flexible hours|Fixed schedule
-Salaries & Benefits|Gross|/ɡroʊs/|Tổng thu nhập trước khi khấu trừ thuế và bảo hiểm|Her gross salary is $5,000 per month.|Total, Before deductions|Net
-Salaries & Benefits|Hourly|/ˈaʊərli/|Theo giờ, được tính theo số giờ làm việc|She earns $20 on an hourly basis.|Per hour, By the hour|Salaried
-Salaries & Benefits|Net|/net/|Lương thực nhận sau khi đã trừ thuế và các khoản khấu trừ|Net pay is lower than gross pay.|Take-home, After deductions|Gross
-Salaries & Benefits|Overtime|/ˈoʊvərtaɪm/|Làm thêm giờ, thời gian làm việc ngoài giờ quy định|Overtime is paid at 1.5 times the regular rate.|Extra hours, Additional time|Regular hours
-Salaries & Benefits|Package|/ˈpækɪdʒ/|Gói lương và phúc lợi toàn diện|The benefits package is very competitive.|Bundle, Set of benefits|N/A
-Salaries & Benefits|Pension|/ˈpenʃn/|Lương hưu, tiền trả cho người về hưu|He receives a monthly pension after retirement.|Retirement fund|N/A
-Salaries & Benefits|Raise|/reɪz/|Tăng lương, sự gia tăng tiền lương|She got a 5% raise this year.|Pay increase, Salary increment|Pay cut
-Salaries & Benefits|Retirement|/rɪˈtaɪərmənt/|Nghỉ hưu, thời gian không còn làm việc|He plans for early retirement.|Pension age, Post-work life|Employment
-Salaries & Benefits|Salary|/ˈsæləri/|Tiền lương cố định trả theo tháng hoặc năm|Annual salary is negotiable.|Wages, Pay|N/A
-Salaries & Benefits|Vacation|/veɪˈkeɪʃn/|Kỳ nghỉ có hưởng lương|Employees get 15 days paid vacation.|Holiday, Leave|Work
-Salaries & Benefits|Wage|/weɪdʒ/|Tiền công trả theo giờ hoặc ngày làm việc|Minimum wage has increased.|Pay, Earnings|N/A
-Promotions, Pensions & Awards|Achievement|/əˈtʃiːvmənt/|Thành tích, điều đạt được qua nỗ lực|Her achievements earned her a promotion.|Accomplishment, Success|Failure
-Promotions, Pensions & Awards|Advancement|/ədˈvænsmənt/|Sự thăng tiến trong sự nghiệp|Seek career advancement opportunities.|Progress, Promotion|Demotion
-Promotions, Pensions & Awards|Contribute|/kənˈtrɪbjuːt/|Đóng góp công sức, tiền bạc vào quỹ hoặc dự án|Employees contribute to the pension fund.|Give, Donate|Withhold
-Promotions, Pensions & Awards|Criteria|/kraɪˈtɪriə/|Tiêu chí, các yêu cầu để đánh giá hoặc lựa chọn|Meet the criteria for promotion.|Standards, Requirements|N/A
-Promotions, Pensions & Awards|Deserving|/dɪˈzɜːrvɪŋ/|Xứng đáng, đáng được nhận thưởng hoặc ghi nhận|A deserving candidate for the award.|Worthy, Meritorious|Undeserving
-Promotions, Pensions & Awards|Distribute|/dɪˈstrɪbjuːt/|Phân phối, trao tặng giải thưởng hoặc lợi nhuận|Distribute bonuses to all employees.|Hand out, Allocate|Collect
-Promotions, Pensions & Awards|Employee of the month|/ɪmˈplɔɪiː əv ðə mʌnθ/|Nhân viên xuất sắc của tháng|She was named employee of the month.|Monthly award winner|N/A
-Promotions, Pensions & Awards|Exceed|/ɪkˈsiːd/|Vượt qua, làm tốt hơn mong đợi|Exceed performance targets.|Surpass, Outperform|Fall short
-Promotions, Pensions & Awards|Promote|/prəˈmoʊt/|Thăng chức, đề bạt lên vị trí cao hơn|He was promoted to manager.|Advance, Elevate|Demote
-Promotions, Pensions & Awards|Promotion|/prəˈmoʊʃn/|Sự thăng chức, lên chức vụ cao hơn|She earned a promotion to director.|Advancement, Elevation|Demotion
-Promotions, Pensions & Awards|Recognize|/ˈrekəɡnaɪz/|Công nhận, ghi nhận thành tích của ai đó|Recognize outstanding employee contributions.|Acknowledge, Appreciate|Ignore
-Promotions, Pensions & Awards|Recognition|/ˌrekəɡˈnɪʃn/|Sự công nhận, ghi nhận giá trị hoặc đóng góp|Employee recognition boosts morale.|Acknowledgment, Appreciation|Neglect
-Promotions, Pensions & Awards|Reward|/rɪˈwɔːrd/|Phần thưởng cho thành tích hoặc hành vi tốt|Reward employees for excellent performance.|Prize, Incentive|Punishment
-Promotions, Pensions & Awards|Seniority|/siːniˈɔːrəti/|Thâm niên, thời gian phục vụ trong tổ chức|Promotions are based on seniority.|Length of service, Tenure|N/A
-Shopping|Bargain|/ˈbɑːrɡən/|Món hời, sản phẩm có giá rẻ hơn bình thường|I got a great bargain on this coat.|Good deal, Discount|Rip-off
-Shopping|Browse|/braʊz/|Dạo xem, xem qua các sản phẩm không có mục đích mua cụ thể|I like to browse online stores.|Look around, Survey|Buy immediately
-Shopping|Cart|/kɑːrt/|Xe đẩy hàng trong siêu thị|Put items in your shopping cart.|Trolley, Basket|N/A
-Shopping|Cash|/kæʃ/|Tiền mặt, thanh toán bằng tiền giấy hoặc xu|Pay in cash or by card.|Currency, Money|Credit
-Shopping|Checkout|/ˈtʃekaʊt/|Quầy thanh toán trong cửa hàng|Wait in line at the checkout.|Cashier, Payment counter|Entrance
-Shopping|Clearance|/ˈklɪrəns/|Bán thanh lý hàng tồn kho với giá giảm mạnh|Shop the clearance section for deals.|Sale, Liquidation|Regular price
-Shopping|Consumer|/kənˈsuːmər/|Người tiêu dùng, người mua và sử dụng sản phẩm|Consumer rights must be protected.|Buyer, Customer|Seller
-Shopping|Discount|/ˈdɪskaʊnt/|Giảm giá, khấu trừ một phần giá bán|Get a 20% discount on all items.|Reduction, Markdown|Markup
-Shopping|Exchange|/ɪksˈtʃeɪndʒ/|Đổi hàng, thay sản phẩm khác cùng giá trị|Exchange the shirt for a different size.|Swap, Trade|Keep
-Shopping|Item|/ˈaɪtəm/|Món hàng, sản phẩm riêng lẻ|Each item is carefully inspected.|Product, Article|N/A
-Shopping|Mall|/mɔːl/|Trung tâm mua sắm lớn|Let's go to the shopping mall.|Shopping center, Plaza|N/A
-Shopping|Purchase|/ˈpɜːrtʃəs/|Mua hàng, việc mua sản phẩm hoặc dịch vụ|Complete your purchase online.|Buy, Acquisition|Sale
-Shopping|Receipt|/rɪˈsiːt/|Hóa đơn, giấy chứng nhận đã mua hàng|Keep your receipt for returns
-Ordering Supplies|Catalog|/ˈkætəlɔːɡ/|Danh mục, sách giới thiệu sản phẩm để đặt hàng|Browse the catalog for office supplies.|Brochure, Product list|N/A
-Ordering Supplies|Compile|/kəmˈpaɪl/|Tập hợp, lập danh sách các mục cần đặt|Compile a list of needed supplies.|Assemble, Collect|Scatter
-Ordering Supplies|Delivery|/dɪˈlɪvəri/|Việc giao hàng đến địa chỉ khách hàng|Expect delivery within 5 business days.|Shipment, Transport|Pickup
-Ordering Supplies|Estimate|/ˈestɪmeɪt/|Ước tính chi phí hoặc thời gian giao hàng|Estimate shipping costs before ordering.|Approximate, Calculate|Know exactly
-Ordering Supplies|Fulfill|/fʊlˈfɪl/|Hoàn thành, thực hiện đầy đủ đơn hàng|Fulfill orders within 24 hours.|Complete, Execute|Neglect
-Ordering Supplies|Inventory|/ˈɪnvəntɔːri/|Hàng tồn kho, danh sách hàng hóa hiện có|Check inventory before placing orders.|Stock, Supplies|N/A
-Ordering Supplies|Order form|/ˈɔːrdər fɔːrm/|Mẫu đơn đặt hàng cần điền thông tin sản phẩm|Fill out the order form completely.|Purchase form|N/A
-Ordering Supplies|Place an order|/pleɪs ən ˈɔːrdər/|Đặt hàng, gửi yêu cầu mua hàng|Place an order online or by phone.|Submit an order, Buy|Cancel order
-Ordering Supplies|Quantity|/ˈkwɑːntəti/|Số lượng, khối lượng hàng hóa đặt mua|Specify the quantity needed.|Amount, Volume|Quality
-Ordering Supplies|Reorder|/ˌriːˈɔːrdər/|Đặt hàng lại, mua thêm hàng đã từng mua|Reorder supplies when stock is low.|Order again, Replenish|N/A
-Ordering Supplies|Stationery|/ˈsteɪʃəneri/|Văn phòng phẩm như giấy, bút, phong bì|Order stationery for the office.|Office supplies, Writing materials|N/A
-Ordering Supplies|Supplier|/səˈplaɪər/|Nhà cung cấp hàng hóa hoặc dịch vụ|Find a reliable supplier for materials.|Vendor, Provider|Customer
-Ordering Supplies|Supply|/səˈplaɪ/|Cung cấp hàng hóa hoặc vật tư; nguồn cung|Supply office materials monthly.|Provide, Furnish|Demand
-Shipping|Carrier|/ˈkæriər/|Hãng vận chuyển, công ty chuyên chở hàng hóa|Choose a reliable shipping carrier.|Transporter, Delivery company|Receiver
-Shipping|Consignment|/kənˈsaɪnmənt/|Lô hàng gửi đi, hàng hóa ký gửi|Track the consignment until delivery.|Shipment, Cargo|N/A
-Shipping|Courier|/ˈkʊriər/|Dịch vụ chuyển phát nhanh hoặc người đưa thư|Send documents by courier service.|Express delivery, Messenger|Regular mail
-Shipping|Destination|/ˌdestɪˈneɪʃn/|Điểm đến, nơi hàng hóa được giao|The package reached its destination.|Final location, Endpoint|Origin
-Shipping|Dispatch|/dɪˈspætʃ/|Gửi đi, phát hàng từ kho|Dispatch orders within 24 hours.|Send out, Ship|Receive
-Shipping|Excursion|/ɪkˈskɜːrʒn/|Chuyến đi ngắn, hành trình vận chuyển|Plan the shipping excursion route.|Trip, Journey|N/A
-Shipping|Fragile|/ˈfrædʒəl/|Dễ vỡ, cần xử lý cẩn thận khi vận chuyển|Mark the box as fragile.|Delicate, Breakable|Sturdy
-Shipping|Insure|/ɪnˈʃʊr/|Mua bảo hiểm cho hàng hóa trong vận chuyển|Insure valuable shipments.|Protect, Cover|Risk
-Shipping|Notify|/ˈnoʊtɪfaɪ/|Thông báo cho người nhận về tình trạng vận chuyển|Notify customers when orders ship.|Inform, Alert|Conceal
-Shipping|Package|/ˈpækɪdʒ/|Kiện hàng, bưu kiện được đóng gói để gửi|Track your package online.|Parcel, Box|N/A
-Shipping|Postage|/ˈpoʊstɪdʒ/|Phí bưu chính, tiền gửi hàng qua đường bưu điện|Calculate postage before mailing.|Shipping fee, Mailing cost|N/A
-Shipping|Tracking number|/ˈtrækɪŋ ˈnʌmbər/|Mã số tra cứu để theo dõi hành trình hàng|Use the tracking number to check status.|Shipment ID, Trace code|N/A
-Shipping|Transit|/ˈtrænzɪt/|Quá trình vận chuyển, đang trên đường giao hàng|The package is currently in transit.|Transportation, En route|Delivered
-Shipping|Warehouse|/ˈwerhaʊs/|Nhà kho, nơi chứa hàng trước khi giao|Store goods in the warehouse.|Storage facility, Depot|Store
-Invoices|Account|/əˈkaʊnt/|Tài khoản khách hàng ghi nhận giao dịch mua bán|Pay your account balance by the due date.|Customer record, Ledger|N/A
-Invoices|Charge|/tʃɑːrdʒ/|Tính tiền, thu phí cho sản phẩm hoặc dịch vụ|Additional charges apply for rush orders.|Fee, Cost|Refund
-Invoices|Compile|/kəmˈpaɪl/|Tập hợp, lập danh sách các khoản phí trong hóa đơn|Compile all expenses into one invoice.|Gather, Assemble|Separate
-Invoices|Customer|/ˈkʌstəmər/|Khách hàng, người mua hàng hoặc sử dụng dịch vụ|Send invoices to customers promptly.|Client, Buyer|Seller
-Invoices|Discount|/ˈdɪskaʊnt/|Giảm giá cho khách hàng thanh toán sớm|Offer a 5% discount for early payment.|Reduction, Deduction|Surcharge
-Invoices|Due date|/duː deɪt/|Ngày đến hạn thanh toán hóa đơn|Payment is due by the due date.|Deadline, Payment date|N/A
-Invoices|Efficient|/ɪˈfɪʃnt/|Hiệu quả, xử lý nhanh chóng và chính xác|An efficient invoicing system saves time.|Effective, Productive|Inefficient
-Invoices|Impose|/ɪmˈpoʊz/|Áp đặt, đưa ra phí hoặc hình phạt bổ sung|Impose late fees on overdue accounts.|Levy, Enforce|Waive
-Invoices|Mistake|/mɪˈsteɪk/|Lỗi, sai sót trong tính toán hoặc thông tin|Correct any mistakes on the invoice.|Error, Inaccuracy|Accuracy
-Invoices|Order|/ˈɔːrdər/|Đơn hàng, yêu cầu mua sản phẩm|The invoice matches the purchase order.|Purchase, Request|Cancellation
-Invoices|Promptly|/ˈprɑːmptli/|Một cách nhanh chóng, kịp thời|Pay invoices promptly to avoid penalties.|Quickly, Immediately|Slowly
-Invoices|Record|/ˈrekərd/|Ghi chép, lưu lại thông tin giao dịch|Record all transactions for accounting.|Document, Register|Forget
-Invoices|Terms|/tɜːrmz/|Điều khoản thanh toán như thời hạn, phương thức|Read the payment terms carefully.|Conditions, Stipulations|N/A
-Inventory|Adjustment|/əˈdʒʌstmənt/|Sự điều chỉnh, thay đổi số lượng hàng tồn kho trong hệ thống|Make an inventory adjustment after the audit.|Correction, Modification|N/A
-Inventory|Audit|/ˈɔːdɪt/|Kiểm toán, kiểm tra chi tiết hàng tồn kho|Conduct an annual inventory audit.|Inspection, Review|N/A
-Inventory|Automatically|/ˌɔːtəˈmætɪkli/|Một cách tự động, không cần can thiệp thủ công|The system updates inventory automatically.|By itself, Mechanically|Manually
-Inventory|Discrepancy|/dɪsˈkrepənsi/|Sự chênh lệch, không khớp giữa số liệu và thực tế|Report any inventory discrepancies immediately.|Difference, Inconsistency|Agreement
-Inventory|Disturb|/dɪˈstɜːrb/|Làm xáo trộn, ảnh hưởng đến trật tự hàng tồn kho|Don't disturb the stock during counting.|Disrupt, Interrupt|Order
-Inventory|Liability|/ˌlaɪəˈbɪləti/|Nghĩa vụ nợ, trách nhiệm tài chính với hàng tồn kho|Unsold inventory becomes a liability.|Debt, Obligation|Asset
-Inventory|Maintain|/meɪnˈteɪn/|Duy trì, giữ mức hàng tồn kho ổn định|Maintain adequate inventory levels.|Keep, Preserve|Neglect
-Inventory|Marketplace|/ˈmɑːrkɪtpleɪs/|Thị trường, nơi mua bán hàng hóa|Adjust inventory based on marketplace demand.|Market, Trading place|N/A
-Inventory|Merchandise|/ˈmɜːrtʃəndaɪs/|Hàng hóa để bán, sản phẩm trong kho|Check merchandise quality before stocking.|Goods, Products|N/A
-Inventory|Monitor|/ˈmɑːnɪtər/|Theo dõi, giám sát tình trạng hàng tồn kho|Monitor inventory levels daily.|Track, Observe|Ignore
-Inventory|Receive|/rɪˈsiːv/|Nhận hàng vào kho từ nhà cung cấp|Receive shipments and update records.|Accept, Take in|Send
-Inventory|Rundown|/ˈrʌndaʊn/|Bản tóm tắt, báo cáo ngắn gọn về tình trạng kho|Provide a rundown of current stock levels.|Summary, Overview|Detailed report
-Inventory|Shelve|/ʃelv/|Xếp hàng lên kệ trong kho hoặc cửa hàng|Shelve new products immediately after receiving.|Stock, Arrange|Remove
-Inventory|Shortage|/ˈʃɔːrtɪdʒ/|Sự thiếu hụt, không đủ hàng trong kho|Report stock shortages to management.|Deficit, Lack|Surplus
-Inventory|Strict|/strɪkt/|Nghiêm ngặt, chặt chẽ trong quản lý kho|Follow strict inventory control procedures.|Rigorous, Exact|Lenient
-Inventory|Surplus|/ˈsɜːrpləs/|Hàng dư thừa, số lượng vượt quá nhu cầu|Sell off surplus stock at a discount.|Excess, Overage|Shortage
-Inventory|Turnover|/ˈtɜːrnoʊvər/|Tốc độ luân chuyển hàng hóa, vòng quay kho|High inventory turnover indicates good sales.|Rotation, Sales rate|Stagnation
-Banking|Account|/əˈkaʊnt/|Tài khoản ngân hàng để gửi tiền và giao dịch|Open a savings account at the bank.|Bank account|N/A
-Banking|Balance|/ˈbæləns/|Số dư, số tiền còn lại trong tài khoản|Check your account balance online.|Remainder, Amount left|Deficit
-Banking|Borrow|/ˈbɑːroʊ/|Vay mượn tiền từ ngân hàng hoặc người khác|Borrow money to start a business.|Take a loan|Lend
-Banking|Cautiously|/ˈkɔːʃəsli/|Một cách thận trọng, cẩn thận trong giao dịch tài chính|Invest cautiously in volatile markets.|Carefully, Prudently|Recklessly
-Banking|Down payment|/daʊn ˈpeɪmənt/|Khoản tiền đặt cọc ban đầu khi mua nhà hoặc xe|Make a 20% down payment on the house.|Deposit, Initial payment|Final payment
-Banking|Dividend|/ˈdɪvɪdend/|Cổ tức, phần lợi nhuận chia cho cổ đông|Receive quarterly dividends from investments.|Profit share, Payout|N/A
-Banking|Interest|/ˈɪntrəst/|Lãi suất, tiền lãi phải trả hoặc nhận được|Pay 5% interest on the loan.|Rate, Return|Principal
-Banking|Loan|/loʊn/|Khoản vay, số tiền ngân hàng cho vay|Apply for a personal loan.|Credit, Advance|Repayment
-Banking|Mortgage|/ˈmɔːrɡɪdʒ/|Khoản vay thế chấp nhà đất để mua bất động sản|Take out a 30-year mortgage.|Home loan, Property loan|N/A
-Banking|Online banking|/ˈɑːnlaɪn ˈbæŋkɪŋ/|Dịch vụ ngân hàng trực tuyến qua internet|Use online banking for bill payments.|Internet banking, E-banking|Branch banking
-Banking|Restriction|/rɪˈstrɪkʃn/|Hạn chế, quy định giới hạn giao dịch|Withdrawal restrictions apply to new accounts.|Limitation, Constraint|Freedom
-Banking|Savings|/ˈseɪvɪŋz/|Tiền tiết kiệm, số tiền để dành không tiêu|Build up savings for emergencies.|Nest egg, Reserves|Spending
-Banking|Transfer|/trænsˈfɜːr/|Chuyển khoản tiền từ tài khoản này sang tài khoản khác|Transfer funds between accounts instantly.|Move, Send|Receive
-Banking|Transaction|/trænˈzækʃn/|Giao dịch, hành động chuyển tiền hoặc thanh toán|Review recent transactions for accuracy.|Deal, Exchange|N/A
-Banking|Withdraw|/wɪðˈdrɔː/|Rút tiền ra khỏi tài khoản ngân hàng|Withdraw cash from the ATM.|Take out, Remove|Deposit
-Accounting|Accumulate|/əˈkjuːmjəleɪt/|Tích lũy, tập hợp số liệu tài chính theo thời gian|Accumulate expenses for the quarterly report.|Gather, Build up|Disperse
-Accounting|Allocate|/ˈæləkeɪt/|Phân bổ ngân sách hoặc chi phí cho các bộ phận|Allocate funds to different departments.|Assign, Distribute|Withhold
-Accounting|Asset|/ˈæset/|Tài sản, những gì công ty sở hữu có giá trị|The building is a valuable company asset.|Property, Resource|Liability
-Accounting|Audit|/ˈɔːdɪt/|Kiểm toán, kiểm tra sổ sách kế toán|Conduct an annual financial audit.|Inspection, Review|N/A
-Accounting|Balance sheet|/ˈbæləns ʃiːt/|Bảng cân đối kế toán thể hiện tài sản và nợ|Review the balance sheet before the meeting.|Financial statement|N/A
-Accounting|Bookkeeping|/ˈbʊkkiːpɪŋ/|Ghi chép sổ sách, công việc ghi lại giao dịch tài chính|Accurate bookkeeping is essential for accounting.|Record-keeping, Accounting|N/A
-Accounting|Debit|/ˈdebɪt/|Ghi nợ, số tiền trừ ra khỏi tài khoản|Debit the amount from the expense account.|Charge, Withdrawal|Credit
-Accounting|Credit|/ˈkredɪt/|Ghi có, số tiền thêm vào tài khoản|Credit the payment to the revenue account.|Addition, Deposit|Debit
-Accounting|Depreciation|/dɪˌpriːʃiˈeɪʃn/|Khấu hao, giảm giá trị tài sản theo thời gian|Calculate depreciation on equipment annually.|Decrease in value, Wear|Appreciation
-Accounting|Entry|/ˈentri/|Bút toán, mục ghi vào sổ kế toán|Make an entry for each transaction.|Record, Notation|N/A
-Accounting|Expense|/ɪkˈspens/|Chi phí, khoản tiền chi ra cho hoạt động kinh doanh|Track all business expenses carefully.|Cost, Expenditure|Income
-Accounting|Fiscal year|/ˈfɪskl jɪr/|Năm tài chính, kỳ kế toán 12 tháng của công ty|The fiscal year ends on December 31st.|Financial year, Accounting period|Calendar year
-Accounting|Ledger|/ˈledʒər/|Sổ cái, sổ kế toán chi tiết các giao dịch|Record all entries in the general ledger.|Account book, Register|N/A
-Accounting|Liability|/ˌlaɪəˈbɪləti/|Nợ phải trả, nghĩa vụ tài chính của công ty|List all liabilities on the balance sheet.|Debt, Obligation|Asset
-Accounting|Revenue|/ˈrevənuː/|Doanh thu, tổng tiền thu được từ bán hàng|Annual revenue increased by 15%.|Income, Earnings|Expense
-Investments|Aggressively|/əˈɡresɪvli/|Một cách táo bạo, mạnh mẽ trong đầu tư|Invest aggressively in high-growth stocks.|Boldly, Assertively|Cautiously
-Investments|Appreciate|/əˈpriːʃieɪt/|Tăng giá trị theo thời gian|Real estate tends to appreciate over years.|Increase in value, Grow|Depreciate
-Investments|Bond|/bɑːnd/|Trái phiếu, chứng khoán nợ phát hành để huy động vốn|Invest in government bonds for stability.|Fixed-income security|Stock
-Investments|Broker|/ˈbroʊkər/|Người môi giới chứng khoán, trung gian giao dịch|Hire a broker to manage investments.|Agent, Intermediary|Direct investor
-Investments|Diversify|/daɪˈvɜːrsɪfaɪ/|Đa dạng hóa danh mục đầu tư để giảm rủi ro|Diversify your portfolio across sectors.|Spread out, Vary|Concentrate
-Investments|Fund|/fʌnd/|Quỹ đầu tư, tập hợp vốn từ nhiều nhà đầu tư|Invest in a mutual fund for growth.|Investment pool, Trust|N/A
-Investments|Gain|/ɡeɪn/|Lợi nhuận, khoản thu được từ đầu tư|Realize capital gains from stock sales.|Profit, Increase|Loss
-Investments|Long-term|/lɔːŋ tɜːrm/|Dài hạn, đầu tư trong thời gian nhiều năm|Focus on long-term investment strategies.|Extended period, Future-oriented|Short-term
-Investments|Mature|/məˈtʃʊr/|Đáo hạn, đến thời điểm trái phiếu được thanh toán|The bond will mature in 10 years.|Come due, Reach maturity|Immature
-Investments|Portfolio|/pɔːrtˈfoʊlioʊ/|Danh mục đầu tư, tập hợp các tài sản đầu tư|Review your investment portfolio quarterly.|Collection, Holdings|N/A
-Investments|Prospectus|/prəˈspektəs/|Bản cáo bạch, tài liệu giới thiệu cơ hội đầu tư|Read the prospectus before investing.|Investment document, Offering|N/A
-Investments|Return|/rɪˈtɜːrn/|Lợi nhuận đầu tư, tỷ suất sinh lời|The investment yielded a 12% return.|Profit, Yield|Loss
-Investments|Risk|/rɪsk/|Rủi ro, khả năng mất tiền trong đầu tư|High-risk investments offer higher returns.|Danger, Uncertainty|Safety
-Investments|Stock|/stɑːk/|Cổ phiếu, chứng khoán vốn của công ty|Buy stocks in established companies.|Share, Equity|Bond
-Investments|Yield|/jiːld/|Lợi suất, tỷ lệ phần trăm lợi nhuận hàng năm|The bond offers a 4% annual yield.|Return, Income rate|Loss
-Taxes|Calculate|/ˈkælkjuleɪt/|Tính toán số thuế phải nộp|Calculate taxes owed for the year.|Compute, Figure out|Estimate
-Taxes|Deadline|/ˈdedlaɪn/|Hạn chót nộp thuế, ngày cuối cùng để nộp|File taxes before the April deadline.|Final date, Cutoff|Extension
-Taxes|Deduct|/dɪˈdʌkt/|Khấu trừ, giảm trừ khoản chi phí khỏi thu nhập|Deduct business expenses from taxable income.|Subtract, Take away|Add
-Taxes|Deductible|/dɪˈdʌktəbl/|Có thể khấu trừ thuế, chi phí được giảm trừ|Charitable donations are tax deductible.|Eligible for deduction|Non-deductible
-Taxes|Exemption|/ɪɡˈzempʃn/|Miễn thuế, khoản không phải chịu thuế|Claim exemptions for dependents.|Tax break, Allowance|Taxable
-Taxes|File|/faɪl/|Nộp tờ khai thuế chính thức|File your tax return electronically.|Submit, Lodge|Withdraw
-Taxes|Income tax|/ˈɪnkʌm tæks/|Thuế thu nhập cá nhân hoặc doanh nghiệp|Pay income tax on annual earnings.|Earnings tax|Sales tax
-Taxes|Penalty|/ˈpenəlti/|Phạt, tiền phạt khi nộp thuế muộn|Late filing results in a penalty.|Fine, Charge|Reward
-Taxes|Refund|/ˈriːfʌnd/|Hoàn thuế, tiền thuế được trả lại khi nộp thừa|Expect a tax refund next month.|Reimbursement, Payback|Payment
-Taxes|Return|/rɪˈtɜːrn/|Tờ khai thuế, mẫu đơn báo cáo thu nhập|Complete your tax return accurately.|Tax form, Declaration|N/A
-Taxes|Taxable|/ˈtæksəbl/|Chịu thuế, thu nhập phải đóng thuế|All wages are taxable income.|Subject to tax|Tax-exempt
-Taxes|Withhold|/wɪðˈhoʊld/|Khấu trừ thuế trước từ lương nhân viên|The employer withholds taxes from paychecks.|Deduct in advance, Hold back|Release
-Financial Statements|Asset|/ˈæset/|Tài sản có giá trị ghi trong báo cáo tài chính|List all company assets on the balance sheet.|Property, Resource|Liability
-Financial Statements|Balance|/ˈbæləns/|Cân đối, sự bằng nhau giữa tài sản và nợ|The balance sheet shows financial balance.|Equilibrium, Equality|Imbalance
-Financial Statements|Detail|/ˈdiːteɪl/|Chi tiết, mô tả cụ thể từng khoản trong báo cáo|Provide details of all expenses.|Specifics, Particulars|Summary
-Financial Statements|Desire|/dɪˈzaɪər/|Mong muốn đạt mục tiêu tài chính|The company's desire is to increase profitability.|Wish, Goal|Indifference
-Financial Statements|Expense|/ɪkˈspens/|Chi phí hoạt động ghi trong báo cáo thu chi|Operating expenses rose this quarter.|Cost, Expenditure|Income
-Financial Statements|Fund|/fʌnd/|Quỹ, nguồn vốn tài chính có sẵn|Allocate funds for new projects.|Capital, Resources|Debt
-Financial Statements|Level|/ˈlevl/|Mức độ, tầm mức của chỉ số tài chính|Maintain a high level of revenue.|Degree, Amount|N/A
-Financial Statements|Overall|/ˌoʊvərˈɔːl/|Tổng thể, bao quát toàn bộ tình hình tài chính|The overall financial performance is strong.|General, Total|Specific
-Financial Statements|Perspective|/pərˈspektɪv/|Góc nhìn, cách đánh giá tình hình tài chính|From an investor's perspective, profits look good.|Viewpoint, Angle|N/A
-Financial Statements|Profit|/ˈprɑːfɪt/|Lợi nhuận sau khi trừ chi phí khỏi doanh thu|Net profit increased by 10% this year.|Earnings, Gain|Loss
-Financial Statements|Project|/ˈprɑːdʒekt/|Dự án đầu tư hoặc kế hoạch kinh doanh|Fund the new expansion project.|Plan, Initiative|N/A
-Financial Statements|Realistic|/ˌriːəˈlɪstɪk/|Thực tế, dự báo tài chính khả thi|Set realistic financial goals.|Practical, Achievable|Unrealistic
-Financial Statements|Statement|/ˈsteɪtmənt/|Báo cáo, bản trình bày tình hình tài chính|Review the income statement monthly.|Report, Document|N/A
-Financial Statements|Target|/ˈtɑːrɡɪt/|Mục tiêu tài chính cụ thể cần đạt được|Set a revenue target for next quarter.|Goal, Objective|N/A
-Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kinh doanh|The project will yield high returns.|Generate, Produce|Consume
+Contracts|Abide by|/əˈbaɪd baɪ/|Tuân thủ, tuân theo đầy đủ các quy định đã cam kết|All parties must abide by the terms.|Follow, Comply with|Violate
+Contracts|Agreement|/əˈɡriːmənt/|Hợp đồng, thỏa thuận chính thức giữa các bên|Reach a mutual agreement.|Contract, Accord|Disagreement
+Contracts|Assurance|/əˈʃʊrəns/|Sự đảm bảo, cam đoan về việc thực hiện nghĩa vụ|Give written assurance of quality.|Guarantee, Pledge|Doubt
+Contracts|Binding|/ˈbaɪndɪŋ/|Có tính ràng buộc pháp lý, bắt buộc phải tuân theo|The contract is legally binding.|Obligatory, Compulsory|Non-binding
+Contracts|Breach|/briːtʃ/|Vi phạm hợp đồng, không thực hiện đúng cam kết|Breach of contract results in penalties.|Violation, Infringement|Compliance
+Contracts|Cancellation|/ˌkænsəˈleɪʃn/|Sự hủy bỏ hợp đồng trước thời hạn đáo hạn|Contract cancellation requires notice.|Termination, Annulment|Confirmation
+Contracts|Clause|/klɔːz/|Điều khoản, mục cụ thể trong hợp đồng|Read the termination clause carefully.|Provision, Article|N/A
+Contracts|Comply with|/kəmˈplaɪ wɪð/|Tuân thủ, làm theo yêu cầu hoặc quy định|Comply with regulatory requirements.|Adhere to, Follow|Violate
+Contracts|Confidentiality|/ˌkɒnfɪdenʃiˈæləti/|Tính bảo mật, nghĩa vụ giữ bí mật thông tin|Sign a confidentiality agreement.|Secrecy, Privacy|Disclosure
+Contracts|Contingency|/kənˈtɪndʒənsi/|Điều khoản dự phòng cho tình huống bất ngờ|Include a contingency clause.|Backup plan, Provision|N/A
+Contracts|Counterpart|/ˈkaʊntərpɑːrt/|Bản sao hợp đồng, bên tương ứng trong thỏa thuận|Each party receives a signed counterpart.|Copy, Duplicate|N/A
+Contracts|Covenant|/ˈkʌvənənt/|Cam kết chính thức, điều ràng buộc trong hợp đồng|Non-compete covenant protects business interests.|Agreement, Promise|N/A
+Contracts|Default|/dɪˈfɔːlt/|Không thực hiện nghĩa vụ, vi phạm điều khoản thanh toán|Default on loan payments.|Failure, Non-payment|Fulfillment
+Contracts|Determine|/dɪˈtɜːrmɪn/|Xác định, quyết định các điều kiện cụ thể|Determine payment terms in advance.|Decide, Establish|Hesitate
+Contracts|Dispute|/dɪˈspjuːt/|Tranh chấp, bất đồng về điều khoản hợp đồng|Resolve disputes through mediation.|Disagreement, Conflict|Agreement
+Contracts|Due diligence|/djuː ˈdɪlɪdʒəns/|Thẩm định, xem xét kỹ lưỡng trước khi ký kết|Conduct due diligence before signing.|Investigation, Review|N/A
+Contracts|Effectuate|/ɪˈfektʃueɪt/|Thực thi, đưa hợp đồng vào hiệu lực|Effectuate the agreement immediately.|Execute, Implement|Cancel
+Contracts|Enforce|/ɪnˈfɔːrs/|Thi hành, buộc thực hiện theo hợp đồng|Enforce contractual obligations.|Implement, Execute|Waive
+Contracts|Engage|/ɪnˈɡeɪdʒ/|Cam kết, thuê dịch vụ hoặc tham gia thỏa thuận|Engage legal counsel for negotiations.|Hire, Commit|Withdraw
+Contracts|Establish|/ɪˈstæblɪʃ/|Thiết lập, tạo ra các điều khoản chính thức|Establish clear deliverables.|Set up, Create|Destroy
+Contracts|Execute|/ˈeksɪkjuːt/|Ký kết chính thức, thực hiện hợp đồng|Execute the contract in duplicate.|Sign, Implement|Cancel
+Contracts|Expiration|/ˌekspəˈreɪʃn/|Hết hạn, ngày kết thúc hiệu lực hợp đồng|Contract expiration date is June 30.|Termination, End|Commencement
+Contracts|Force majeure|/fɔːrs mæˈʒɜːr/|Sự kiện bất khả kháng (thiên tai, chiến tranh)|Force majeure clause protects from liability.|Act of God, Unforeseen event|N/A
+Contracts|Indemnify|/ɪnˈdemnɪfaɪ/|Bồi thường, đảm bảo không bị thiệt hại|The seller agrees to indemnify the buyer.|Compensate, Reimburse|N/A
+Contracts|Liability|/ˌlaɪəˈbɪləti/|Trách nhiệm pháp lý, nghĩa vụ phải chịu|Limit liability in the contract.|Responsibility, Obligation|Immunity
+Contracts|Negotiate|/nɪˈɡəʊʃieɪt/|Thương lượng, đàm phán các điều khoản|Negotiate favorable terms.|Bargain, Discuss|Accept
+Contracts|Obligate|/ˈɒblɪɡeɪt/|Bắt buộc, ràng buộc về mặt pháp lý|The contract obligates payment within 30 days.|Compel, Bind|Free
+Contracts|Party|/ˈpɑːrti/|Bên tham gia hợp đồng, đối tượng ký kết|Third-party involvement requires approval.|Participant, Signatory|N/A
+Contracts|Provision|/prəˈvɪʒn/|Điều khoản, quy định cụ thể trong văn bản|Review all provisions thoroughly.|Clause, Stipulation|N/A
+Contracts|Ratify|/ˈrætɪfaɪ/|Phê chuẩn, chính thức công nhận hợp đồng|The board will ratify the agreement.|Approve, Confirm|Reject
+Contracts|Remedy|/ˈremədi/|Biện pháp khắc phục khi vi phạm hợp đồng|Legal remedies include compensation.|Solution, Recourse|N/A
+Contracts|Renewal|/rɪˈnjuːəl/|Gia hạn, kéo dài thời hạn hợp đồng|Contract renewal requires mutual consent.|Extension, Continuation|Termination
+Contracts|Rescind|/rɪˈsɪnd/|Hủy bỏ, thu hồi hợp đồng đã ký|Rescind the agreement due to fraud.|Cancel, Revoke|Uphold
+Contracts|Resolve|/rɪˈzɒlv/|Giải quyết vấn đề hoặc tranh chấp hợp đồng|Resolve disputes through arbitration.|Settle, Fix|Complicate
+Contracts|Severability|/ˌsevərəˈbɪləti/|Tính khả thi riêng của từng điều khoản|Severability clause preserves remaining terms.|Separability|N/A
+Contracts|Specific|/spəˈsɪfɪk/|Cụ thể, rõ ràng, không mơ hồ|Specify exact delivery dates.|Precise, Explicit|Vague
+Contracts|Stipulate|/ˈstɪpjuleɪt/|Quy định rõ ràng trong hợp đồng|Stipulate payment conditions.|Specify, State|Omit
+Contracts|Subcontract|/ˈsʌbkɒntrækt/|Hợp đồng phụ, thuê lại cho bên thứ ba|Subcontract specialized work.|Outsource, Delegate|N/A
+Contracts|Termination|/ˌtɜːrmɪˈneɪʃn/|Chấm dứt hợp đồng trước hoặc đúng hạn|Early termination incurs fees.|Ending, Cancellation|Continuation
+Contracts|Waive|/weɪv/|Từ bỏ quyền lợi, không đòi hỏi thực hiện|Waive the right to sue.|Relinquish, Forgo|Claim
+Contracts|Warranty|/ˈwɒrənti/|Bảo đảm, cam kết về chất lượng sản phẩm|Warranty covers manufacturing defects.|Guarantee, Assurance|N/A
+Contracts|Whereas|/weərˈæz/|Trong khi đó, điều khoản mở đầu hợp đồng|Whereas the parties agree to collaborate...|Given that, Considering|N/A
+Contracts|Witness|/ˈwɪtnəs/|Người làm chứng khi ký hợp đồng|Two witnesses signed the document.|Observe, Attest|N/A
+Marketing|Advertise|/ˈædvərtaɪz/|Quảng cáo, đăng thông tin sản phẩm trên các phương tiện truyền thông|Advertise on social media platforms.|Promote, Publicize|Conceal
+Marketing|Appeal|/əˈpiːl/|Sức hấp dẫn, khả năng lôi cuốn khách hàng mục tiêu|The product has broad consumer appeal.|Attraction, Allure|Repulsion
+Marketing|Attract|/əˈtrækt/|Thu hút sự chú ý của khách hàng tiềm năng|Attract customers with compelling offers.|Draw, Lure|Repel
+Marketing|Awareness|/əˈweənəs/|Nhận thức, mức độ biết đến thương hiệu|Build brand awareness through campaigns.|Recognition, Consciousness|Ignorance
+Marketing|Branding|/ˈbrændɪŋ/|Xây dựng thương hiệu, tạo hình ảnh riêng biệt|Effective branding creates customer loyalty.|Brand identity, Positioning|N/A
+Marketing|Campaign|/kæmˈpeɪn/|Chiến dịch quảng cáo có kế hoạch và mục tiêu rõ ràng|Launch a marketing campaign this quarter.|Initiative, Drive|N/A
+Marketing|Clientele|/ˌklaɪənˈtel/|Tập khách hàng, nhóm người mua hàng thường xuyên|Expand our clientele through referrals.|Customer base, Patrons|N/A
+Marketing|Compare|/kəmˈpeər/|So sánh sản phẩm với đối thủ cạnh tranh|Compare features and benefits.|Contrast, Evaluate|Ignore
+Marketing|Competition|/ˌkɒmpəˈtɪʃn/|Sự cạnh tranh gay gắt trên thị trường|Face intense competition in the sector.|Rivalry, Contest|Cooperation
+Marketing|Competitive advantage|/kəmˈpetɪtɪv ədˈvæntɪdʒ/|Lợi thế cạnh tranh, điểm mạnh vượt trội so với đối thủ|Innovation provides competitive advantage.|Edge, Superiority|Disadvantage
+Marketing|Consumer behavior|/kənˈsjuːmər bɪˈheɪvjər/|Hành vi người tiêu dùng, cách khách hàng ra quyết định mua|Study consumer behavior patterns.|Buying habits, Purchasing patterns|N/A
+Marketing|Consume|/kənˈsjuːm/|Tiêu thụ, sử dụng sản phẩm hoặc dịch vụ|Consumers consume more during holidays.|Use, Utilize|Produce
+Marketing|Conversion rate|/kənˈvɜːrʒn reɪt/|Tỷ lệ chuyển đổi từ khách hàng tiềm năng thành mua hàng|Improve conversion rates through testing.|Sales rate, Purchase ratio|N/A
+Marketing|Convince|/kənˈvɪns/|Thuyết phục khách hàng tin tưởng và mua sản phẩm|Convince buyers with testimonials.|Persuade, Influence|Discourage
+Marketing|Currently|/ˈkʌrəntli/|Hiện tại, trong giai đoạn này của thị trường|Currently offering a limited-time discount.|Presently, Now|Previously
+Marketing|Customer retention|/ˈkʌstəmər rɪˈtenʃn/|Giữ chân khách hàng, duy trì lòng trung thành|Focus on customer retention strategies.|Loyalty maintenance|Customer loss
+Marketing|Demographic|/ˌdeməˈɡræfɪk/|Nhân khẩu học, phân khúc khách hàng theo tuổi, giới tính|Target specific demographic groups.|Population segment, Market segment|N/A
+Marketing|Differentiate|/ˌdɪfəˈrenʃieɪt/|Tạo sự khác biệt, phân biệt sản phẩm với đối thủ|Differentiate through unique features.|Distinguish, Set apart|Homogenize
+Marketing|Distribution channel|/ˌdɪstrɪˈbjuːʃn ˈtʃænl/|Kênh phân phối, đường đi của sản phẩm đến tay người tiêu dùng|Expand distribution channels online.|Sales channel, Supply route|N/A
+Marketing|Endorsement|/ɪnˈdɔːrsmənt/|Sự ủng hộ, quảng cáo bởi người nổi tiếng|Celebrity endorsements boost sales.|Support, Approval|Criticism
+Marketing|Engagement|/ɪnˈɡeɪdʒmənt/|Mức độ tương tác của khách hàng với thương hiệu|Social media engagement is increasing.|Interaction, Involvement|Disengagement
+Marketing|Fad|/fæd/|Mốt nhất thời, xu hướng ngắn hạn trên thị trường|Don't invest heavily in passing fads.|Trend, Craze|Classic
+Marketing|Focus group|/ˈfəʊkəs ɡruːp/|Nhóm khách hàng thử nghiệm để thu thập ý kiến|Conduct focus groups before launch.|Test panel, Sample group|N/A
+Marketing|Impression|/ɪmˈpreʃn/|Lượt hiển thị quảng cáo, số lần được nhìn thấy|Track ad impressions and click-through rates.|View, Exposure|N/A
+Marketing|Incentive|/ɪnˈsentɪv/|Ưu đãi khuyến khích khách hàng mua hàng|Offer incentives for early purchases.|Motivation, Reward|Disincentive
+Marketing|Influencer|/ˈɪnfluənsər/|Người có ảnh hưởng trên mạng xã hội|Partner with influencers for promotion.|Opinion leader, Trendsetter|N/A
+Marketing|Innovation|/ˌɪnəˈveɪʃn/|Đổi mới sản phẩm hoặc phương thức tiếp thị|Innovation drives market leadership.|Novelty, Breakthrough|Stagnation
+Marketing|Inspiration|/ˌɪnspəˈreɪʃn/|Cảm hứng cho chiến dịch sáng tạo|Draw inspiration from customer stories.|Creativity, Motivation|N/A
+Marketing|Launch|/lɔːntʃ/|Ra mắt sản phẩm mới ra thị trường|Launch the new product line next month.|Release, Introduce|Discontinue
+Marketing|Lead generation|/liːd ˌdʒenəˈreɪʃn/|Tạo khách hàng tiềm năng, thu thập thông tin người quan tâm|Focus on lead generation strategies.|Prospect finding, Customer acquisition|N/A
+Marketing|Loyalty program|/ˈlɔɪəlti ˈprəʊɡræm/|Chương trình khách hàng thân thiết, tích điểm đổi quà|Launch a loyalty program for repeat customers.|Rewards scheme, Points system|N/A
+Marketing|Market research|/ˈmɑːrkɪt rɪˈsɜːrtʃ/|Nghiên cứu thị trường, phân tích nhu cầu khách hàng|Conduct market research before expansion.|Consumer analysis, Market study|N/A
+Marketing|Market segment|/ˈmɑːrkɪt ˈseɡmənt/|Phân khúc thị trường, nhóm khách hàng mục tiêu cụ thể|Target the premium market segment.|Customer group, Niche|N/A
+Marketing|Market share|/ˈmɑːrkɪt ʃeər/|Thị phần, tỷ lệ chiếm lĩnh thị trường|Increase market share by 15%.|Market portion, Market penetration|N/A
+Marketing|Niche|/niːʃ/|Thị trường ngách, phân khúc hẹp và chuyên biệt|Target a profitable niche market.|Specialty market, Segment|Mass market
+Marketing|Outreach|/ˈaʊtriːtʃ/|Tiếp cận khách hàng, mở rộng kết nối với công chúng|Community outreach builds brand trust.|Contact, Engagement|Withdrawal
+Marketing|Penetration|/ˌpenɪˈtreɪʃn/|Thâm nhập thị trường, mở rộng khách hàng|Market penetration strategies are essential.|Entry, Infiltration|Withdrawal
+Marketing|Perception|/pərˈsepʃn/|Nhận thức của khách hàng về thương hiệu|Shape positive brand perception.|Impression, View|Reality
+Marketing|Persuasion|/pərˈsweɪʒn/|Sự thuyết phục, kỹ thuật lôi kéo khách hàng|Master persuasion techniques in sales.|Influence, Convincing|Coercion
+Marketing|Positioning|/pəˈzɪʃnɪŋ/|Định vị thương hiệu trong tâm trí khách hàng|Strategic positioning differentiates the brand.|Placement, Market position|N/A
+Marketing|Productive|/prəˈdʌktɪv/|Hiệu quả cao, tạo ra kết quả tốt|Productive marketing campaigns yield results.|Effective, Efficient|Unproductive
+Marketing|Promotion|/prəˈməʊʃn/|Khuyến mãi, hoạt động xúc tiến bán hàng|Run a promotion for new customers.|Sale, Special offer|N/A
+Marketing|Reach|/riːtʃ/|Phạm vi tiếp cận, số người nhìn thấy quảng cáo|Expand reach through digital channels.|Audience, Coverage|N/A
+Marketing|Retention|/rɪˈtenʃn/|Giữ chân khách hàng, duy trì lâu dài|Customer retention reduces acquisition costs.|Loyalty, Maintenance|Loss
+Marketing|ROI (Return on Investment)|/ɑːr əʊ aɪ/|Lợi tức đầu tư, hiệu quả tài chính của chiến dịch|Measure marketing ROI carefully.|Profitability, Return|Loss
+Marketing|Satisfaction|/ˌsætɪsˈfækʃn/|Sự hài lòng của khách hàng về sản phẩm|Ensure customer satisfaction through quality.|Contentment, Fulfillment|Dissatisfaction
+Marketing|Slogan|/ˈsləʊɡən/|Khẩu hiệu, câu quảng cáo ngắn gọn dễ nhớ|Create a memorable brand slogan.|Tagline, Catchphrase|N/A
+Marketing|Target audience|/ˈtɑːrɡɪt ˈɔːdiəns/|Đối tượng mục tiêu, nhóm khách hàng cần hướng đến|Define the target audience clearly.|Intended market, Demographics|N/A
+Marketing|Testimonial|/ˌtestɪˈməʊniəl/|Lời chứng thực, đánh giá tích cực từ khách hàng|Feature customer testimonials on the website.|Recommendation, Endorsement|Criticism
+Marketing|Trend|/trend/|Xu hướng, hướng phát triển của thị trường|Follow emerging market trends.|Tendency, Direction|Constancy
+Marketing|Value proposition|/ˈvæljuː ˌprɒpəˈzɪʃn/|Giá trị đề xuất, lợi ích độc đáo cho khách hàng|Communicate a clear value proposition.|Unique benefit, Selling point|N/A
+Marketing|Viral marketing|/ˈvaɪrəl ˈmɑːrkɪtɪŋ/|Tiếp thị lan truyền qua mạng xã hội|Content went viral on social media.|Buzz marketing, Word-of-mouth|N/A
+Marketing|Word-of-mouth|/wɜːrd əv maʊθ/|Truyền miệng, khách hàng giới thiệu cho nhau|Rely on word-of-mouth recommendations.|Personal recommendation, Referral|N/A
+Warranties|Characteristic|/ˌkærəktəˈrɪstɪk/|Đặc tính, đặc điểm riêng biệt của sản phẩm|Key characteristics include durability.|Feature, Trait|N/A
+Warranties|Claim|/kleɪm/|Yêu cầu bồi thường, khiếu nại theo bảo hành|File a warranty claim within 30 days.|Request, Demand|Waive
+Warranties|Consequence|/ˈkɒnsɪkwəns/|Hậu quả khi vi phạm điều khoản bảo hành|Failure to comply has serious consequences.|Result, Outcome|Cause
+Warranties|Consider|/kənˈsɪdər/|Cân nhắc, xem xét kỹ trước khi quyết định|Consider all warranty options carefully.|Think about, Evaluate|Ignore
+Warranties|Coverage|/ˈkʌvərɪdʒ/|Phạm vi bảo hành, những gì được bao gồm|Full coverage includes parts and labor.|Protection, Inclusion|Exclusion
+Warranties|Defect|/ˈdiːfekt/|Khuyết tật, lỗi sản xuất trong sản phẩm|Report defects within the warranty period.|Flaw, Imperfection|Perfection
+Warranties|Exclusion|/ɪkˈskluːʒn/|Loại trừ, những gì không được bảo hành|Read warranty exclusions carefully.|Exception, Omission|Inclusion
+Warranties|Expiration|/ˌekspəˈreɪʃn/|Hết hạn bảo hành, ngày kết thúc hiệu lực|Check the warranty expiration date.|Termination, End date|Commencement
+Warranties|Extended warranty|/ɪkˈstendɪd ˈwɒrənti/|Bảo hành kéo dài, gói bảo hành mở rộng thêm|Purchase an extended warranty for peace of mind.|Additional coverage, Service plan|N/A
+Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Frequently asked questions about warranties.|Often, Regularly|Rarely
+Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or money back.|Assurance, Promise|Risk
+Warranties|Imply|/ɪmˈplaɪ/|Ngụ ý, ám chỉ không nói rõ ràng|The warranty implies certain obligations.|Suggest, Indicate|State explicitly
+Warranties|Limitation|/ˌlɪmɪˈteɪʃn/|Giới hạn, hạn chế của phạm vi bảo hành|Understand warranty limitations before purchase.|Restriction, Constraint|Extension
+Warranties|Malfunction|/mælˈfʌŋkʃn/|Sự trục trặc, hoạt động không đúng cách|Report malfunctions immediately for repair.|Defect, Breakdown|Function
+Warranties|Misuse|/ˌmɪsˈjuːs/|Sử dụng sai cách, không đúng hướng dẫn|Warranty is void if product is misused.|Abuse, Improper use|Proper use
+Warranties|Promise|/ˈprɒmɪs/|Lời hứa, cam kết của nhà sản xuất|The company promises quality workmanship.|Pledge, Commitment|Denial
+Warranties|Protect|/prəˈtekt/|Bảo vệ khách hàng khỏi chi phí sửa chữa|The warranty protects against defects.|Guard, Shield|Expose
+Warranties|Replacement|/rɪˈpleɪsmənt/|Thay thế sản phẩm lỗi bằng sản phẩm mới|Receive a replacement within 5 business days.|Substitute, Exchange|Original
+Warranties|Reputation|/ˌrepjuˈteɪʃn/|Danh tiếng công ty về dịch vụ bảo hành|Maintain reputation through excellent service.|Standing, Image|Infamy
+Warranties|Require|/rɪˈkwaɪər/|Yêu cầu, đòi hỏi điều kiện để bảo hành|Warranty requires proof of purchase.|Need, Demand|Optional
+Warranties|Restore|/rɪˈstɔːr/|Khôi phục sản phẩm về tình trạng ban đầu|Restore the item to working condition.|Repair, Reinstate|Damage
+Warranties|Terms and conditions|/tɜːrmz ənd kənˈdɪʃnz/|Điều khoản và điều kiện của bảo hành|Read the terms and conditions thoroughly.|Rules, Provisions|N/A
+Warranties|Transferable|/trænsˈfɜːrəbl/|Có thể chuyển nhượng bảo hành cho người khác|The warranty is transferable to new owners.|Assignable, Movable|Non-transferable
+Warranties|Variety|/vəˈraɪəti/|Sự đa dạng các loại bảo hành có sẵn|Offer a variety of warranty options.|Diversity, Range|Uniformity
+Warranties|Void|/vɔɪd/|Vô hiệu, không còn giá trị pháp lý|Tampering voids the warranty.|Invalid, Null|Valid
         `;
 
         const parseData = (str) => {
@@ -451,7 +225,8 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                     meaning: parts[3],
                     example: parts[4],
                     synonym: parts[5] || "N/A",
-                    antonym: parts[6] || "N/A"
+                    antonym: parts[6] || "N/A",
+                    family: parts[7] || "N/A"
                 };
             });
         };
@@ -496,13 +271,35 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
         };
 
         const LinkedWordList = ({ text, jumpToWord, colorClass = "text-gray-600" }) => {
-            if (!text || text === "N/A") return <span className="text-gray-400">N/A</span>;
+            if (!text || text === "N/A") return <span className="text-gray-400 italic text-xs">Không có</span>;
             const words = text.split(',').map(w => w.trim());
-            return ( <span> {words.map((w, i) => { const exists = toeicData.some(item => item.word.toLowerCase() === w.toLowerCase()); return ( <React.Fragment key={i}> {i > 0 && ", "} {exists ? ( <button onClick={(e) => { e.stopPropagation(); jumpToWord(w); }} className={`${colorClass} hover:underline font-semibold cursor-pointer`}>{w}</button> ) : ( <span className={colorClass}>{w}</span> )} </React.Fragment> ); })} </span> );
+            return ( 
+                <span> 
+                    {words.map((w, i) => { 
+                        const exists = toeicData.some(item => item.word.toLowerCase() === w.toLowerCase()); 
+                        return ( 
+                            <React.Fragment key={i}> 
+                                {i > 0 && ", "} 
+                                {exists ? ( 
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); jumpToWord(w); }} 
+                                        className={`${colorClass} hover:underline font-bold cursor-pointer hover:bg-yellow-100 px-1 rounded transition-all`}
+                                        title="Xem chi tiết từ này"
+                                    >
+                                        {w}
+                                    </button> 
+                                ) : ( 
+                                    <span className={colorClass}>{w}</span> 
+                                )} 
+                            </React.Fragment> 
+                        ); 
+                    })} 
+                </span> 
+            );
         };
 
-        const WordItem = ({ item, isLearned, isDetailOpen, isHighlighted, toggleLearned, toggleDetails }) => (
-            <div id={`word-${item.id}`} className={`p-4 rounded-lg border transition-all ${isHighlighted ? 'ring-2 ring-yellow-400 bg-yellow-50' : 'bg-white border-slate-200'} ${isLearned ? 'bg-emerald-50' : ''}`}>
+        const WordItem = ({ item, isLearned, isDetailOpen, isHighlighted, toggleLearned, toggleDetails, jumpToWord }) => (
+            <div id={`word-${item.id}`} className={`p-4 rounded-lg border transition-all ${isHighlighted ? 'ring-4 ring-yellow-400 bg-yellow-50 scale-105 z-10 shadow-xl' : 'bg-white border-slate-200'} ${isLearned ? 'bg-emerald-50' : ''}`}>
                 <div className="flex justify-between">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1"> <span className="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1 rounded">{item.topic}</span> </div>
@@ -513,13 +310,56 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                 </div>
                 <div className="mt-2 pt-2 border-t border-slate-100">
                     <p className="font-medium text-sm text-slate-800">{item.meaning}</p>
-                    <button onClick={() => toggleDetails(item.id)} className="text-xs text-indigo-500 font-semibold mt-1"> {isDetailOpen ? 'Thu gọn' : 'Chi tiết'} <i className={`fas fa-chevron-${isDetailOpen ? 'up' : 'down'}`}></i> </button>
-                    {isDetailOpen && ( <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded"> <p><strong>Ví dụ:</strong> "{item.example}"</p> </div> )}
+                    <button onClick={() => toggleDetails(item.id)} className="text-xs text-indigo-500 font-semibold mt-1 hover:text-indigo-700 flex items-center gap-1"> 
+                        {isDetailOpen ? 'Thu gọn' : 'Chi tiết'} <i className={`fas fa-chevron-${isDetailOpen ? 'up' : 'down'}`}></i> 
+                    </button>
+                    
+                    {isDetailOpen && ( 
+                        <div className="mt-2 text-sm space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100 animate-fadeIn"> 
+                            <div><span className="font-bold text-slate-700 text-xs uppercase block mb-1">Ví dụ:</span> <p className="italic text-slate-600 bg-white p-2 rounded border border-slate-200">"{item.example}"</p></div>
+                            
+                            <div className="grid grid-cols-1 gap-2 border-t border-slate-200 pt-2 mt-2">
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-blue-600 text-xs uppercase mb-1">Đồng nghĩa:</span>
+                                    <div className="bg-blue-50 p-2 rounded border border-blue-100 text-sm">
+                                        <LinkedWordList text={item.synonym} jumpToWord={jumpToWord} colorClass="text-blue-800" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-red-500 text-xs uppercase mb-1">Trái nghĩa:</span>
+                                    <div className="bg-red-50 p-2 rounded border border-red-100 text-sm">
+                                        <LinkedWordList text={item.antonym} jumpToWord={jumpToWord} colorClass="text-red-800" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-purple-600 text-xs uppercase mb-1">Gia đình từ:</span>
+                                    <div className="bg-purple-50 p-2 rounded border border-purple-100 text-sm">
+                                        <LinkedWordList text={item.family} jumpToWord={jumpToWord} colorClass="text-purple-800" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    )}
                 </div>
             </div>
         );
 
-        const WordListView = ({ data, learnedWords, toggleLearned, showDetails, toggleDetails, highlightedId }) => ( <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"> {data.map(item => ( <WordItem key={item.id} item={item} isLearned={learnedWords.has(item.id)} isDetailOpen={showDetails === item.id} isHighlighted={highlightedId === item.id} toggleLearned={toggleLearned} toggleDetails={toggleDetails} /> ))} </div> );
+        const WordListView = ({ data, learnedWords, toggleLearned, showDetails, toggleDetails, highlightedId, jumpToWord }) => ( 
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"> 
+                {data.map(item => ( 
+                    <WordItem 
+                        key={item.id} 
+                        item={item} 
+                        isLearned={learnedWords.has(item.id)} 
+                        isDetailOpen={showDetails === item.id} 
+                        isHighlighted={highlightedId === item.id} 
+                        toggleLearned={toggleLearned} 
+                        toggleDetails={toggleDetails}
+                        jumpToWord={jumpToWord}
+                    /> 
+                ))} 
+            </div> 
+        );
 
         const FlashcardView = ({ data, learnedWords, toggleLearned }) => {
             const [index, setIndex] = React.useState(0);
@@ -716,12 +556,17 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
             const [pvpWinner, setPvPWinner] = React.useState(null);
             const [aiMemory, setAiMemory] = React.useState({});
             const [aiTargets, setAiTargets] = React.useState([]);
+            
+            const [selectedTopics, setSelectedTopics] = React.useState([]);
+            const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
+
             const [roomId, setRoomId] = React.useState('');
             const [isHost, setIsHost] = React.useState(false);
             const [onlineStatus, setOnlineStatus] = React.useState('idle'); 
             const [inputRoomId, setInputRoomId] = React.useState('');
             const [hasPaid, setHasPaid] = React.useState(false); 
 
+            // Functions Definitions (Moved outside effects)
             const speak = (text) => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
@@ -729,6 +574,18 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                     u.lang = 'en-US';
                     window.speechSynthesis.speak(u);
                 }
+            };
+
+            const toggleTopic = (topic) => {
+                setSelectedTopics(prev => {
+                    if (prev.includes(topic)) return prev.filter(t => t !== topic);
+                    return [...prev, topic];
+                });
+            };
+
+            const toggleAllTopics = () => {
+                if (selectedTopics.length === uniqueTopics.length) setSelectedTopics([]);
+                else setSelectedTopics(uniqueTopics);
             };
 
             const calculateAiMoves = () => {
@@ -744,23 +601,6 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                     if (matchInMemory !== undefined) secondIdx = matchInMemory; else { const remaining = allAvailable.filter(i => i !== firstIdx); secondIdx = remaining[Math.floor(Math.random() * remaining.length)]; }
                 }
                 return [firstIdx, secondIdx];
-            };
-
-            const handleCardClick = (index) => {
-                if (gameMode === 'pvp_online') { handleOnlineCardClick(index); return; }
-                if (processing || flippedIndices.includes(index) || matchedIndices.includes(index)) return;
-                playSound('flip');
-                const newFlipped = [...flippedIndices, index];
-                setFlippedIndices(newFlipped);
-                setAiMemory(prev => ({ ...prev, [index]: cards[index].itemId }));
-                if (newFlipped.length === 2) { setProcessing(true); checkForMatch(newFlipped); }
-            };
-
-            const performAiTurn = () => {
-                if (aiTargets.length === 0) {
-                    const moves = calculateAiMoves();
-                    setAiTargets(moves);
-                }
             };
 
             const checkForMatch = ([idx1, idx2]) => {
@@ -847,6 +687,86 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                 }
             };
 
+            const handleCardClick = (index) => {
+                if (gameMode === 'pvp_online') { handleOnlineCardClick(index); return; }
+                if (processing || flippedIndices.includes(index) || matchedIndices.includes(index)) return;
+                playSound('flip');
+                const newFlipped = [...flippedIndices, index];
+                setFlippedIndices(newFlipped);
+                setAiMemory(prev => ({ ...prev, [index]: cards[index].itemId }));
+                if (newFlipped.length === 2) { setProcessing(true); checkForMatch(newFlipped); }
+            };
+
+            const performAiTurn = () => {
+                if (aiTargets.length === 0) {
+                    const moves = calculateAiMoves();
+                    setAiTargets(moves);
+                }
+            };
+
+            const startLevel = (mode = gameMode) => {
+                setLevelComplete(false); setMatchedIndices([]); setFlippedIndices([]); setPvPWinner(null); setAiMemory({}); setHasPaid(false); setAiTargets([]);
+                if (level === 1) { setCurrentPlayer(1); setScores({ 1: 0, 2: 0 }); }
+                
+                let availableData = allData;
+                if (selectedTopics.length > 0) {
+                    availableData = allData.filter(item => selectedTopics.includes(item.topic));
+                }
+                if (availableData.length < 8) availableData = allData;
+
+                const shuffledData = [...availableData].sort(() => Math.random() - 0.5);
+                const pairCount = (mode === 'ai' || mode === 'pvp_online') ? 8 : 6;
+                const selectedItems = shuffledData.slice(0, pairCount);
+                
+                let cardSet = [];
+                selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
+                setCards(cardSet.sort(() => Math.random() - 0.5));
+            };
+
+            const startGameWithTopics = (mode) => {
+                setGameMode(mode);
+                startLevel(mode);
+            };
+
+            const createRoom = async () => {
+                if (!user || !db) return alert("Vui lòng đăng nhập!");
+                if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
+                try {
+                    const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+                    
+                    let availableData = allData;
+                    if (selectedTopics.length > 0) availableData = allData.filter(item => selectedTopics.includes(item.topic));
+                    if (availableData.length < 8) availableData = allData;
+
+                    const shuffledData = [...availableData].sort(() => Math.random() - 0.5);
+                    const selectedItems = shuffledData.slice(0, 8); 
+                    let cardSet = [];
+                    selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
+                    cardSet.sort(() => Math.random() - 0.5);
+                    
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
+                    await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
+                    setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting'); setHasPaid(false);
+                } catch (error) { console.error("Lỗi tạo phòng:", error); alert("Lỗi tạo phòng. Hãy kiểm tra mạng."); }
+            };
+
+            const joinRoom = async () => {
+                 if (!user || !db) return alert("Vui lòng đăng nhập!");
+                if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
+                if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
+                try {
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
+                    const doc = await roomRef.get();
+                    if (!doc.exists) return alert("Phòng không tồn tại!");
+                    if (doc.data().hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình!");
+                    if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+                    await roomRef.update({ guestId: user.uid, status: 'playing' });
+                    setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing'); setHasPaid(false);
+                } catch (error) { console.error("Lỗi vào phòng:", error); alert("Lỗi kết nối phòng."); }
+            };
+            
+            // --- EFFECTS ---
+
             // AI Logic Hook 1
             React.useEffect(() => {
                  if (gameMode === 'ai' && currentPlayer === 2 && !levelComplete && !pvpWinner && !processing && flippedIndices.length === 0 && aiTargets.length === 0) {
@@ -872,8 +792,9 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                 }
             }, [aiTargets, flippedIndices, gameMode, currentPlayer]);
 
-            React.useEffect(() => { if (gameMode && gameMode !== 'pvp_online') startLevel(); }, [level, gameMode]);
+            React.useEffect(() => { if (gameMode && gameMode !== 'pvp_online') startLevel(); }, [level]); // Removed gameMode dep to avoid double reset
 
+            // Online Sync
             React.useEffect(() => {
                 if (gameMode === 'pvp_online' && roomId && db) {
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
@@ -897,10 +818,7 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                                     if (winner !== 'draw') {
                                         const amIHost = isHost;
                                         const iWon = (amIHost && winner === 1) || (!amIHost && winner === 2);
-                                        
-                                        if (iWon) newCoinBalance += betAmount;
-                                        else newCoinBalance -= betAmount;
-                                        
+                                        if (iWon) newCoinBalance += betAmount; else newCoinBalance -= betAmount;
                                         setCoins(newCoinBalance);
                                         if (user && db) {
                                             const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
@@ -910,64 +828,62 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                                 }
                             }
                         }
-                    }, (error) => { console.error("Lỗi đồng bộ:", error); if (onlineStatus !== 'idle') alert("Mất kết nối!"); });
+                    });
                     return () => unsubscribe();
                 }
             }, [gameMode, roomId, isHost, onlineStatus, hasPaid, coins]);
 
-            const startLevel = () => {
-                setLevelComplete(false); setMatchedIndices([]); setFlippedIndices([]); setPvPWinner(null); setAiMemory({}); setHasPaid(false); setAiTargets([]);
-                if (level === 1) { setCurrentPlayer(1); setScores({ 1: 0, 2: 0 }); }
-                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
-                const pairCount = (gameMode === 'ai' || gameMode === 'pvp_online') ? 8 : 6;
-                const selectedItems = shuffledData.slice(0, pairCount);
-                let cardSet = [];
-                selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
-                setCards(cardSet.sort(() => Math.random() - 0.5));
-            };
 
-            const createRoom = async () => {
-                if (!user || !db) return alert("Vui lòng đăng nhập!");
-                if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
-                try {
-                    const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
-                    const shuffledData = [...allData].sort(() => Math.random() - 0.5);
-                    const selectedItems = shuffledData.slice(0, 8); 
-                    let cardSet = [];
-                    selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
-                    cardSet.sort(() => Math.random() - 0.5);
-                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
-                    await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
-                    setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting'); setHasPaid(false);
-                } catch (error) { console.error("Lỗi tạo phòng:", error); alert("Lỗi tạo phòng. Hãy kiểm tra mạng."); }
-            };
-
-            const joinRoom = async () => {
-                if (!user || !db) return alert("Vui lòng đăng nhập!");
-                if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
-                if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
-                try {
-                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
-                    const doc = await roomRef.get();
-                    if (!doc.exists) return alert("Phòng không tồn tại!");
-                    if (doc.data().hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình!");
-                    if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
-                    await roomRef.update({ guestId: user.uid, status: 'playing' });
-                    setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing'); setHasPaid(false);
-                } catch (error) { console.error("Lỗi vào phòng:", error); alert("Lỗi kết nối phòng."); }
-            };
-
+            // TOPIC SELECTION SCREEN
             if (!gameMode) {
                 return (
-                    <div className="flex flex-col items-center justify-center h-[500px] gap-6 animate-fadeIn">
-                        <h2 className="text-2xl font-black text-indigo-900 mb-4">Chọn Chế Độ Chơi</h2>
-                        <button onClick={() => setGameMode('solo')} className="w-64 p-6 bg-white border-2 border-indigo-100 hover:border-indigo-500 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group"> <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition"><i className="fas fa-user text-3xl text-indigo-600"></i></div> <span className="font-bold text-lg text-slate-800">Luyện tập (1 người)</span> </button>
-                        <button onClick={() => setGameMode('ai')} className="w-64 p-6 bg-white border-2 border-purple-100 hover:border-purple-500 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group"> <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center group-hover:bg-purple-100 transition"><i className="fas fa-robot text-3xl text-purple-600"></i></div> <span className="font-bold text-lg text-slate-800">Chơi với Máy (AI)</span> </button>
-                        <button onClick={() => setGameMode('pvp_online')} className="w-64 p-6 bg-white border-2 border-orange-100 hover:border-orange-500 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group"> <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center group-hover:bg-orange-100 transition"><i className="fas fa-globe text-3xl text-orange-600"></i></div> <span className="font-bold text-lg text-slate-800">Online PvP (Cược 200)</span> </button>
+                    <div className="flex flex-col items-center p-4 animate-fadeIn">
+                        <h2 className="text-2xl font-black text-indigo-900 mb-2">Cài Đặt Trò Chơi</h2>
+                        <div className="bg-white p-4 rounded-xl shadow-md w-full max-w-2xl border border-indigo-50 mb-6">
+                            <div className="flex justify-between items-center mb-3">
+                                <h3 className="font-bold text-gray-700">Chọn Chủ Đề ({selectedTopics.length || 'Tất cả'})</h3>
+                                <button 
+                                    onClick={toggleAllTopics}
+                                    className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100"
+                                >
+                                    {selectedTopics.length === uniqueTopics.length ? 'Bỏ chọn hết' : 'Chọn tất cả'}
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+                                {uniqueTopics.map(topic => (
+                                    <button
+                                        key={topic}
+                                        onClick={() => toggleTopic(topic)}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all topic-chip ${selectedTopics.includes(topic) ? 'selected' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'}`}
+                                    >
+                                        {topic}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="mt-2 text-xs text-gray-400 italic text-center">
+                                {selectedTopics.length === 0 ? "Chế độ: Tự động Mix (Tất cả chủ đề)" : "Chế độ: Mix Thủ công"}
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-4 w-full max-w-sm">
+                            <button onClick={() => startGameWithTopics('solo')} className="p-4 bg-white border-2 border-indigo-100 hover:border-indigo-500 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
+                                <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100"><i className="fas fa-user text-xl text-indigo-600"></i></div>
+                                <div className="text-left"><span className="font-bold block text-slate-800">Luyện tập (1 người)</span><span className="text-xs text-slate-400">Kiếm xu, qua màn</span></div>
+                            </button>
+                            <button onClick={() => startGameWithTopics('ai')} className="p-4 bg-white border-2 border-purple-100 hover:border-purple-500 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
+                                <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center group-hover:bg-purple-100"><i className="fas fa-robot text-xl text-purple-600"></i></div>
+                                <div className="text-left"><span className="font-bold block text-slate-800">Đấu với Máy (AI)</span><span className="text-xs text-slate-400">Luyện phản xạ</span></div>
+                            </button>
+                            <button onClick={() => startGameWithTopics('pvp_online')} className="p-4 bg-white border-2 border-orange-100 hover:border-orange-500 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
+                                <div className="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center group-hover:bg-orange-100"><i className="fas fa-globe text-xl text-orange-600"></i></div>
+                                <div className="text-left"><span className="font-bold block text-slate-800">Online PvP (Cược 200)</span><span className="text-xs text-slate-400">Đấu với người thật</span></div>
+                            </button>
+                        </div>
                     </div>
                 );
             }
 
+            // ONLINE WAITING SCREEN
             if (gameMode === 'pvp_online' && onlineStatus !== 'playing') {
                 return (
                     <div className="flex flex-col items-center justify-center h-[500px] gap-6 animate-fadeIn">
@@ -1047,127 +963,3 @@ Financial Statements|Yield|/jiːld/|Tạo ra, sinh lợi từ hoạt động kin
                             </> )} <button onClick={() => { setGameMode(null); setOnlineStatus('idle'); }} className="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-full font-bold shadow-lg transition">Về Menu Chính</button>
                         </div>
                     )}
-                </div>
-            );
-        };
-
-        function App() {
-            const [view, setView] = React.useState('list'); 
-            const [selectedTopic, setSelectedTopic] = React.useState('All');
-            const [searchTerm, setSearchTerm] = React.useState('');
-            const [learnedWords, setLearnedWords] = React.useState(new Set());
-            const [coins, setCoins] = React.useState(0);
-            const [showDetails, setShowDetails] = React.useState(null); 
-            const [highlightedId, setHighlightedId] = React.useState(null);
-            const [user, setUser] = React.useState(null);
-            const [showLeaderboard, setShowLeaderboard] = React.useState(false);
-
-            React.useEffect(() => {
-                if (!auth) return;
-                const unsubscribe = auth.onAuthStateChanged((u) => {
-                    if (u) { setUser(u); } 
-                    else { auth.signInAnonymously().catch(e => console.error("Anon Auth Error", e)); }
-                });
-                return () => unsubscribe();
-            }, []);
-
-            const loginGoogle = async () => {
-                try {
-                    await auth.signInWithPopup(googleProvider);
-                } catch (error) {
-                    console.error("Login failed", error);
-                    alert("Lỗi đăng nhập Google: " + error.message);
-                }
-            };
-
-            const logout = async () => {
-                await auth.signOut();
-            };
-
-            React.useEffect(() => {
-                const saved = localStorage.getItem('toeic_learned_full_v2');
-                if (saved) setLearnedWords(new Set(JSON.parse(saved)));
-                const savedCoins = localStorage.getItem('toeic_user_coins');
-                if (savedCoins) setCoins(parseInt(savedCoins, 10));
-            }, []);
-
-            React.useEffect(() => { localStorage.setItem('toeic_learned_full_v2', JSON.stringify([...learnedWords])); }, [learnedWords]);
-
-            React.useEffect(() => {
-                localStorage.setItem('toeic_user_coins', coins.toString());
-                if (user && db) {
-                    const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
-                    userRef.set({ coins: coins }, { merge: true });
-                }
-            }, [coins, user]);
-
-            const topics = ['All', ...new Set(toeicData.map(item => item.topic))];
-            const toggleLearned = (id) => { setLearnedWords(prev => { const newSet = new Set(prev); if (newSet.has(id)) newSet.delete(id); else newSet.add(id); return newSet; }); };
-            const toggleDetails = (id) => setShowDetails(prev => prev === id ? null : id);
-            const jumpToWord = (wordText) => {
-                const target = toeicData.find(w => w.word.toLowerCase() === wordText.toLowerCase());
-                if (target) {
-                    if (selectedTopic !== 'All' && target.topic !== selectedTopic) setSelectedTopic('All');
-                    setSearchTerm(''); if (view !== 'list') setView('list'); setShowDetails(target.id); setHighlightedId(target.id);
-                    setTimeout(() => { const el = document.getElementById(`word-${target.id}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
-                    setTimeout(() => setHighlightedId(null), 2500);
-                }
-            };
-            const filteredData = toeicData.filter(item => {
-                const matchTopic = selectedTopic === 'All' || item.topic === selectedTopic;
-                const matchSearch = item.word.toLowerCase().includes(searchTerm.toLowerCase()) || item.meaning.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchTopic && matchSearch;
-            });
-            const speakWord = (text) => { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; window.speechSynthesis.speak(u); } };
-
-            return (
-                <div className="min-h-screen flex flex-col max-w-7xl mx-auto shadow-2xl bg-white rounded-xl overflow-hidden my-2 border border-slate-200">
-                    <header className="bg-gradient-to-br from-indigo-900 via-blue-900 to-indigo-900 text-white p-4 shadow-lg sticky top-0 z-50">
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                            <div><h1 className="text-xl font-black tracking-tight flex items-center gap-2"><i className="fas fa-graduation-cap text-yellow-400"></i> TOEIC Liam</h1><p className="text-indigo-200 text-xs mt-1">Học từ vựng & Kiếm Xu</p></div>
-                            <div className="flex items-center gap-3">
-                                {user && !user.isAnonymous ? (
-                                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
-                                        <img src={user.photoURL} alt="User" className="w-6 h-6 rounded-full border border-white" />
-                                        <span className="text-xs font-bold truncate max-w-[80px]">{user.displayName}</span>
-                                        <button onClick={logout} className="text-red-300 hover:text-red-100 ml-1"><i className="fas fa-sign-out-alt"></i></button>
-                                    </div>
-                                ) : (
-                                    <button onClick={loginGoogle} className="bg-white text-indigo-900 px-3 py-1.5 rounded-full font-bold shadow-md flex items-center gap-2 text-sm hover:bg-gray-100 transition">
-                                        <i className="fab fa-google text-red-500"></i> <span>Đăng nhập</span>
-                                    </button>
-                                )}
-                                <button onClick={() => setShowLeaderboard(true)} className="bg-yellow-400 hover:bg-yellow-300 text-indigo-900 px-3 py-1.5 rounded-full font-bold shadow-md flex items-center gap-2 text-sm transition"><i className="fas fa-trophy"></i><span>BXH</span></button>
-                                <div className="bg-white/10 px-3 py-1.5 rounded-full font-bold flex items-center gap-2 border border-white/20"><i className="fas fa-coins text-yellow-400"></i> <span>{coins}</span></div>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex bg-white/10 p-1 rounded-lg backdrop-blur-sm overflow-x-auto">
-                            {[ {id: 'list', icon: 'fa-list', label: 'Từ vựng'}, {id: 'flashcard', icon: 'fa-layer-group', label: 'Flashcard'}, {id: 'quiz', icon: 'fa-question-circle', label: 'Quiz'}, {id: 'game', icon: 'fa-gamepad', label: 'Lật Hình'} ].map(tab => (
-                                <button key={tab.id} onClick={() => setView(tab.id)} className={`flex-1 px-4 py-2 rounded-md transition-all text-sm font-bold flex items-center justify-center gap-2 whitespace-nowrap ${view === tab.id ? 'bg-white text-indigo-900 shadow-lg' : 'text-indigo-200 hover:text-white hover:bg-white/10'}`}><i className={`fas ${tab.icon}`}></i> {tab.label}</button>
-                            ))}
-                        </div>
-                        {view === 'list' && (
-                            <div className="mt-3 flex gap-2">
-                                <select className="bg-indigo-800/50 border border-indigo-700 text-white px-3 py-2 rounded text-sm focus:outline-none" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} >{topics.map(t => <option key={t} value={t} className="text-gray-900">{t}</option>)}</select>
-                                <input type="text" placeholder="Tìm kiếm..." className="flex-grow px-3 py-2 rounded text-slate-900 bg-white text-sm focus:outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                            </div>
-                        )}
-                    </header>
-                    <main className="flex-grow p-4 bg-slate-50 relative overflow-y-auto h-[600px] scroll-smooth">
-                        {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} toggleLearned={toggleLearned} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} />}
-                        {view === 'flashcard' && <FlashcardView data={filteredData} learnedWords={learnedWords} toggleLearned={toggleLearned} />}
-                        {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} />}
-                        {view === 'game' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
-                    </main>
-                    <LeaderboardModal isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} user={user} coins={coins} />
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
-
-
