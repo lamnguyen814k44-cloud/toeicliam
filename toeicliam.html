@@ -553,7 +553,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -581,7 +581,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1388,39 +1388,74 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         // --- COMPONENTS ---
+        // Audio cache để không phải tải lại
+        const audioCache = {};
+        
         const SpeakerButton = ({ text, lang = 'US', className = "" }) => {
-            const speak = (e) => {
+            const [isPlaying, setIsPlaying] = React.useState(false);
+            
+            const speak = async (e) => {
                 e.stopPropagation();
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(text);
-
-                    // Voice Selection: Prioritize Google > Microsoft > Natural
-                    const voices = window.speechSynthesis.getVoices();
-                    let selectedVoice = null;
-                    const preferredName = lang === 'UK' ? 'Google UK English Female' : 'Google US English';
-
-                    selectedVoice = voices.find(v => v.name === preferredName); // Specific Best Match
-                    if (!selectedVoice) selectedVoice = voices.find(v => v.name.includes('Google') && v.lang.includes(lang === 'UK' ? 'GB' : 'US')); // Any Google for region
-                    if (!selectedVoice) selectedVoice = voices.find(v => v.name.includes('Microsoft') && v.lang.includes(lang === 'UK' ? 'GB' : 'US')); // Microsoft as backup
-
-                    if (selectedVoice) msg.voice = selectedVoice; else msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
-
-                    msg.volume = 1;
-                    msg.rate = 0.9; // Slightly slower for clarity
-                    msg.pitch = 1;
-                    window.speechSynthesis.speak(msg);
+                if (isPlaying) return;
+                
+                setIsPlaying(true);
+                
+                try {
+                    // Sử dụng Google Translate TTS - giọng chuẩn, miễn phí
+                    const tl = lang === 'UK' ? 'en-GB' : 'en-US';
+                    const cacheKey = `${text}_${tl}`;
+                    
+                    let audio;
+                    if (audioCache[cacheKey]) {
+                        audio = audioCache[cacheKey];
+                        audio.currentTime = 0;
+                    } else {
+                        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${tl === 'en-GB' ? 'en-gb' : 'en'}&client=tw-ob`;
+                        audio = new Audio(url);
+                        audioCache[cacheKey] = audio;
+                    }
+                    
+                    audio.onended = () => setIsPlaying(false);
+                    audio.onerror = () => {
+                        // Fallback về SpeechSynthesis nếu Google TTS lỗi
+                        if ('speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                            const msg = new SpeechSynthesisUtterance(text);
+                            msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
+                            msg.rate = 0.9;
+                            msg.onend = () => setIsPlaying(false);
+                            window.speechSynthesis.speak(msg);
+                        } else {
+                            setIsPlaying(false);
+                        }
+                    };
+                    
+                    await audio.play();
+                } catch (err) {
+                    // Fallback về SpeechSynthesis
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const msg = new SpeechSynthesisUtterance(text);
+                        msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
+                        msg.rate = 0.9;
+                        msg.onend = () => setIsPlaying(false);
+                        window.speechSynthesis.speak(msg);
+                    } else {
+                        setIsPlaying(false);
+                    }
                 }
             };
 
-            // Pre-load voices (Chrome requires this to load voice list)
-            React.useEffect(() => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.getVoices();
-                }
-            }, []);
-
-            return (<button onClick={speak} className={`inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all border ${className} ${lang === 'US' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'}`} title={lang === 'US' ? 'Giọng Mỹ (US)' : 'Giọng Anh (UK)'}> <i className="fas fa-volume-up"></i> {lang} </button>);
+            return (
+                <button 
+                    onClick={speak} 
+                    disabled={isPlaying}
+                    className={`inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all border ${className} ${isPlaying ? 'opacity-50 cursor-wait' : ''} ${lang === 'US' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'}`} 
+                    title={lang === 'US' ? 'Giọng Mỹ (US)' : 'Giọng Anh (UK)'}
+                > 
+                    <i className={`fas ${isPlaying ? 'fa-spinner fa-spin' : 'fa-volume-up'}`}></i> {lang} 
+                </button>
+            );
         };
 
         const LinkedWordList = ({ text, jumpToWord, colorClass = "text-gray-600", hoverClass = "hover:bg-yellow-100" }) => {
@@ -2326,11 +2361,26 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Functions Definitions (Moved outside effects)
             const speak = (text) => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const u = new SpeechSynthesisUtterance(text);
-                    u.lang = 'en-US';
-                    window.speechSynthesis.speak(u);
+                // Sử dụng Google TTS
+                try {
+                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
+                    const audio = new Audio(url);
+                    audio.play().catch(() => {
+                        // Fallback về SpeechSynthesis
+                        if ('speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                            const u = new SpeechSynthesisUtterance(text);
+                            u.lang = 'en-US';
+                            window.speechSynthesis.speak(u);
+                        }
+                    });
+                } catch (e) {
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const u = new SpeechSynthesisUtterance(text);
+                        u.lang = 'en-US';
+                        window.speechSynthesis.speak(u);
+                    }
                 }
             };
 
@@ -3226,11 +3276,26 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const speakWord = (text) => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const u = new SpeechSynthesisUtterance(text);
-                    u.lang = 'en-US';
-                    window.speechSynthesis.speak(u);
+                // Sử dụng Google TTS
+                try {
+                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
+                    const audio = new Audio(url);
+                    audio.play().catch(() => {
+                        // Fallback về SpeechSynthesis
+                        if ('speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                            const u = new SpeechSynthesisUtterance(text);
+                            u.lang = 'en-US';
+                            window.speechSynthesis.speak(u);
+                        }
+                    });
+                } catch (e) {
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const u = new SpeechSynthesisUtterance(text);
+                        u.lang = 'en-US';
+                        window.speechSynthesis.speak(u);
+                    }
                 }
             };
 
