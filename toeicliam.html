@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Master Pro - Earn & Learn</title>
+    <!-- React & Tailwind -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDKs (Compat Version for Stability) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .rotate-y-0 { transform: rotateY(0deg); }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .animate-popIn { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .player-active {
+            border: 2px solid #FBBF24; /* yellow-400 */
+            background-color: #FFFBEB; /* yellow-50 */
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- 1. CẤU HÌNH FIREBASE ---
+        // Đã cập nhật theo thông tin bạn cung cấp
+        const firebaseConfigManual = {
+            apiKey: "AIzaSyCM_gVrI8Yfg-eghdzMT5aIKx_vh9eNavc",
+            authDomain: "toeic-game.firebaseapp.com",
+            projectId: "toeic-game",
+            storageBucket: "toeic-game.firebasestorage.app",
+            messagingSenderId: "256652471234",
+            appId: "1:256652471234:web:227e24e34cd391a1fec45b",
+            measurementId: "G-4TTN534GNR"
+        };
+
+        let firebaseConfig;
+        let isEnvConfig = false;
+
+        if (typeof __firebase_config !== 'undefined') {
+            try {
+                firebaseConfig = JSON.parse(__firebase_config);
+                isEnvConfig = true;
+            } catch (e) {
+                // console.error("Lỗi parsing config môi trường", e);
+                firebaseConfig = firebaseConfigManual;
+            }
+        } else {
+            firebaseConfig = firebaseConfigManual;
+        }
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const app = firebase.apps.length ? firebase.app() : null;
+        const auth = app ? firebase.auth() : null;
+        const db = app ? firebase.firestore() : null;
+        
+        const appId = (typeof __app_id !== 'undefined') ? __app_id : 'toeic-master-live-v1';
+
+        // --- DATA ---
+        const systemApiKey = ""; 
+        const getApiKey = () => localStorage.getItem('user_gemini_api_key') || (systemApiKey.length > 10 ? systemApiKey : null);
+
+        const rawDataString = `
+Contracts|Abide by|/ə’baid/|Tuân thủ, tuân theo|Parties must abide by the terms.|Follow, Obey|Violate
+Contracts|Agreement|/ə’gri:mənt/|Hợp đồng, giao kèo|Signed the agreement.|Contract, Deal|Disagreement
+Contracts|Agree|/ə’gri:/|Đồng ý, tán thành|I agree with the plan.|Consent, Concur|Disagree
+Contracts|Assurance|/ə’ʃuərəns/|Sự chắc chắn|Gave assurance of quality.|Guarantee, Pledge|Doubt
+Contracts|Cancellation|/,kænse’leiʃn/|Sự hủy bỏ|Flight cancellation.|Annulment|Confirmation
+Contracts|Determine|/di’tə:min/|Quyết định, xác định|Determine the cause.|Decide, Ascertain|Hesitate
+Contracts|Engage|/in’geidʤ/|Tham gia, cam kết|Engage in business.|Participate|Withdraw
+Contracts|Establish|/is’tæbliʃ/|Thiết lập|Establish a company.|Set up, Found|Destroy
+Contracts|Obligate|/’ɔbligeit/|Bắt buộc|Legally obligated.|Compel, Force|Free
+Contracts|Party|/’pɑ:ti/|Bên (trong hợp đồng)|Both parties agreed.|Side, Faction|N/A
+Contracts|Provision|/prə'viʒn/|Điều khoản, dự trữ|Contract provision.|Clause, Stipulation|Removal
+Contracts|Resolve|/ri’zɔlv/|Giải quyết|Resolve the issue.|Solve, Settle|Complicate
+Contracts|Specific|/spi’sifik/|Riêng biệt, đặc trưng|Specific instructions.|Particular, Precise|General
+Marketing|Attract|/ə’trækt/|Hấp dẫn, thu hút|Attract customers.|Lure, Draw|Repel
+Marketing|Compare|/kəm’peə/|So sánh|Compare prices.|Contrast|Ignore
+Marketing|Competition|/,kɔmpi’tiʃn/|Sự cạnh tranh|Market competition.|Rivalry|Cooperation
+Marketing|Consume|/kən’sju:m/|Tiêu thụ|Consume energy.|Use, Devour|Produce
+Marketing|Convince|/kən’vins/|Thuyết phục|Convince the client.|Persuade|Discourage
+Marketing|Currently|/ˈkʌrəntli/|Hiện thời, hiện nay|Currently unavailable.|Presently, Now|Formerly
+Marketing|Fad|/fæd/|Mốt nhất thời|Just a passing fad.|Trend, Craze|Tradition
+Marketing|Inspiration|/,inspə’reiʃn/|Cảm hứng|Source of inspiration.|Motivation|Discouragement
+Marketing|Market|/’mɑ:kit/|Thị trường, tiếp thị|Target market.|Trade, Sell|Buy
+Marketing|Persuasion|/pə’sweiʤn/|Sự thuyết phục|Power of persuasion.|Influence|Force
+Marketing|Productive|/prəˈdʌktɪv/|Có hiệu quả|Productive meeting.|Efficient|Unproductive
+Marketing|Satisfaction|/,sætis’fækʃn/|Sự hài lòng|Customer satisfaction.|Contentment|Dissatisfaction
+Warranties|Characteristic|/,kæriktə’ristik/|Đặc điểm|Key characteristic.|Trait, Feature|Uncharacteristic
+Warranties|Consequence|/’kɔnsikwəns/|Hậu quả|Face the consequences.|Result, Outcome|Cause
+Warranties|Consider|/kən’sidə/|Cân nhắc|Consider the offer.|Think about|Ignore
+Warranties|Cover|/’kʌvə/|Che, phủ, bảo hiểm|Warranty covers repairs.|Include, Insure|Exclude
+Warranties|Expiration|/,ekspaiə’reiʃn/|Sự hết hạn|Expiration date.|Termination|Start
+Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên|Frequently asked.|Often|Rarely
+Warranties|Imply|/im’plai/|Ngụ ý|Imply a threat.|Suggest|State
+Warranties|Promise|/’prɔmis/|Hứa, cam đoan|Keep a promise.|Vow, Pledge|Deny
+Warranties|Protect|/prə'tekt/|Bảo vệ|Protect data.|Guard, Shield|Attack
+Warranties|Reputation|/,repju:’teiʃn/|Danh tiếng|Good reputation.|Fame, Status|Infamy
+Warranties|Require|/ri’kwaiə/|Đòi hỏi, yêu cầu|Require assistance.|Need, Demand|Optional
+Warranties|Variety|/və’raiəti/|Sự đa dạng|Variety of choices.|Diversity|Uniformity
+Planning|Address|/ə’dres/|Giải quyết, trình bày|Address the problem.|Deal with|Ignore
+Planning|Avoid|/ə’vɔid/|Tránh, hủy bỏ|Avoid mistakes.|Evade, Shun|Confront
+Planning|Demonstrate|/’demənstreit/|Chứng minh|Demonstrate how.|Show, Prove|Hide
+Planning|Develop|/di’veləp/|Phát triển|Develop skills.|Grow, Evolve|Stagnate
+Planning|Evaluate|/i’væljueit/|Đánh giá|Evaluate performance.|Assess, Judge|Neglect
+Planning|Gather|/’gæðə/|Thu thập|Gather data.|Collect|Disperse
+Planning|Offer|/’ɔfə/|Đề nghị|Make an offer.|Propose|Refuse
+Planning|Primarily|/’praimərili/|Chủ yếu|Primarily responsible.|Mainly|Secondarily
+Planning|Risk|/rɪsk/|Rủi ro|Financial risk.|Danger, Hazard|Safety
+Planning|Strategy|/ˈstrætədʒi/|Chiến lược|Marketing strategy.|Plan, Tactic|Improvisation
+Planning|Strong|/strɔɳ/|Mạnh, kiên quyết|Strong leadership.|Powerful|Weak
+Planning|Substitution|/,sʌbsti’tju:ʃn/|Sự thay thế|Product substitution.|Replacement|Retention
+Conferences|Accommodate|/ə’kɔmədeit/|Cung cấp chỗ ở|Accommodate guests.|House, Fit|Reject
+Conferences|Arrangement|/ə’reindʤmənt/|Sự sắp xếp|Travel arrangement.|Preparation|Disorder
+Conferences|Association|/ə,sousi’eiʃn/|Hiệp hội|Trade association.|Organization|Separation
+Conferences|Attend|/ə’tend/|Tham dự|Attend the conference.|Present at|Miss
+Conferences|Get in touch|/tʌtʃ/|Liên lạc|Get in touch soon.|Contact|Ignore
+Conferences|Hold|/hould/|Tổ chức, giữ|Hold a meeting.|Conduct|Cancel
+Conferences|Location|/lou’keiʃn/|Vị trí|Prime location.|Place, Site|N/A
+Conferences|Overcrowded|/əʊvəˈkraʊdɪd/|Đông nghịt|Overcrowded room.|Congested|Empty
+Conferences|Register|/’redʤistə/|Đăng ký|Register online.|Enroll, Sign up|Withdraw
+Conferences|Select|/si’lekt/|Chọn lựa|Select a winner.|Choose, Pick|Reject
+Conferences|Session|/’seʃn/|Phiên họp|Morning session.|Meeting|Break
+Conferences|Take part in|/pɑ:t/|Tham gia|Take part in discussion.|Participate|Avoid
+Computers|Access|/ˈækses/|Truy cập|Access denied.|Enter|Exit
+Computers|Allocate|/ˈæləkeɪt/|Phân bổ|Allocate memory.|Assign|Withhold
+Computers|Compatible|/kəm’pætəbl/|Tương thích|Compatible software.|Consistent|Incompatible
+Computers|Delete|/di’li:t/|Xóa đi|Delete files.|Erase, Remove|Restore
+Computers|Display|/dis’plei/|Hiển thị|Display screen.|Show, Exhibit|Hide
+Computers|Duplicate|/’dju:plikit/|Sao lại|Duplicate copy.|Copy, Replicate|Original
+Computers|Failure|/’feiljə/|Hỏng, thất bại|System failure.|Breakdown|Success
+Computers|Figure out|/’figjə/|Tìm hiểu, đoán ra|Figure out why.|Solve|Misunderstand
+Computers|Ignore|/ig’nɔ:/|Bỏ qua|Ignore warnings.|Disregard|Heed
+Computers|Search|/sə:tʃ/|Tìm kiếm|Search online.|Seek, Hunt|Find
+Computers|Shut down|/ʃʌt daʊn/|Tắt máy|Shut down PC.|Turn off|Start up
+Computers|Warning|/’wɔ:niɳ/|Cảnh báo|Warning sign.|Caution, Alert|Approval
+Office Tech|Affordable|/əˈfɔːd/|Có đủ khả năng|Affordable price.|Cheap|Expensive
+Office Tech|As needed|/ni:did/|Khi cần thiết|Update as needed.|When necessary|Always
+Office Tech|Be in charge of|/tʃɑ:dʤ/|Chịu trách nhiệm|In charge of sales.|Responsible for|Subordinate to
+Office Tech|Capacity|/kə’pæsiti/|Sức chứa|Storage capacity.|Volume, Size|Incapacity
+Office Tech|Durable|/ˈdjʊərəbl/|Bền|Durable material.|Long-lasting|Fragile
+Office Tech|Initiative|/i’niʃiətiv/|Sáng kiến|Take initiative.|Drive|Apathy
+Office Tech|Physically|/ˈfɪzɪkli/|Về thể chất|Physically fit.|Bodily|Mentally
+Office Tech|Provider|/prə'vaidə/|Nhà cung cấp|Service provider.|Supplier|Consumer
+Office Tech|Recur|/ri’kə:/|Tái diễn|Error recurs.|Repeat|Cease
+Office Tech|Reduction|/ri’dʌkʃn/|Sự giảm bớt|Cost reduction.|Decrease|Increase
+Office Tech|Stay on top of|/tɔp/|Nắm bắt tình hình|Stay on top of work.|Keep up with|Fall behind
+Office Tech|Stock|/stɒk/|Kho, hàng dự trữ|In stock.|Inventory|Debt
+Procedures|Appreciation|/ə,pri:ʃi’eiʃn/|Sự đánh giá cao|Show appreciation.|Gratitude|Ingratitude
+Procedures|Be made of|/meid/|Làm bằng|Made of steel.|Consist of|N/A
+Procedures|Bring in|/briɳ/|Tuyển dụng, mang lại|Bring in experts.|Hire, Introduce|Remove
+Procedures|Casually|/ˈkæʒuəli/|Bình thường|Dress casually.|Informally|Formally
+Procedures|Code|/koud/|Quy định, mã|Dress code.|Rule, Law|N/A
+Procedures|Expose|/iks’pouz/|Phơi bày|Expose the truth.|Reveal|Hide
+Procedures|Glimpse|/glimps/|Nhìn thoáng qua|Catch a glimpse.|Glance, Peek|Stare
+Procedures|Out of|/aut/|Hết, không còn|Out of stock.|Lacking|Full of
+Procedures|Outdated|/aut’deitid/|Lỗi thời|Outdated system.|Obsolete|Modern
+Procedures|Practice|/’præktis/|Thực hành|Practice daily.|Habit, Custom|Theory
+Procedures|Reinforce|/,ri:in’fɔ:s/|Tăng cường|Reinforce rules.|Strengthen|Weaken
+Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Written
+        `;
+
+        const parseData = (str) => {
+            return str.trim().split('\n').filter(line => line.trim() !== '').map((line, index) => {
+                const parts = line.split('|');
+                return {
+                    id: index + 1,
+                    topic: parts[0],
+                    word: parts[1],
+                    ipa: parts[2],
+                    meaning: parts[3],
+                    example: parts[4],
+                    synonym: parts[5] || "N/A",
+                    antonym: parts[6] || "N/A"
+                };
+            });
+        };
+
+        const toeicData = parseData(rawDataString);
+
+        // --- GLOBAL SOUND HELPER (WEB AUDIO API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'flip') {
+                // Tiếng tách nhẹ
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'match') {
+                // Tiếng Ting (Thành công)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'miss') {
+                // Tiếng Bụp (Sai)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        };
+
+        // --- COMPONENTS ---
+
+        const SpeakerButton = ({ text, lang = 'US', className = "" }) => {
+            const speak = (e) => {
+                e.stopPropagation();
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    const voices = window.speechSynthesis.getVoices();
+                    let voice = null;
+                    if (lang === 'US') {
+                        voice = voices.find(v => v.lang === 'en-US' && !v.name.includes('UK'));
+                    } else {
+                        voice = voices.find(v => v.lang === 'en-GB' || v.name.includes('UK'));
+                    }
+                    if (voice) utterance.voice = voice;
+                    else utterance.lang = lang === 'US' ? 'en-US' : 'en-GB';
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.speak(utterance);
+                }
+            };
+
+            return (
+                <button 
+                    onClick={speak} 
+                    className={`inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all border ${className} 
+                    ${lang === 'US' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'}`}
+                    title={lang === 'US' ? 'Giọng Mỹ (US)' : 'Giọng Anh (UK)'}
+                >
+                    <i className="fas fa-volume-up"></i> {lang}
+                </button>
+            );
+        };
+
+        const LinkedWordList = ({ text, jumpToWord, colorClass = "text-gray-600" }) => {
+            if (!text || text === "N/A") return <span className="text-gray-400">N/A</span>;
+            const words = text.split(',').map(w => w.trim());
+            return (
+                <span>
+                    {words.map((w, i) => {
+                        const exists = toeicData.some(item => item.word.toLowerCase() === w.toLowerCase());
+                        return (
+                            <React.Fragment key={i}>
+                                {i > 0 && ", "}
+                                {exists ? (
+                                    <button onClick={(e) => { e.stopPropagation(); jumpToWord(w); }} className={`${colorClass} hover:underline font-semibold cursor-pointer`}>{w}</button>
+                                ) : (
+                                    <span className={colorClass}>{w}</span>
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
+                </span>
+            );
+        };
+
+        const WordItem = ({ item, isLearned, isDetailOpen, isHighlighted, toggleLearned, toggleDetails }) => (
+            <div id={`word-${item.id}`} className={`p-4 rounded-lg border transition-all ${isHighlighted ? 'ring-2 ring-yellow-400 bg-yellow-50' : 'bg-white border-slate-200'} ${isLearned ? 'bg-emerald-50' : ''}`}>
+                <div className="flex justify-between">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1 rounded">{item.topic}</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-lg font-bold text-slate-800">{item.word}</h3>
+                            <div className="flex gap-1">
+                                <SpeakerButton text={item.word} lang="US" />
+                                <SpeakerButton text={item.word} lang="UK" />
+                            </div>
+                        </div>
+                        <p className="text-xs text-slate-500 font-mono mt-1">{item.ipa}</p>
+                    </div>
+                    <button onClick={() => toggleLearned(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center border ${isLearned ? 'bg-emerald-500 text-white' : 'text-gray-300'}`}><i className="fas fa-check"></i></button>
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-100">
+                    <p className="font-medium text-sm text-slate-800">{item.meaning}</p>
+                    <button onClick={() => toggleDetails(item.id)} className="text-xs text-indigo-500 font-semibold mt-1">
+                        {isDetailOpen ? 'Thu gọn' : 'Chi tiết'} <i className={`fas fa-chevron-${isDetailOpen ? 'up' : 'down'}`}></i>
+                    </button>
+                    {isDetailOpen && (
+                        <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">
+                            <p><strong>Ví dụ:</strong> "{item.example}"</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+
+        const WordListView = ({ data, learnedWords, toggleLearned, showDetails, toggleDetails, highlightedId }) => (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {data.map(item => (
+                    <WordItem key={item.id} item={item} isLearned={learnedWords.has(item.id)} isDetailOpen={showDetails === item.id} isHighlighted={highlightedId === item.id} toggleLearned={toggleLearned} toggleDetails={toggleDetails} />
+                ))}
+            </div>
+        );
+
+        const FlashcardView = ({ data, learnedWords, toggleLearned }) => {
+            const [index, setIndex] = React.useState(0);
+            const [isFlipped, setIsFlipped] = React.useState(false);
+
+            React.useEffect(() => { setIndex(0); setIsFlipped(false); }, [data.length]);
+
+            const next = () => { setIsFlipped(false); setTimeout(() => setIndex(prev => (prev + 1) % data.length), 150); };
+            const prev = () => { setIsFlipped(false); setTimeout(() => setIndex(prev => (prev - 1 + data.length) % data.length), 150); };
+
+            if (data.length === 0) return <div className="text-center p-10 text-gray-400">Không có dữ liệu</div>;
+            const item = data[index];
+            const isLearned = learnedWords.has(item.id);
+
+            return (
+                <div className="flex flex-col items-center h-full justify-center py-4">
+                    <div className="perspective-1000 w-full max-w-sm h-80 cursor-pointer group" onClick={() => setIsFlipped(!isFlipped)}>
+                        <div className={`relative w-full h-full text-center transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : 'rotate-y-0'}`}>
+                            <div className="card-face bg-white border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+                                <span className="absolute top-4 left-4 bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded">{index + 1}/{data.length}</span>
+                                <span className="absolute top-4 right-4 text-[10px] text-indigo-500 font-bold uppercase tracking-widest">{item.topic}</span>
+                                <h2 className="text-4xl font-black text-slate-800 mb-2">{item.word}</h2>
+                                <span className="text-lg text-slate-500 font-mono mb-4 bg-slate-50 px-2 rounded">{item.ipa}</span>
+                                <div className="text-xs text-slate-400 animate-pulse mt-4 flex items-center gap-1"><i className="fas fa-sync-alt"></i> Chạm để lật</div>
+                                <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
+                                    <SpeakerButton text={item.word} lang="US" />
+                                    <SpeakerButton text={item.word} lang="UK" />
+                                </div>
+                            </div>
+                            <div className="card-face rotate-y-180 bg-slate-800 text-white">
+                                <h3 className="text-2xl font-bold mb-2 text-yellow-400 px-4">{item.meaning}</h3>
+                                <p className="text-sm italic opacity-90 mb-4 px-6 text-slate-300">"{item.example}"</p>
+                                <div className="flex gap-4 absolute bottom-6">
+                                    <button onClick={(e) => { e.stopPropagation(); toggleLearned(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition ${isLearned ? 'bg-green-500 text-white shadow-lg shadow-green-500/50' : 'bg-white/10 hover:bg-white/30'}`}><i className="fas fa-check"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-6 mt-6">
+                        <button onClick={prev} className="px-5 py-2 bg-white shadow-md rounded-full hover:bg-indigo-50 text-indigo-900 transition"><i className="fas fa-arrow-left"></i></button>
+                        <button onClick={next} className="px-5 py-2 bg-white shadow-md rounded-full hover:bg-indigo-50 text-indigo-900 transition"><i className="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            );
+        };
+        
+        // --- NEW FEATURES: LEADERBOARD & GAME ---
+
+        const LeaderboardModal = ({ isOpen, onClose, user, coins }) => {
+            const [leaders, setLeaders] = React.useState([]);
+            const [name, setName] = React.useState('');
+            const [isSaving, setIsSaving] = React.useState(false);
+
+            React.useEffect(() => {
+                if (isOpen) {
+                    if (!db) return;
+                    fetchLeaders();
+                    if (user) {
+                        const loadProfile = async () => {
+                            const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                            try {
+                                const snap = await userRef.get();
+                                if (snap.exists) setName(snap.data().displayName || '');
+                            } catch (e) { console.error(e); }
+                        };
+                        loadProfile();
+                    }
+                }
+            }, [isOpen, user]);
+
+            const fetchLeaders = async () => {
+                if (!db) return;
+                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
+                colRef.onSnapshot((snapshot) => {
+                    const data = [];
+                    snapshot.forEach(doc => data.push(doc.data()));
+                    data.sort((a, b) => b.coins - a.coins);
+                    setLeaders(data.slice(0, 10));
+                });
+            };
+
+            const saveProfile = async () => {
+                if (!name.trim() || !user || !db) return;
+                setIsSaving(true);
+                try {
+                    const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                    await userRef.set({ userId: user.uid, displayName: name, coins: coins, updatedAt: new Date().toISOString() }, { merge: true });
+                    alert("Đã lưu tên thành công!");
+                } catch (e) { alert("Lỗi lưu tên."); } finally { setIsSaving(false); }
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="p-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white flex justify-between items-center">
+                            <h2 className="text-xl font-black flex items-center gap-2"><i className="fas fa-trophy"></i> Bảng Xếp Hạng</h2>
+                            <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition"><i className="fas fa-times"></i></button>
+                        </div>
+                        <div className="p-5 overflow-y-auto flex-1">
+                            {!db && <div className="p-3 mb-4 bg-red-100 text-red-700 text-xs rounded border border-red-200">Bạn chưa cấu hình Firebase.</div>}
+                            <div className="bg-indigo-50 p-4 rounded-xl mb-6 border border-indigo-100">
+                                <h3 className="font-bold text-indigo-900 mb-2 text-sm uppercase">Hồ sơ của bạn</h3>
+                                <div className="flex gap-2">
+                                    <input type="text" className="flex-1 border rounded px-3 py-2 text-sm" placeholder="Tên hiển thị..." value={name} onChange={(e) => setName(e.target.value)} disabled={!db} />
+                                    <button onClick={saveProfile} disabled={isSaving || !db} className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700 disabled:opacity-50">{isSaving ? '...' : 'Lưu'}</button>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                {leaders.map((leader, index) => (
+                                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${leader.userId === user?.uid ? 'bg-yellow-50 border-yellow-300' : 'bg-white border-slate-100'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-400 text-white' : index === 1 ? 'bg-gray-300 text-white' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</div>
+                                            <div><div className="font-bold text-slate-800 text-sm">{leader.displayName || 'Ẩn danh'}</div>{leader.userId === user?.uid && <span className="text-[10px] text-indigo-500 font-bold bg-indigo-100 px-1.5 rounded">Bạn</span>}</div>
+                                        </div>
+                                        <div className="font-black text-indigo-600 flex items-center gap-1">{leader.coins.toLocaleString()} <i className="fas fa-coins text-yellow-500 text-xs"></i></div>
+                                    </div>
+                                ))}
+                                {leaders.length === 0 && <p className="text-center text-gray-400 text-sm">{db ? "Chưa có dữ liệu." : "Vui lòng kết nối Firebase."}</p>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MemoryGameView = ({ allData, setCoins, user }) => {
+            const [gameMode, setGameMode] = React.useState(null); 
+            
+            // Shared State
+            const [cards, setCards] = React.useState([]);
+            const [flippedIndices, setFlippedIndices] = React.useState([]);
+            const [matchedIndices, setMatchedIndices] = React.useState([]);
+            const [level, setLevel] = React.useState(1);
+            const [levelComplete, setLevelComplete] = React.useState(false);
+            const [processing, setProcessing] = React.useState(false);
+            const [matchedItem, setMatchedItem] = React.useState(null);
+
+            // PvP / AI State
+            const [currentPlayer, setCurrentPlayer] = React.useState(1);
+            const [scores, setScores] = React.useState({ 1: 0, 2: 0 });
+            const [pvpWinner, setPvPWinner] = React.useState(null);
+            
+            // AI Memory
+            const [aiMemory, setAiMemory] = React.useState({});
+
+            // ONLINE PVP STATES
+            const [roomId, setRoomId] = React.useState('');
+            const [isHost, setIsHost] = React.useState(false);
+            const [onlineStatus, setOnlineStatus] = React.useState('idle'); 
+            const [inputRoomId, setInputRoomId] = React.useState('');
+
+            // Init Game
+            React.useEffect(() => {
+                if (gameMode && gameMode !== 'pvp_online') startLevel();
+            }, [level, gameMode]);
+
+            // --- ONLINE LOGIC START ---
+            
+            // Listen to Room Changes
+            React.useEffect(() => {
+                if (gameMode === 'pvp_online' && roomId && db) {
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
+                    const unsubscribe = roomRef.onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            
+                            // 1. Sync Guest Joining
+                            if (isHost && onlineStatus === 'waiting' && data.guestId) {
+                                setOnlineStatus('playing');
+                            }
+
+                            // 2. Sync Board & Game State (for both)
+                            if (data.status === 'playing') {
+                                setCards(data.board || []);
+                                setFlippedIndices(data.flipped || []);
+                                setMatchedIndices(data.matched || []);
+                                setScores(data.scores || { host: 0, guest: 0 });
+                                setCurrentPlayer(data.turn === data.hostId ? 1 : 2); // 1 is Host, 2 is Guest
+                                setProcessing(data.processing || false);
+                                
+                                // Check Win
+                                if ((data.matched || []).length === (data.board || []).length && (data.board || []).length > 0) {
+                                    const s = data.scores;
+                                    const winner = s.host > s.guest ? 1 : (s.guest > s.host ? 2 : 'draw');
+                                    setPvPWinner(winner);
+                                }
+                            }
+                        }
+                    });
+                    return () => unsubscribe();
+                }
+            }, [gameMode, roomId, isHost, onlineStatus]);
+
+            const createRoom = async () => {
+                if (!user || !db) return alert("Vui lòng đăng nhập để chơi Online!");
+                const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                // Init Board Data
+                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
+                const selectedItems = shuffledData.slice(0, 8); 
+                let cardSet = [];
+                selectedItems.forEach(item => {
+                    cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id });
+                    cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id });
+                });
+                cardSet.sort(() => Math.random() - 0.5);
+
+                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
+                
+                await roomRef.set({
+                    hostId: user.uid,
+                    guestId: null,
+                    status: 'waiting',
+                    board: cardSet,
+                    flipped: [],
+                    matched: [],
+                    turn: user.uid,
+                    scores: { host: 0, guest: 0 },
+                    processing: false,
+                    createdAt: new Date().toISOString()
+                });
+
+                setRoomId(newRoomId);
+                setIsHost(true);
+                setOnlineStatus('waiting');
+            };
+
+            const joinRoom = async () => {
+                if (!user || !db) return alert("Vui lòng đăng nhập!");
+                if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
+                
+                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
+                const doc = await roomRef.get();
+                
+                if (!doc.exists) return alert("Phòng không tồn tại!");
+                if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+
+                await roomRef.update({
+                    guestId: user.uid,
+                    status: 'playing'
+                });
+
+                setRoomId(inputRoomId);
+                setIsHost(false);
+                setOnlineStatus('playing');
+            };
+
+            const handleOnlineCardClick = async (index) => {
+                // Determine if it's my turn
+                const amIHost = isHost;
+                const myUid = user.uid;
+                
+                if (processing) return; 
+                
+                const isMyTurn = (amIHost && currentPlayer === 1) || (!amIHost && currentPlayer === 2);
+                
+                if (!isMyTurn) return; 
+                if (flippedIndices.includes(index) || matchedIndices.includes(index)) return;
+
+                // PLAY FLIP SOUND
+                playSound('flip');
+
+                // Send Flip to Firestore
+                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(roomId);
+                const newFlipped = [...flippedIndices, index];
+                
+                await roomRef.update({ flipped: newFlipped });
+                
+                // Check Logic 
+                if (newFlipped.length === 2) {
+                    await roomRef.update({ processing: true });
+                    
+                    const card1 = cards[newFlipped[0]];
+                    const card2 = cards[newFlipped[1]];
+                    const isMatch = card1.itemId === card2.itemId;
+
+                    if (isMatch) {
+                        setTimeout(async () => {
+                            // MATCH: PLAY SOUND & SPEAK (Only active player hears voice, both should technically but simplify)
+                            playSound('match');
+                            const wordToSpeak = card1.type === 'word' ? card1.content : card2.content;
+                            speak(wordToSpeak);
+                            
+                            const newMatched = [...matchedIndices, ...newFlipped];
+                            const newScores = { ...scores };
+                            if (amIHost) newScores.host += 100;
+                            else newScores.guest += 100;
+
+                            await roomRef.update({
+                                matched: newMatched,
+                                flipped: [],
+                                scores: newScores,
+                                processing: false
+                            });
+                        }, 600);
+                    } else {
+                        setTimeout(async () => {
+                            playSound('miss'); // Sound for miss
+                            
+                            // Switch turn
+                            const doc = await roomRef.get();
+                            const currentData = doc.data();
+                            const nextTurn = currentData.turn === currentData.hostId ? currentData.guestId : currentData.hostId;
+
+                            await roomRef.update({
+                                flipped: [],
+                                processing: false,
+                                turn: nextTurn
+                            });
+                        }, 1000);
+                    }
+                }
+            };
+
+            // --- ONLINE LOGIC END ---
+
+            // AI Turn Logic
+            React.useEffect(() => {
+                if (gameMode === 'ai' && currentPlayer === 2 && !levelComplete && !pvpWinner && !processing) {
+                    const aiTurnTimer = setTimeout(() => {
+                        performAiTurn();
+                    }, 1200); 
+                    return () => clearTimeout(aiTurnTimer);
+                }
+            }, [currentPlayer, gameMode, processing, levelComplete, pvpWinner]);
+
+            const startLevel = () => {
+                setLevelComplete(false);
+                setMatchedIndices([]);
+                setFlippedIndices([]);
+                setPvPWinner(null);
+                setAiMemory({});
+                
+                if (level === 1) {
+                    setCurrentPlayer(1);
+                    setScores({ 1: 0, 2: 0 });
+                }
+
+                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
+                const pairCount = (gameMode === 'ai') ? 8 : 6;
+                const selectedItems = shuffledData.slice(0, pairCount);
+                
+                let cardSet = [];
+                selectedItems.forEach(item => {
+                    cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id });
+                    cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id });
+                });
+                setCards(cardSet.sort(() => Math.random() - 0.5));
+            };
+
+            const speak = (text) => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'en-US';
+                    window.speechSynthesis.speak(u);
+                }
+            };
+
+            const performAiTurn = () => {
+                // AI Logic (same as before)
+                const memoryIndices = Object.keys(aiMemory).map(Number).filter(idx => !matchedIndices.includes(idx));
+                let firstIdx = -1;
+                let secondIdx = -1;
+
+                for (let i = 0; i < memoryIndices.length; i++) {
+                    for (let j = i + 1; j < memoryIndices.length; j++) {
+                        const idxA = memoryIndices[i];
+                        const idxB = memoryIndices[j];
+                        if (cards[idxA].itemId === cards[idxB].itemId) {
+                            firstIdx = idxA;
+                            secondIdx = idxB;
+                            break;
+                        }
+                    }
+                    if (firstIdx !== -1) break;
+                }
+
+                if (firstIdx === -1) {
+                    const unknownIndices = cards.map((_, i) => i).filter(i => !matchedIndices.includes(i) && !memoryIndices.includes(i));
+                    const allAvailable = cards.map((_, i) => i).filter(i => !matchedIndices.includes(i));
+                    if (unknownIndices.length > 0) firstIdx = unknownIndices[Math.floor(Math.random() * unknownIndices.length)];
+                    else firstIdx = allAvailable[Math.floor(Math.random() * allAvailable.length)];
+
+                    const firstCard = cards[firstIdx];
+                    const matchInMemory = memoryIndices.find(idx => cards[idx].itemId === firstCard.itemId && idx !== firstIdx);
+                    if (matchInMemory !== undefined) secondIdx = matchInMemory;
+                    else {
+                        const remaining = allAvailable.filter(i => i !== firstIdx);
+                        secondIdx = remaining[Math.floor(Math.random() * remaining.length)];
+                    }
+                }
+
+                handleCardClick(firstIdx);
+                setTimeout(() => { handleCardClick(secondIdx); }, 800);
+            };
+
+            const handleCardClick = (index) => {
+                if (gameMode === 'pvp_online') {
+                    handleOnlineCardClick(index);
+                    return;
+                }
+
+                if (processing || flippedIndices.includes(index) || matchedIndices.includes(index)) return;
+
+                // PLAY FLIP SOUND
+                playSound('flip');
+
+                const newFlipped = [...flippedIndices, index];
+                setFlippedIndices(newFlipped);
+                setAiMemory(prev => ({ ...prev, [index]: cards[index].itemId }));
+
+                // REMOVED VOICE ON FLIP (ONLY ON MATCH)
+                // if (cards[index].type === 'word') speak(cards[index].content);
+
+                if (newFlipped.length === 2) {
+                    setProcessing(true);
+                    checkForMatch(newFlipped);
+                }
+            };
+
+            const checkForMatch = ([idx1, idx2]) => {
+                const card1 = cards[idx1];
+                const card2 = cards[idx2];
+                const isMatch = card1.itemId === card2.itemId;
+
+                if (isMatch) {
+                    setTimeout(() => {
+                        // MATCH LOGIC
+                        playSound('match'); // PLAY MATCH SOUND
+                        const wordToSpeak = card1.type === 'word' ? card1.content : card2.content;
+                        speak(wordToSpeak); // PLAY VOICE ON MATCH
+
+                        const newMatched = [...matchedIndices, idx1, idx2];
+                        setMatchedIndices(newMatched);
+                        setFlippedIndices([]);
+                        setProcessing(false);
+
+                        if (gameMode === 'solo') {
+                            setCoins(prev => prev + 100);
+                            const matchedId = card1.itemId;
+                            const itemDetails = allData.find(i => i.id === matchedId);
+                            setMatchedItem(itemDetails);
+                            // speak is already called above
+                            if (user && db) {
+                                const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                                const currentCoins = parseInt(localStorage.getItem('toeic_user_coins') || 0) + 100;
+                                userRef.set({ coins: currentCoins }, { merge: true });
+                            }
+                        } else {
+                            // AI Score
+                            setScores(prev => ({ ...prev, [currentPlayer]: prev[currentPlayer] + 100 }));
+                        }
+
+                        if (newMatched.length === cards.length) {
+                            if (gameMode === 'solo') {
+                                setTimeout(() => setLevelComplete(true), 500);
+                            } else {
+                                setTimeout(() => {
+                                    const winner = scores[1] > scores[2] ? 1 : (scores[2] > scores[1] ? 2 : 'draw');
+                                    setPvPWinner(winner);
+                                }, 500);
+                            }
+                        }
+                    }, 600);
+                } else {
+                    setTimeout(() => {
+                        playSound('miss'); // PLAY MISS SOUND
+                        setFlippedIndices([]);
+                        setProcessing(false);
+                        if (gameMode === 'ai') {
+                            setCurrentPlayer(prev => prev === 1 ? 2 : 1);
+                        }
+                    }, 1000);
+                }
+            };
+
+            // MENU SCREEN
+            if (!gameMode) {
+                return (
+                    <div className="flex flex-col items-center justify-center h-[500px] gap-6 animate-fadeIn">
+                        <h2 className="text-2xl font-black text-indigo-900 mb-4">Chọn Chế Độ Chơi</h2>
+                        <button onClick={() => setGameMode('solo')} className="w-64 p-6 bg-white border-2 border-indigo-100 hover:border-indigo-500 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group">
+                            <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition"><i className="fas fa-user text-3xl text-indigo-600"></i></div>
+                            <span className="font-bold text-lg text-slate-800">Luyện tập (1 người)</span>
+                        </button>
+                        <button onClick={() => setGameMode('ai')} className="w-64 p-6 bg-white border-2 border-purple-100 hover:border-purple-500 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group">
+                            <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center group-hover:bg-purple-100 transition"><i className="fas fa-robot text-3xl text-purple-600"></i></div>
+                            <span className="font-bold text-lg text-slate-800">Chơi với Máy (AI)</span>
+                        </button>
+                        <button onClick={() => setGameMode('pvp_online')} className="w-64 p-6 bg-white border-2 border-orange-100 hover:border-orange-500 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group">
+                            <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center group-hover:bg-orange-100 transition"><i className="fas fa-globe text-3xl text-orange-600"></i></div>
+                            <span className="font-bold text-lg text-slate-800">Online PvP (2 người)</span>
+                        </button>
+                    </div>
+                );
+            }
+
+            // ONLINE WAITING SCREEN
+            if (gameMode === 'pvp_online' && onlineStatus !== 'playing') {
+                return (
+                    <div className="flex flex-col items-center justify-center h-[500px] gap-6 animate-fadeIn">
+                        <button onClick={() => { setGameMode(null); setOnlineStatus('idle'); }} className="absolute top-4 left-4 text-slate-400 hover:text-slate-600 font-bold"><i className="fas fa-arrow-left"></i> Menu</button>
+                        
+                        {onlineStatus === 'waiting' ? (
+                            <div className="text-center">
+                                <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                                    <i className="fas fa-wifi text-4xl text-orange-500"></i>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">Đang chờ đối thủ...</h3>
+                                <p className="text-slate-500 mb-4">Gửi mã này cho bạn bè:</p>
+                                <div className="text-4xl font-black text-indigo-600 bg-white border-2 border-indigo-100 px-6 py-3 rounded-xl tracking-widest shadow-sm mb-6">{roomId}</div>
+                                <p className="text-xs text-slate-400">Đừng thoát màn hình này nhé.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 w-full max-w-xs text-center">
+                                <h2 className="text-2xl font-black text-indigo-900 mb-6">Online PvP Lobby</h2>
+                                <button onClick={createRoom} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2">
+                                    <i className="fas fa-plus-circle"></i> Tạo Phòng Mới
+                                </button>
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
+                                    <div className="relative flex justify-center text-sm"><span className="px-2 bg-[#f0f4f8] text-gray-500">Hoặc vào phòng</span></div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 font-bold text-center tracking-widest"
+                                        placeholder="Nhập mã phòng"
+                                        maxLength="6"
+                                        value={inputRoomId}
+                                        onChange={(e) => setInputRoomId(e.target.value)}
+                                    />
+                                    <button onClick={joinRoom} className="bg-white border-2 border-indigo-100 text-indigo-600 px-4 py-2 rounded-xl font-bold hover:bg-indigo-50">Vào</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
+
+            // GAME BOARD
+            const myTurn = (gameMode === 'pvp_online') ? ((isHost && currentPlayer === 1) || (!isHost && currentPlayer === 2)) : true; // visual help
+
+            return (
+                <div className="max-w-3xl mx-auto py-4 px-2 relative">
+                    <div className="flex justify-between items-center mb-4">
+                        <button onClick={() => { setGameMode(null); setOnlineStatus('idle'); }} className="text-slate-400 hover:text-slate-600 text-sm font-bold"><i className="fas fa-arrow-left"></i> Menu</button>
+                        {gameMode === 'solo' ? (
+                            <div className="flex gap-4 items-center">
+                                <div className="text-xl font-black text-indigo-800">Level {level}</div>
+                                <div className="text-sm text-slate-500">Đã ghép: <span className="font-bold text-indigo-600">{matchedIndices.length / 2}</span> / {cards.length / 2}</div>
+                            </div>
+                        ) : (
+                            <div className="flex gap-4 sm:gap-8 items-center bg-white px-4 sm:px-6 py-2 rounded-full shadow-sm border border-slate-100">
+                                <div className={`flex flex-col items-center px-4 py-1 rounded-lg transition-all ${currentPlayer === 1 ? 'bg-blue-50 border-b-2 border-blue-500' : 'opacity-50'}`}>
+                                    <span className="text-xs font-bold text-blue-800">{gameMode === 'pvp_online' && !isHost ? 'Đối thủ' : 'Bạn (P1)'}</span>
+                                    <span className="text-lg font-black text-blue-600">{scores[1]}</span>
+                                </div>
+                                <div className="text-slate-300 font-bold text-xs">VS</div>
+                                <div className={`flex flex-col items-center px-4 py-1 rounded-lg transition-all ${currentPlayer === 2 ? 'bg-red-50 border-b-2 border-red-500' : 'opacity-50'}`}>
+                                    <span className="text-xs font-bold text-red-800">{gameMode === 'ai' ? 'Máy (AI)' : (gameMode === 'pvp_online' && !isHost ? 'Bạn (P2)' : 'Đối thủ')}</span>
+                                    <span className="text-lg font-black text-red-600">{scores[2]}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={`grid gap-3 ${gameMode !== 'solo' ? 'grid-cols-4' : 'grid-cols-3 sm:grid-cols-4'}`}>
+                        {cards.map((card, index) => {
+                            const isFlipped = flippedIndices.includes(index);
+                            const isMatched = matchedIndices.includes(index);
+                            if (isMatched) return <div key={card.id} className="aspect-[3/4] opacity-0 transition-opacity duration-500"></div>;
+
+                            return (
+                                <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-[3/4] cursor-pointer perspective-1000 group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`}>
+                                    <div className={`w-full h-full transition-all duration-300 transform-style-3d relative shadow-sm rounded-lg ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                        <div className={`absolute inset-0 backface-hidden border-2 rounded-lg flex items-center justify-center transition-colors shadow-inner
+                                            ${card.type === 'word' ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}
+                                        `}>
+                                            {/* BACK FACE DESIGN */}
+                                            {card.type === 'word' ? (
+                                                <div className="text-center">
+                                                    <i className="fas fa-flag-usa text-3xl text-blue-300 mb-1 opacity-50"></i>
+                                                    <span className="block text-xs font-black text-blue-400 mt-1">EN</span>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center">
+                                                    <i className="fas fa-star text-3xl text-red-300 mb-1 opacity-50"></i>
+                                                    <span className="block text-xs font-black text-red-400 mt-1">VN</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-indigo-500 rounded-lg flex flex-col items-center justify-center p-2 text-center shadow-lg">
+                                            <span className="text-[10px] font-bold text-indigo-400 uppercase mb-1">{card.type === 'word' ? 'EN' : 'VN'}</span>
+                                            <p className={`${card.content.length > 20 ? 'text-xs' : 'text-sm'} font-bold text-slate-800`}>{card.content}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {matchedItem && gameMode === 'solo' && (
+                       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+                           <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-indigo-100 relative text-center">
+                                <div className="inline-block p-3 rounded-full bg-green-100 text-green-600 mb-3 text-2xl animate-bounce"><i className="fas fa-check"></i></div>
+                                <h3 className="text-2xl font-black text-indigo-900 mb-1">{matchedItem.word}</h3>
+                                <div className="flex justify-center gap-2 mb-3"><SpeakerButton text={matchedItem.word} lang="US" /><SpeakerButton text={matchedItem.word} lang="UK" /></div>
+                                <p className="text-slate-500 font-mono text-sm mb-3">{matchedItem.ipa}</p>
+                                <p className="text-lg font-bold text-yellow-600 mb-4">{matchedItem.meaning}</p>
+                                <div className="bg-slate-50 p-3 rounded-lg text-sm text-slate-600 italic mb-5 border border-slate-100">"{matchedItem.example}"</div>
+                                <button onClick={() => setMatchedItem(null)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105">Tiếp tục</button>
+                           </div>
+                       </div>
+                    )}
+
+                    {levelComplete && gameMode === 'solo' && (
+                        <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl animate-fadeIn">
+                            <i className="fas fa-crown text-6xl text-yellow-400 mb-4 drop-shadow-md"></i>
+                            <h2 className="text-3xl font-black text-indigo-900 mb-2">Hoàn Thành!</h2>
+                            <p className="text-slate-600 mb-6">Bạn đã vượt qua Level {level}</p>
+                            <button onClick={() => setLevel(l => l + 1)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transform hover:scale-105 transition">Màn Tiếp Theo <i className="fas fa-arrow-right ml-2"></i></button>
+                        </div>
+                    )}
+
+                    {pvpWinner && (
+                        <div className="absolute inset-0 z-10 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center rounded-xl animate-fadeIn p-6 text-center">
+                            {pvpWinner === 'draw' ? (
+                                <><i className="fas fa-handshake text-6xl text-gray-400 mb-4"></i><h2 className="text-3xl font-black text-slate-800 mb-2">Hòa Nhau!</h2></>
+                            ) : (
+                                <>
+                                    <i className="fas fa-trophy text-6xl text-yellow-400 mb-4 drop-shadow-lg animate-bounce"></i>
+                                    <h2 className={`text-4xl font-black mb-2 ${pvpWinner === 1 ? 'text-blue-600' : 'text-red-600'}`}>
+                                        {gameMode === 'pvp_online' 
+                                            ? (isHost && pvpWinner === 1) || (!isHost && pvpWinner === 2) ? 'Bạn Thắng!' : 'Bạn Thua Rồi!'
+                                            : (pvpWinner === 1 ? 'Bạn Thắng!' : 'Máy Thắng!')
+                                        }
+                                    </h2>
+                                    <p className="text-xl font-bold text-slate-500 mb-6">Điểm số: {scores[pvpWinner]}</p>
+                                </>
+                            )}
+                            <button onClick={() => { setGameMode(null); setOnlineStatus('idle'); }} className="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-full font-bold shadow-lg transition">Về Menu Chính</button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        function App() {
+            const [view, setView] = React.useState('list'); 
+            const [selectedTopic, setSelectedTopic] = React.useState('All');
+            const [searchTerm, setSearchTerm] = React.useState('');
+            const [learnedWords, setLearnedWords] = React.useState(new Set());
+            const [coins, setCoins] = React.useState(0);
+            const [showDetails, setShowDetails] = React.useState(null); 
+            const [highlightedId, setHighlightedId] = React.useState(null);
+            const [user, setUser] = React.useState(null);
+            const [showLeaderboard, setShowLeaderboard] = React.useState(false);
+
+            React.useEffect(() => {
+                if (!auth) return;
+                const initAuth = async () => { 
+                    try { 
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously(); 
+                        }
+                    } catch (e) { console.error(e); } 
+                };
+                initAuth();
+                const unsubscribe = auth.onAuthStateChanged(setUser);
+                return () => unsubscribe();
+            }, []);
+
+            React.useEffect(() => {
+                const saved = localStorage.getItem('toeic_learned_full_v2');
+                if (saved) setLearnedWords(new Set(JSON.parse(saved)));
+                const savedCoins = localStorage.getItem('toeic_user_coins');
+                if (savedCoins) setCoins(parseInt(savedCoins, 10));
+            }, []);
+
+            React.useEffect(() => {
+                localStorage.setItem('toeic_learned_full_v2', JSON.stringify([...learnedWords]));
+            }, [learnedWords]);
+
+            React.useEffect(() => {
+                localStorage.setItem('toeic_user_coins', coins.toString());
+                if (user && db) {
+                    const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                    userRef.set({ coins: coins }, { merge: true });
+                }
+            }, [coins, user]);
+
+            const topics = ['All', ...new Set(toeicData.map(item => item.topic))];
+            const toggleLearned = (id) => { setLearnedWords(prev => { const newSet = new Set(prev); if (newSet.has(id)) newSet.delete(id); else newSet.add(id); return newSet; }); };
+            const toggleDetails = (id) => setShowDetails(prev => prev === id ? null : id);
+            const jumpToWord = (wordText) => {
+                const target = toeicData.find(w => w.word.toLowerCase() === wordText.toLowerCase());
+                if (target) {
+                    if (selectedTopic !== 'All' && target.topic !== selectedTopic) setSelectedTopic('All');
+                    setSearchTerm(''); if (view !== 'list') setView('list'); setShowDetails(target.id); setHighlightedId(target.id);
+                    setTimeout(() => { const el = document.getElementById(`word-${target.id}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
+                    setTimeout(() => setHighlightedId(null), 2500);
+                }
+            };
+            const filteredData = toeicData.filter(item => {
+                const matchTopic = selectedTopic === 'All' || item.topic === selectedTopic;
+                const matchSearch = item.word.toLowerCase().includes(searchTerm.toLowerCase()) || item.meaning.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchTopic && matchSearch;
+            });
+            const speakWord = (text) => { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; window.speechSynthesis.speak(u); } };
+
+            return (
+                <div className="min-h-screen flex flex-col max-w-7xl mx-auto shadow-2xl bg-white rounded-xl overflow-hidden my-2 border border-slate-200">
+                    <header className="bg-gradient-to-br from-indigo-900 via-blue-900 to-indigo-900 text-white p-4 shadow-lg sticky top-0 z-50">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div><h1 className="text-xl font-black tracking-tight flex items-center gap-2"><i className="fas fa-graduation-cap text-yellow-400"></i> TOEIC Master Pro</h1><p className="text-indigo-200 text-xs mt-1">Học từ vựng & Kiếm Xu</p></div>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setShowLeaderboard(true)} className="bg-yellow-400 hover:bg-yellow-300 text-indigo-900 px-3 py-1.5 rounded-full font-bold shadow-md flex items-center gap-2 text-sm transition"><i className="fas fa-trophy"></i><span>BXH</span></button>
+                                <div className="bg-white/10 px-3 py-1.5 rounded-full font-bold flex items-center gap-2 border border-white/20"><i className="fas fa-coins text-yellow-400"></i> <span>{coins}</span></div>
+                            </div>
+                        </div>
+                        <div className="mt-4 flex bg-white/10 p-1 rounded-lg backdrop-blur-sm overflow-x-auto">
+                            {[ {id: 'list', icon: 'fa-list', label: 'Từ vựng'}, {id: 'flashcard', icon: 'fa-layer-group', label: 'Flashcard'}, {id: 'game', icon: 'fa-gamepad', label: 'Lật Hình'} ].map(tab => (
+                                <button key={tab.id} onClick={() => setView(tab.id)} className={`flex-1 px-4 py-2 rounded-md transition-all text-sm font-bold flex items-center justify-center gap-2 whitespace-nowrap ${view === tab.id ? 'bg-white text-indigo-900 shadow-lg' : 'text-indigo-200 hover:text-white hover:bg-white/10'}`}><i className={`fas ${tab.icon}`}></i> {tab.label}</button>
+                            ))}
+                        </div>
+                        {view === 'list' && (
+                            <div className="mt-3 flex gap-2">
+                                <select className="bg-indigo-800/50 border border-indigo-700 text-white px-3 py-2 rounded text-sm focus:outline-none" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} >{topics.map(t => <option key={t} value={t} className="text-gray-900">{t}</option>)}</select>
+                                <input type="text" placeholder="Tìm kiếm..." className="flex-grow px-3 py-2 rounded text-slate-900 bg-white text-sm focus:outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            </div>
+                        )}
+                    </header>
+                    <main className="flex-grow p-4 bg-slate-50 relative overflow-y-auto h-[600px] scroll-smooth">
+                        {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} toggleLearned={toggleLearned} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} />}
+                        {view === 'flashcard' && <FlashcardView data={filteredData} learnedWords={learnedWords} toggleLearned={toggleLearned} />}
+                        {view === 'game' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} />}
+                    </main>
+                    <LeaderboardModal isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} user={user} coins={coins} />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
