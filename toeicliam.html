@@ -2522,8 +2522,27 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     if (roomData.hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình!");
                     if (roomData.status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+                    
+                    // Update room với guestId và status
                     await roomRef.update({ guestId: user.uid, status: 'playing' });
-                    setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing'); setHasPaid(false);
+                    
+                    // Set local state - đảm bảo gameMode được set đúng
+                    setGameMode('pvp_online');
+                    setRoomId(inputRoomId);
+                    setIsHost(false);
+                    setOnlineStatus('playing');
+                    setHasPaid(false);
+                    
+                    // Load cards ngay lập tức từ room data
+                    if (roomData.board) {
+                        setCards(roomData.board);
+                        setFlippedIndices(roomData.flipped || []);
+                        setMatchedIndices(roomData.matched || []);
+                        setScores(roomData.scores || { host: 0, guest: 0 });
+                        setCurrentPlayer(roomData.turn === roomData.hostId ? 1 : 2);
+                    }
+                    
+                    console.log("Joined room successfully:", inputRoomId);
                 } catch (error) { console.error("Lỗi vào phòng:", error); alert("Lỗi kết nối phòng."); }
             };
 
@@ -2640,6 +2659,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         const multiplier = data.multiplier || 1;
                                         const betAmount = 200 * multiplier;
 
+                                        let newCoinBalance = coins;
                                         if (iWon) newCoinBalance += betAmount; else newCoinBalance -= betAmount;
 
                                         setCoins(newCoinBalance);
