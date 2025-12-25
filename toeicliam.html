@@ -418,26 +418,38 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
 
             const createRoom = async () => {
                 if (!user || !db) return alert("Vui lòng đăng nhập để chơi Online!");
-                const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
-                const shuffledData = [...allData].sort(() => Math.random() - 0.5);
-                const selectedItems = shuffledData.slice(0, 8); 
-                let cardSet = [];
-                selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
-                cardSet.sort(() => Math.random() - 0.5);
-                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
-                await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
-                setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting');
+                
+                try {
+                    const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const shuffledData = [...allData].sort(() => Math.random() - 0.5);
+                    const selectedItems = shuffledData.slice(0, 8); 
+                    let cardSet = [];
+                    selectedItems.forEach(item => { cardSet.push({ id: `word-${item.id}-${Math.random()}`, content: item.word, type: 'word', itemId: item.id }); cardSet.push({ id: `mean-${item.id}-${Math.random()}`, content: item.meaning, type: 'meaning', itemId: item.id }); });
+                    cardSet.sort(() => Math.random() - 0.5);
+                    
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
+                    await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
+                    setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting');
+                } catch (error) {
+                    console.error("Lỗi tạo phòng:", error);
+                    alert("Không thể tạo phòng. Vui lòng kiểm tra quyền truy cập Firestore (Cần bật 'Test Mode').");
+                }
             };
 
             const joinRoom = async () => {
                 if (!user || !db) return alert("Vui lòng đăng nhập!");
                 if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
-                const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
-                const doc = await roomRef.get();
-                if (!doc.exists) return alert("Phòng không tồn tại!");
-                if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
-                await roomRef.update({ guestId: user.uid, status: 'playing' });
-                setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing');
+                try {
+                    const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
+                    const doc = await roomRef.get();
+                    if (!doc.exists) return alert("Phòng không tồn tại!");
+                    if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+                    await roomRef.update({ guestId: user.uid, status: 'playing' });
+                    setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing');
+                } catch (error) {
+                    console.error("Lỗi vào phòng:", error);
+                    alert("Lỗi kết nối phòng.");
+                }
             };
 
             const handleOnlineCardClick = async (index) => {
