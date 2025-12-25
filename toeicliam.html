@@ -2745,7 +2745,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm ring-2 ring-offset-1 ${p.uid === user?.uid ? 'bg-indigo-600 ring-indigo-500' : 'bg-slate-400 ring-slate-200'}`}>
                                                     {(p.displayName || '?').charAt(0).toUpperCase()}
                                                 </div>
-                                                <span className="text-[8px] font-bold text-slate-500 truncate w-12 text-center">{p.uid === user?.uid ? 'BẠN' : p.displayName}</span>
+                                                <span className="text-[8px] font-bold text-slate-500 truncate w-12 text-center">{p.uid === user?.uid ? 'BẠN' : (p.displayName || 'Khách')}</span>
                                             </div>
                                         ))}
                                         {onlinePlayers.length === 0 && <span className="text-[10px] text-slate-400 italic">Đang tải danh sách...</span>}
@@ -2771,8 +2771,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                     {(p.displayName || '?').charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.displayName}</span>
-                                                    <span className="text-[10px] text-slate-400">{p.uid === user.uid ? '(Bạn)' : (p.status === 'playing' ? 'Đang chơi' : 'Đang rảnh')}</span>
+                                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.displayName || 'Ẩn danh'}</span>
+                                                    <span className="text-[10px] text-slate-400">{user && p.uid === user.uid ? '(Bạn)' : (p.status === 'playing' ? 'Đang chơi' : 'Đang rảnh')}</span>
                                                 </div>
                                             </div>
                                             <button
@@ -2999,10 +2999,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 };
 
                 updatePresence();
+                const interval = setInterval(updatePresence, 15000);
 
                 return () => {
                     clearInterval(interval);
-                    window.removeEventListener('beforeunload', handleUnload);
                 };
             }, [user, view]);
 
