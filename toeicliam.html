@@ -85,103 +85,270 @@
 
         // --- DATA ---
         const rawDataString = `
-Contracts|Abide by|/ə’baid/|Tuân thủ, tuân theo|Parties must abide by the terms.|Follow, Obey|Violate
-Contracts|Agreement|/ə’gri:mənt/|Hợp đồng, giao kèo|Signed the agreement.|Contract, Deal|Disagreement
-Contracts|Agree|/ə’gri:/|Đồng ý, tán thành|I agree with the plan.|Consent, Concur|Disagree
-Contracts|Assurance|/ə’ʃuərəns/|Sự chắc chắn|Gave assurance of quality.|Guarantee, Pledge|Doubt
-Contracts|Cancellation|/,kænse’leiʃn/|Sự hủy bỏ|Flight cancellation.|Annulment|Confirmation
-Contracts|Determine|/di’tə:min/|Quyết định, xác định|Determine the cause.|Decide, Ascertain|Hesitate
-Contracts|Engage|/in’geidʤ/|Tham gia, cam kết|Engage in business.|Participate|Withdraw
-Contracts|Establish|/is’tæbliʃ/|Thiết lập|Establish a company.|Set up, Found|Destroy
-Contracts|Obligate|/’ɔbligeit/|Bắt buộc|Legally obligated.|Compel, Force|Free
-Contracts|Party|/’pɑ:ti/|Bên (trong hợp đồng)|Both parties agreed.|Side, Faction|N/A
-Contracts|Provision|/prə'viʒn/|Điều khoản, dự trữ|Contract provision.|Clause, Stipulation|Removal
-Contracts|Resolve|/ri’zɔlv/|Giải quyết|Resolve the issue.|Solve, Settle|Complicate
-Contracts|Specific|/spi’sifik/|Riêng biệt, đặc trưng|Specific instructions.|Particular, Precise|General
-Marketing|Attract|/ə’trækt/|Hấp dẫn, thu hút|Attract customers.|Lure, Draw|Repel
-Marketing|Compare|/kəm’peə/|So sánh|Compare prices.|Contrast|Ignore
-Marketing|Competition|/,kɔmpi’tiʃn/|Sự cạnh tranh|Market competition.|Rivalry|Cooperation
-Marketing|Consume|/kən’sju:m/|Tiêu thụ|Consume energy.|Use, Devour|Produce
-Marketing|Convince|/kən’vins/|Thuyết phục|Convince the client.|Persuade|Discourage
-Marketing|Currently|/ˈkʌrəntli/|Hiện thời, hiện nay|Currently unavailable.|Presently, Now|Formerly
-Marketing|Fad|/fæd/|Mốt nhất thời|Just a passing fad.|Trend, Craze|Tradition
-Marketing|Inspiration|/,inspə’reiʃn/|Cảm hứng|Source of inspiration.|Motivation|Discouragement
-Marketing|Market|/’mɑ:kit/|Thị trường, tiếp thị|Target market.|Trade, Sell|Buy
-Marketing|Persuasion|/pə’sweiʤn/|Sự thuyết phục|Power of persuasion.|Influence|Force
-Marketing|Productive|/prəˈdʌktɪv/|Có hiệu quả|Productive meeting.|Efficient|Unproductive
-Marketing|Satisfaction|/,sætis’fækʃn/|Sự hài lòng|Customer satisfaction.|Contentment|Dissatisfaction
-Warranties|Characteristic|/,kæriktə’ristik/|Đặc điểm|Key characteristic.|Trait, Feature|Uncharacteristic
-Warranties|Consequence|/’kɔnsikwəns/|Hậu quả|Face the consequences.|Result, Outcome|Cause
-Warranties|Consider|/kən’sidə/|Cân nhắc|Consider the offer.|Think about|Ignore
-Warranties|Cover|/’kʌvə/|Che, phủ, bảo hiểm|Warranty covers repairs.|Include, Insure|Exclude
-Warranties|Expiration|/,ekspaiə’reiʃn/|Sự hết hạn|Expiration date.|Termination|Start
-Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên|Frequently asked.|Often|Rarely
-Warranties|Imply|/im’plai/|Ngụ ý|Imply a threat.|Suggest|State
-Warranties|Promise|/’prɔmis/|Hứa, cam đoan|Keep a promise.|Vow, Pledge|Deny
-Warranties|Protect|/prə'tekt/|Bảo vệ|Protect data.|Guard, Shield|Attack
-Warranties|Reputation|/,repju:’teiʃn/|Danh tiếng|Good reputation.|Fame, Status|Infamy
-Warranties|Require|/ri’kwaiə/|Đòi hỏi, yêu cầu|Require assistance.|Need, Demand|Optional
-Warranties|Variety|/və’raiəti/|Sự đa dạng|Variety of choices.|Diversity|Uniformity
-Planning|Address|/ə’dres/|Giải quyết, trình bày|Address the problem.|Deal with|Ignore
-Planning|Avoid|/ə’vɔid/|Tránh, hủy bỏ|Avoid mistakes.|Evade, Shun|Confront
-Planning|Demonstrate|/’demənstreit/|Chứng minh|Demonstrate how.|Show, Prove|Hide
-Planning|Develop|/di’veləp/|Phát triển|Develop skills.|Grow, Evolve|Stagnate
-Planning|Evaluate|/i’væljueit/|Đánh giá|Evaluate performance.|Assess, Judge|Neglect
-Planning|Gather|/’gæðə/|Thu thập|Gather data.|Collect|Disperse
-Planning|Offer|/’ɔfə/|Đề nghị|Make an offer.|Propose|Refuse
-Planning|Primarily|/’praimərili/|Chủ yếu|Primarily responsible.|Mainly|Secondarily
-Planning|Risk|/rɪsk/|Rủi ro|Financial risk.|Danger, Hazard|Safety
-Planning|Strategy|/ˈstrætədʒi/|Chiến lược|Marketing strategy.|Plan, Tactic|Improvisation
-Planning|Strong|/strɔɳ/|Mạnh, kiên quyết|Strong leadership.|Powerful|Weak
-Planning|Substitution|/,sʌbsti’tju:ʃn/|Sự thay thế|Product substitution.|Replacement|Retention
-Conferences|Accommodate|/ə’kɔmədeit/|Cung cấp chỗ ở|Accommodate guests.|House, Fit|Reject
-Conferences|Arrangement|/ə’reindʤmənt/|Sự sắp xếp|Travel arrangement.|Preparation|Disorder
-Conferences|Association|/ə,sousi’eiʃn/|Hiệp hội|Trade association.|Organization|Separation
-Conferences|Attend|/ə’tend/|Tham dự|Attend the conference.|Present at|Miss
-Conferences|Get in touch|/tʌtʃ/|Liên lạc|Get in touch soon.|Contact|Ignore
-Conferences|Hold|/hould/|Tổ chức, giữ|Hold a meeting.|Conduct|Cancel
-Conferences|Location|/lou’keiʃn/|Vị trí|Prime location.|Place, Site|N/A
-Conferences|Overcrowded|/əʊvəˈkraʊdɪd/|Đông nghịt|Overcrowded room.|Congested|Empty
-Conferences|Register|/’redʤistə/|Đăng ký|Register online.|Enroll, Sign up|Withdraw
-Conferences|Select|/si’lekt/|Chọn lựa|Select a winner.|Choose, Pick|Reject
-Conferences|Session|/’seʃn/|Phiên họp|Morning session.|Meeting|Break
-Conferences|Take part in|/pɑ:t/|Tham gia|Take part in discussion.|Participate|Avoid
-Computers|Access|/ˈækses/|Truy cập|Access denied.|Enter|Exit
-Computers|Allocate|/ˈæləkeɪt/|Phân bổ|Allocate memory.|Assign|Withhold
-Computers|Compatible|/kəm’pætəbl/|Tương thích|Compatible software.|Consistent|Incompatible
-Computers|Delete|/di’li:t/|Xóa đi|Delete files.|Erase, Remove|Restore
-Computers|Display|/dis’plei/|Hiển thị|Display screen.|Show, Exhibit|Hide
-Computers|Duplicate|/’dju:plikit/|Sao lại|Duplicate copy.|Copy, Replicate|Original
-Computers|Failure|/’feiljə/|Hỏng, thất bại|System failure.|Breakdown|Success
-Computers|Figure out|/’figjə/|Tìm hiểu, đoán ra|Figure out why.|Solve|Misunderstand
-Computers|Ignore|/ig’nɔ:/|Bỏ qua|Ignore warnings.|Disregard|Heed
-Computers|Search|/sə:tʃ/|Tìm kiếm|Search online.|Seek, Hunt|Find
-Computers|Shut down|/ʃʌt daʊn/|Tắt máy|Shut down PC.|Turn off|Start up
-Computers|Warning|/’wɔ:niɳ/|Cảnh báo|Warning sign.|Caution, Alert|Approval
-Office Tech|Affordable|/əˈfɔːd/|Có đủ khả năng|Affordable price.|Cheap|Expensive
-Office Tech|As needed|/ni:did/|Khi cần thiết|Update as needed.|When necessary|Always
-Office Tech|Be in charge of|/tʃɑ:dʤ/|Chịu trách nhiệm|In charge of sales.|Responsible for|Subordinate to
-Office Tech|Capacity|/kə’pæsiti/|Sức chứa|Storage capacity.|Volume, Size|Incapacity
-Office Tech|Durable|/ˈdjʊərəbl/|Bền|Durable material.|Long-lasting|Fragile
-Office Tech|Initiative|/i’niʃiətiv/|Sáng kiến|Take initiative.|Drive|Apathy
-Office Tech|Physically|/ˈfɪzɪkli/|Về thể chất|Physically fit.|Bodily|Mentally
-Office Tech|Provider|/prə'vaidə/|Nhà cung cấp|Service provider.|Supplier|Consumer
-Office Tech|Recur|/ri’kə:/|Tái diễn|Error recurs.|Repeat|Cease
-Office Tech|Reduction|/ri’dʌkʃn/|Sự giảm bớt|Cost reduction.|Decrease|Increase
-Office Tech|Stay on top of|/tɔp/|Nắm bắt tình hình|Stay on top of work.|Keep up with|Fall behind
-Office Tech|Stock|/stɒk/|Kho, hàng dự trữ|In stock.|Inventory|Debt
-Procedures|Appreciation|/ə,pri:ʃi’eiʃn/|Sự đánh giá cao|Show appreciation.|Gratitude|Ingratitude
-Procedures|Be made of|/meid/|Làm bằng|Made of steel.|Consist of|N/A
-Procedures|Bring in|/briɳ/|Tuyển dụng, mang lại|Bring in experts.|Hire, Introduce|Remove
-Procedures|Casually|/ˈkæʒuəli/|Bình thường|Dress casually.|Informally|Formally
-Procedures|Code|/koud/|Quy định, mã|Dress code.|Rule, Law|N/A
-Procedures|Expose|/iks’pouz/|Phơi bày|Expose the truth.|Reveal|Hide
-Procedures|Glimpse|/glimps/|Nhìn thoáng qua|Catch a glimpse.|Glance, Peek|Stare
-Procedures|Out of|/aut/|Hết, không còn|Out of stock.|Lacking|Full of
-Procedures|Outdated|/aut’deitid/|Lỗi thời|Outdated system.|Obsolete|Modern
-Procedures|Practice|/’præktis/|Thực hành|Practice daily.|Habit, Custom|Theory
-Procedures|Reinforce|/,ri:in’fɔ:s/|Tăng cường|Reinforce rules.|Strengthen|Weaken
-Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Written
+Contracts|Abide by|/ə'baid/|Tuân thủ, tuân theo (quy định, điều khoản)|Parties must abide by the terms.|Follow, Obey|Violate
+Contracts|Agreement|/ə'gri:mənt/|Hợp đồng, thỏa thuận giữa các bên|Signed the agreement.|Contract, Deal|Disagreement
+Contracts|Agree|/ə'gri:/|Đồng ý, tán thành với ý kiến hoặc đề xuất|I agree with the plan.|Consent, Concur|Disagree
+Contracts|Assurance|/ə'ʃuərəns/|Sự đảm bảo, cam kết chắc chắn về điều gì đó|Gave assurance of quality.|Guarantee, Pledge|Doubt
+Contracts|Cancellation|/,kænse'leiʃn/|Sự hủy bỏ (hợp đồng, đơn hàng)|Flight cancellation.|Annulment|Confirmation
+Contracts|Determine|/di'tə:min/|Quyết định, xác định rõ ràng điều gì đó|Determine the cause.|Decide, Ascertain|Hesitate
+Contracts|Engage|/in'geidʤ/|Tham gia, cam kết vào một hoạt động hoặc hợp đồng|Engage in business.|Participate|Withdraw
+Contracts|Establish|/is'tæbliʃ/|Thiết lập, thành lập (công ty, quy định)|Establish a company.|Set up, Found|Destroy
+Contracts|Obligate|/'ɔbligeit/|Bắt buộc, ràng buộc về mặt pháp lý hoặc đạo đức|Legally obligated.|Compel, Force|Free
+Contracts|Party|/'pɑ:ti/|Bên (tham gia trong hợp đồng hoặc thỏa thuận)|Both parties agreed.|Side, Faction|N/A
+Contracts|Provision|/prə'viʒn/|Điều khoản, quy định cụ thể trong hợp đồng|Contract provision.|Clause, Stipulation|Removal
+Contracts|Resolve|/ri'zɔlv/|Giải quyết, tìm ra giải pháp cho vấn đề|Resolve the issue.|Solve, Settle|Complicate
+Contracts|Specific|/spi'sifik/|Cụ thể, rõ ràng, riêng biệt|Specific instructions.|Particular, Precise|General
+Marketing|Attract|/ə'trækt/|Thu hút, lôi cuốn (khách hàng, sự chú ý)|Attract customers.|Lure, Draw|Repel
+Marketing|Compare|/kəm'peə/|So sánh để tìm điểm khác biệt hoặc giống nhau|Compare prices.|Contrast|Ignore
+Marketing|Competition|/,kɔmpi'tiʃn/|Sự cạnh tranh giữa các doanh nghiệp|Market competition.|Rivalry|Cooperation
+Marketing|Consume|/kən'sju:m/|Tiêu thụ, sử dụng hết (sản phẩm, tài nguyên)|Consume energy.|Use, Devour|Produce
+Marketing|Convince|/kən'vins/|Thuyết phục ai đó tin hoặc làm điều gì|Convince the client.|Persuade|Discourage
+Marketing|Currently|/ˈkʌrəntli/|Hiện tại, vào thời điểm này|Currently unavailable.|Presently, Now|Formerly
+Marketing|Fad|/fæd/|Mốt nhất thời, trào lưu tạm thời|Just a passing fad.|Trend, Craze|Tradition
+Marketing|Inspiration|/,inspə'reiʃn/|Cảm hứng, nguồn động lực sáng tạo|Source of inspiration.|Motivation|Discouragement
+Marketing|Market|/'mɑ:kit/|Thị trường; tiếp thị sản phẩm|Target market.|Trade, Sell|Buy
+Marketing|Persuasion|/pə'sweiʤn/|Sự thuyết phục, khả năng làm người khác tin theo|Power of persuasion.|Influence|Force
+Marketing|Productive|/prəˈdʌktɪv/|Có năng suất, hiệu quả cao|Productive meeting.|Efficient|Unproductive
+Marketing|Satisfaction|/,sætis'fækʃn/|Sự hài lòng, thỏa mãn của khách hàng|Customer satisfaction.|Contentment|Dissatisfaction
+Warranties|Characteristic|/,kæriktə'ristik/|Đặc điểm, đặc tính riêng biệt|Key characteristic.|Trait, Feature|Uncharacteristic
+Warranties|Consequence|/'kɔnsikwəns/|Hậu quả, kết quả của một hành động|Face the consequences.|Result, Outcome|Cause
+Warranties|Consider|/kən'sidə/|Cân nhắc, xem xét kỹ lưỡng|Consider the offer.|Think about|Ignore
+Warranties|Cover|/'kʌvə/|Bao gồm, chi trả (trong bảo hành, bảo hiểm)|Warranty covers repairs.|Include, Insure|Exclude
+Warranties|Expiration|/,ekspaiə'reiʃn/|Sự hết hạn, thời điểm kết thúc hiệu lực|Expiration date.|Termination|Start
+Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Frequently asked.|Often|Rarely
+Warranties|Imply|/im'plai/|Ngụ ý, ám chỉ một cách gián tiếp|Imply a threat.|Suggest|State
+Warranties|Promise|/'prɔmis/|Lời hứa, cam đoan sẽ làm điều gì đó|Keep a promise.|Vow, Pledge|Deny
+Warranties|Protect|/prə'tekt/|Bảo vệ, che chở khỏi nguy hiểm hoặc hư hại|Protect data.|Guard, Shield|Attack
+Warranties|Reputation|/,repju:'teiʃn/|Danh tiếng, uy tín của cá nhân hoặc tổ chức|Good reputation.|Fame, Status|Infamy
+Warranties|Require|/ri'kwaiə/|Yêu cầu, đòi hỏi phải có điều gì đó|Require assistance.|Need, Demand|Optional
+Warranties|Variety|/və'raiəti/|Sự đa dạng, nhiều loại khác nhau|Variety of choices.|Diversity|Uniformity
+Planning|Address|/ə'dres/|Giải quyết, xử lý (vấn đề); trình bày|Address the problem.|Deal with|Ignore
+Planning|Avoid|/ə'vɔid/|Tránh, né tránh điều gì đó|Avoid mistakes.|Evade, Shun|Confront
+Planning|Demonstrate|/'demənstreit/|Chứng minh, minh họa cách thức hoặc sự thật|Demonstrate how.|Show, Prove|Hide
+Planning|Develop|/di'veləp/|Phát triển, cải thiện dần dần|Develop skills.|Grow, Evolve|Stagnate
+Planning|Evaluate|/i'væljueit/|Đánh giá, xem xét giá trị hoặc chất lượng|Evaluate performance.|Assess, Judge|Neglect
+Planning|Gather|/'gæðə/|Thu thập, tập hợp lại một nơi|Gather data.|Collect|Disperse
+Planning|Offer|/'ɔfə/|Đề nghị, đưa ra (cơ hội, sản phẩm)|Make an offer.|Propose|Refuse
+Planning|Primarily|/'praimərili/|Chủ yếu, trước hết về mặt quan trọng|Primarily responsible.|Mainly|Secondarily
+Planning|Risk|/rɪsk/|Rủi ro, nguy cơ có thể xảy ra tổn thất|Financial risk.|Danger, Hazard|Safety
+Planning|Strategy|/ˈstrætədʒi/|Chiến lược, kế hoạch dài hạn để đạt mục tiêu|Marketing strategy.|Plan, Tactic|Improvisation
+Planning|Strong|/strɔɳ/|Mạnh mẽ, vững chắc, có ảnh hưởng lớn|Strong leadership.|Powerful|Weak
+Planning|Substitution|/,sʌbsti'tju:ʃn/|Sự thay thế, việc dùng cái khác thay cho cái ban đầu|Product substitution.|Replacement|Retention
+Conferences|Accommodate|/ə'kɔmədeit/|Cung cấp chỗ ở; đáp ứng nhu cầu|Accommodate guests.|House, Fit|Reject
+Conferences|Arrangement|/ə'reindʤmənt/|Sự sắp xếp, chuẩn bị trước|Travel arrangement.|Preparation|Disorder
+Conferences|Association|/ə,sousi'eiʃn/|Hiệp hội, tổ chức có mục đích chung|Trade association.|Organization|Separation
+Conferences|Attend|/ə'tend/|Tham dự, có mặt tại sự kiện|Attend the conference.|Present at|Miss
+Conferences|Get in touch|/tʌtʃ/|Liên lạc, liên hệ với ai đó|Get in touch soon.|Contact|Ignore
+Conferences|Hold|/hould/|Tổ chức, giữ (sự kiện, cuộc họp)|Hold a meeting.|Conduct|Cancel
+Conferences|Location|/lou'keiʃn/|Vị trí, địa điểm diễn ra sự kiện|Prime location.|Place, Site|N/A
+Conferences|Overcrowded|/əʊvəˈkraʊdɪd/|Đông nghịt, quá tải người|Overcrowded room.|Congested|Empty
+Conferences|Register|/'redʤistə/|Đăng ký tham gia chính thức|Register online.|Enroll, Sign up|Withdraw
+Conferences|Select|/si'lekt/|Chọn lựa cẩn thận từ nhiều lựa chọn|Select a winner.|Choose, Pick|Reject
+Conferences|Session|/'seʃn/|Phiên họp, buổi làm việc|Morning session.|Meeting|Break
+Conferences|Take part in|/pɑ:t/|Tham gia, tham dự vào hoạt động|Take part in discussion.|Participate|Avoid
+Computers|Access|/ˈækses/|Truy cập, quyền sử dụng hệ thống|Access denied.|Enter|Exit
+Computers|Allocate|/ˈæləkeɪt/|Phân bổ, phân phối tài nguyên|Allocate memory.|Assign|Withhold
+Computers|Compatible|/kəm'pætəbl/|Tương thích, có thể hoạt động cùng nhau|Compatible software.|Consistent|Incompatible
+Computers|Delete|/di'li:t/|Xóa bỏ vĩnh viễn (dữ liệu, file)|Delete files.|Erase, Remove|Restore
+Computers|Display|/dis'plei/|Hiển thị trên màn hình|Display screen.|Show, Exhibit|Hide
+Computers|Duplicate|/'dju:plikit/|Sao chép, tạo bản sao giống hệt|Duplicate copy.|Copy, Replicate|Original
+Computers|Failure|/'feiljə/|Sự hỏng hóc, thất bại trong hoạt động|System failure.|Breakdown|Success
+Computers|Figure out|/'figjə/|Tìm hiểu, giải quyết hoặc hiểu ra điều gì|Figure out why.|Solve|Misunderstand
+Computers|Ignore|/ig'nɔ:/|Bỏ qua, không chú ý đến|Ignore warnings.|Disregard|Heed
+Computers|Search|/sə:tʃ/|Tìm kiếm thông tin trên hệ thống|Search online.|Seek, Hunt|Find
+Computers|Shut down|/ʃʌt daʊn/|Tắt máy, ngừng hoạt động hệ thống|Shut down PC.|Turn off|Start up
+Computers|Warning|/'wɔ:niɳ/|Cảnh báo về nguy hiểm hoặc vấn đề|Warning sign.|Caution, Alert|Approval
+Office Tech|Affordable|/əˈfɔːd/|Có giá phải chăng, có khả năng chi trả được|Affordable price.|Cheap, Reasonable|Expensive
+Office Tech|As needed|/ni:did/|Khi cần thiết, theo nhu cầu phát sinh|Update as needed.|When necessary|Always
+Office Tech|Be in charge of|/tʃɑ:dʤ/|Chịu trách nhiệm, phụ trách công việc|In charge of sales.|Responsible for|Subordinate to
+Office Tech|Capacity|/kə'pæsiti/|Sức chứa, dung lượng; năng lực|Storage capacity.|Volume, Size|Incapacity
+Office Tech|Durable|/ˈdjʊərəbl/|Bền, có độ bền cao, sử dụng lâu dài|Durable material.|Long-lasting|Fragile
+Office Tech|Initiative|/i'niʃiətiv/|Sáng kiến, tính chủ động trong công việc|Take initiative.|Drive|Apathy
+Office Tech|Physically|/ˈfɪzɪkli/|Về mặt vật lý, thể chất|Physically fit.|Bodily|Mentally
+Office Tech|Provider|/prə'vaidə/|Nhà cung cấp dịch vụ hoặc sản phẩm|Service provider.|Supplier|Consumer
+Office Tech|Recur|/ri'kə:/|Tái diễn, xảy ra lại nhiều lần|Error recurs.|Repeat|Cease
+Office Tech|Reduction|/ri'dʌkʃn/|Sự giảm bớt, cắt giảm (chi phí, số lượng)|Cost reduction.|Decrease|Increase
+Office Tech|Stay on top of|/tɔp/|Nắm bắt tình hình, theo dõi sát sao|Stay on top of work.|Keep up with|Fall behind
+Office Tech|Stock|/stɒk/|Hàng dự trữ, hàng tồn kho|In stock.|Inventory|Debt
+Procedures|Appreciation|/ə,pri:ʃi'eiʃn/|Sự đánh giá cao, lòng biết ơn|Show appreciation.|Gratitude|Ingratitude
+Procedures|Be made of|/meid/|Được làm bằng (vật liệu gì)|Made of steel.|Consist of|N/A
+Procedures|Bring in|/briɳ/|Tuyển dụng; đưa vào, mang lại (lợi nhuận)|Bring in experts.|Hire, Introduce|Remove
+Procedures|Casually|/ˈkæʒuəli/|Một cách bình thường, không trang trọng, xuề xòa|Dress casually.|Informally|Formally
+Procedures|Code|/koud/|Quy định, quy tắc; mã số|Dress code.|Rule, Law|N/A
+Procedures|Expose|/iks'pouz/|Phơi bày, vạch trần sự thật|Expose the truth.|Reveal|Hide
+Procedures|Glimpse|/glimps/|Cái nhìn thoáng qua, chớp nhoáng|Catch a glimpse.|Glance, Peek|Stare
+Procedures|Out of|/aut/|Hết, cạn kiệt, không còn (hàng, tiền)|Out of stock.|Lacking|Full of
+Procedures|Outdated|/aut'deitid/|Lỗi thời, không còn phù hợp với thời đại|Outdated system.|Obsolete|Modern
+Procedures|Practice|/'præktis/|Thực hành; thói quen, tập quán trong công việc|Practice daily.|Habit, Custom|Theory
+Procedures|Reinforce|/,ri:in'fɔ:s/|Tăng cường, củng cố (quy định, kỹ năng)|Reinforce rules.|Strengthen|Weaken
+Procedures|Verbally|/'və:bəli/|Bằng lời nói, bằng miệng (không viết)|Agreed verbally.|Orally|Written
+Electronics|Answering machine|/ˈɑːnsərɪŋ məˈʃiːn/|Máy trả lời tự động ghi lại tin nhắn khi chủ nhân vắng mặt|Check the answering machine for messages.|Voicemail system|N/A
+Electronics|Automation|/ˌɔːtəˈmeɪʃn/|Tự động hóa, việc sử dụng máy móc thay con người|Factory automation increases efficiency.|Mechanization|Manual operation
+Electronics|Bandwidth|/ˈbændwɪdθ/|Băng thông, khả năng truyền dữ liệu của mạng|High bandwidth allows faster downloads.|Data capacity|N/A
+Electronics|Battery|/ˈbætəri/|Pin, ắc quy cung cấp điện cho thiết bị|My phone battery is almost dead.|Power cell|N/A
+Electronics|Capacity|/kəˈpæsəti/|Dung lượng lưu trữ hoặc khả năng chứa đựng|This hard drive has 1TB capacity.|Storage space, Volume|Incapacity
+Electronics|Circuitry|/ˈsɜːrkɪtri/|Hệ thống mạch điện trong thiết bị điện tử|The circuitry was damaged by water.|Electronic circuits|N/A
+Electronics|Disk drive|/dɪsk draɪv/|Ổ đĩa, thiết bị đọc và ghi dữ liệu trên đĩa|Save the file to the external disk drive.|Hard drive, Storage device|N/A
+Electronics|Duplicate|/ˈduːplɪkeɪt/|Sao chép, tạo bản sao giống hệt nguyên bản|Please duplicate this CD for backup.|Copy, Replicate|Original
+Electronics|Earbuds|/ˈɪəbʌdz/|Tai nghe nhỏ đặt vào trong tai|She uses wireless earbuds during workouts.|Earphones, In-ear headphones|Speakers
+Electronics|Fehler|/ˈfeɪljər/|Sự hỏng hóc, lỗi hoặc thất bại của hệ thống|System failure caused data loss.|Breakdown, Malfunction|Success
+Electronics|Jack|/dʒæk/|Ổ cắm để kết nối thiết bị điện tử|Plug headphones into the audio jack.|Socket, Port|N/A
+Electronics|Minimal|/ˈmɪnɪməl/|Tối thiểu, ở mức độ nhỏ nhất có thể|The device requires minimal maintenance.|Minimum, Smallest|Maximum
+Electronics|Multitask|/ˌmʌltiˈtæsk/|Đa nhiệm, thực hiện nhiều tác vụ cùng lúc|This computer can multitask efficiently.|Do multiple tasks|Single-task
+Electronics|Optical|/ˈɑːptɪkl/|Quang học, liên quan đến ánh sáng và thị giác|Optical fibers transmit data using light.|Visual, Light-based|Electrical
+Electronics|Physically|/ˈfɪzɪkli/|Về mặt vật lý, thực tế hữu hình|The drive was physically damaged.|Bodily, Materially|Virtually
+Electronics|Reception|/rɪˈsepʃn/|Sự tiếp nhận tín hiệu (radio, TV, điện thoại)|Poor reception affects call quality.|Signal strength|Transmission
+Electronics|Shut down|/ʃʌt daʊn/|Tắt máy, ngừng hoạt động hoàn toàn|Shut down the computer before leaving.|Turn off, Power off|Start up, Boot up
+Electronics|Tablet|/ˈtæblət/|Máy tính bảng, thiết bị cảm ứng di động|She takes notes on her tablet.|iPad, Touchscreen device|Desktop
+Electronics|Transmit|/trænzˈmɪt/|Truyền tải (dữ liệu, tín hiệu) từ nơi này sang nơi khác|Satellites transmit signals worldwide.|Send, Broadcast|Receive
+Electronics|USB|/ˌjuː es ˈbiː/|Cổng kết nối chuẩn cho máy tính và thiết bị|Connect the printer via USB cable.|Universal Serial Bus|N/A
+Electronics|Voltage|/ˈvoʊltɪdʒ/|Điện áp, lực điện đo bằng volt|This device requires 220V voltage.|Electric potential|N/A
+Electronics|Warranty|/ˈwɔːrənti/|Bảo hành, cam kết sửa chữa miễn phí trong thời hạn|The laptop comes with a 2-year warranty.|Guarantee|N/A
+Correspondence|Acknowledge|/əkˈnɑːlɪdʒ/|Thừa nhận, xác nhận đã nhận được thông tin|Please acknowledge receipt of this email.|Confirm, Recognize|Deny
+Correspondence|Attachment|/əˈtætʃmənt/|File đính kèm trong email|The contract is in the attachment.|Enclosure, Appendix|N/A
+Correspondence|Courier|/ˈkʊriər/|Người chuyển phát nhanh hoặc dịch vụ giao hàng|Send the documents by courier.|Messenger, Delivery service|Recipient
+Correspondence|Delay|/dɪˈleɪ/|Sự chậm trễ, hoãn lại so với dự kiến|Apologize for the delay in response.|Postponement, Holdup|Promptness
+Correspondence|Envelope|/ˈenvəloʊp/|Phong bì dùng để đựng thư|Put the letter in an envelope.|Wrapper, Cover|N/A
+Correspondence|Fax|/fæks/|Máy fax hoặc hành động gửi văn bản qua fax|Please fax the signed agreement.|Facsimile, Telefax|N/A
+Correspondence|Forward|/ˈfɔːrwərd/|Chuyển tiếp (email, thư) cho người khác|Forward this email to the manager.|Send on, Redirect|Hold, Keep
+Correspondence|Greet|/ɡriːt/|Chào hỏi, gửi lời chào trong thư tín|Begin by greeting the recipient formally.|Welcome, Salute|Ignore
+Correspondence|Heading|/ˈhedɪŋ/|Tiêu đề, phần đầu của văn bản hoặc thư|Use a clear heading for each section.|Title, Header|Footer
+Correspondence|Letterhead|/ˈletərhed/|Tiêu đề có in sẵn logo, địa chỉ công ty trên giấy|Use company letterhead for official letters.|Stationery header|N/A
+Correspondence|Mention|/ˈmenʃn/|Đề cập, nhắc đến điều gì đó trong văn bản|He mentioned the meeting in his email.|Refer to, Cite|Omit
+Correspondence|Postage|/ˈpoʊstɪdʒ/|Cước phí bưu điện để gửi thư|Calculate postage for international mail.|Mailing cost, Stamp fee|N/A
+Correspondence|Prompt|/prɑːmpt/|Nhanh chóng, kịp thời không chậm trễ|Thank you for your prompt reply.|Quick, Immediate|Delayed
+Correspondence|Recipient|/rɪˈsɪpiənt/|Người nhận thư hoặc email|Address the letter to the correct recipient.|Receiver, Addressee|Sender
+Correspondence|Reply|/rɪˈplaɪ/|Trả lời, hồi âm lại thư hoặc email|Please reply at your earliest convenience.|Respond, Answer|Ignore
+Correspondence|Salutation|/ˌsæljuˈteɪʃn/|Lời chào đầu thư (Dear Sir/Madam)|Use an appropriate salutation.|Greeting, Opening|Closing
+Correspondence|Send|/send/|Gửi đi (thư, email, hàng hóa)|Send the invoice by email.|Dispatch, Mail|Receive
+Correspondence|Subject line|/ˈsʌbdʒɪkt laɪn/|Dòng tiêu đề ngắn gọn của email|Write a clear subject line.|Email header, Topic|Body
+Correspondence|To whom it may concern|/tuː huːm ɪt meɪ kənˈsɜːrn/|Kính gửi (dùng khi không biết tên người nhận)|Begin with "To whom it may concern."|Generic salutation|Personal greeting
+Correspondence|Urgent|/ˈɜːrdʒənt/|Khẩn cấp, cần xử lý ngay lập tức|Mark the email as urgent.|Pressing, Critical|Unimportant
+Job Ads & Recruiting|Abundant|/əˈbʌndənt/|Dồi dào, có nhiều ứng viên hoặc cơ hội việc làm|Job opportunities are abundant this year.|Plentiful, Ample|Scarce
+Job Ads & Recruiting|Accomplishment|/əˈkɑːmplɪʃmənt/|Thành tích, điều đã đạt được trong sự nghiệp|List your accomplishments on the resume.|Achievement, Success|Failure
+Job Ads & Recruiting|Applicant|/ˈæplɪkənt/|Người nộp đơn xin việc|We received 50 applicants for the position.|Candidate, Job seeker|Employer
+Job Ads & Recruiting|Bring together|/brɪŋ təˈɡeðər/|Tập hợp, quy tụ nhiều người hoặc tài năng|Bring together a talented team.|Assemble, Unite|Separate
+Job Ads & Recruiting|Candidate|/ˈkændɪdeɪt/|Ứng viên được xem xét cho vị trí hoặc chức vụ|The candidate impressed the interviewers.|Applicant, Nominee|Employer
+Job Ads & Recruiting|Come up with|/kʌm ʌp wɪð/|Nghĩ ra, đưa ra (ý tưởng, giải pháp)|Come up with creative marketing ideas.|Think of, Devise|Ignore
+Job Ads & Recruiting|Commensurate|/kəˈmensərət/|Tương xứng, cân đối với (kinh nghiệm, trình độ)|Salary commensurate with experience.|Proportional, Equivalent|Disproportionate
+Job Ads & Recruiting|Match|/mætʃ/|Phù hợp, kết nối đúng người với công việc|Match candidates to suitable positions.|Pair, Fit|Mismatch
+Job Ads & Recruiting|Profile|/ˈproʊfaɪl/|Hồ sơ năng lực, bộ đặc điểm của ứng viên lý tưởng|He doesn't fit the job profile.|Characteristics, Description|N/A
+Job Ads & Recruiting|Qualifications|/ˌkwɑːlɪfɪˈkeɪʃnz/|Trình độ, bằng cấp và kỹ năng cần thiết cho công việc|List your qualifications clearly.|Credentials, Requirements|Disqualifications
+Job Ads & Recruiting|Recruit|/rɪˈkruːt/|Tuyển dụng, thu hút người tham gia tổ chức|The company recruits top graduates.|Hire, Enlist|Dismiss
+Job Ads & Recruiting|Submit|/səbˈmɪt/|Nộp, gửi (hồ sơ, đơn xin việc)|Submit your resume online.|Send in, Present|Withdraw
+Applying & Interviewing|Ability|/əˈbɪləti/|Khả năng, năng lực thực hiện công việc|Demonstrate your leadership ability.|Capability, Skill|Inability
+Applying & Interviewing|Background|/ˈbækɡraʊnd/|Quá trình học tập và làm việc trước đây|Tell me about your educational background.|History, Experience|Foreground
+Applying & Interviewing|Candidate|/ˈkændɪdeɪt/|Ứng viên tham gia phỏng vấn|The candidate arrived on time.|Applicant, Interviewee|Interviewer
+Applying & Interviewing|Confident|/ˈkɑːnfɪdənt/|Tự tin, tin tưởng vào khả năng bản thân|She appeared confident during the interview.|Self-assured, Certain|Insecure
+Applying & Interviewing|Cover letter|/ˈkʌvər ˈletər/|Thư xin việc đi kèm hồ sơ giới thiệu bản thân|Attach a cover letter with your resume.|Application letter|N/A
+Applying & Interviewing|Employment|/ɪmˈplɔɪmənt/|Việc làm, công ăn việc làm|Seeking full-time employment.|Job, Work|Unemployment
+Applying & Interviewing|Follow up|/ˈfɑːloʊ ʌp/|Theo dõi, liên hệ lại sau khi nộp đơn hoặc phỏng vấn|Follow up with a thank-you email.|Check back, Contact again|Ignore
+Applying & Interviewing|Impression|/ɪmˈpreʃn/|Ấn tượng, cảm nhận ban đầu về ai đó|Make a good first impression.|Perception, Impact|N/A
+Applying & Interviewing|Inquire|/ɪnˈkwaɪər/|Hỏi thăm, tìm hiểu thông tin|Inquire about the job opening.|Ask, Investigate|Answer
+Applying & Interviewing|Negotiate|/nɪˈɡoʊʃieɪt/|Thương lượng, đàm phán về lương hoặc điều kiện|Negotiate salary and benefits.|Discuss, Bargain|Accept
+Applying & Interviewing|Prepare|/prɪˈper/|Chuẩn bị trước cho phỏng vấn hoặc sự kiện|Prepare answers to common questions.|Get ready, Plan|Neglect
+Applying & Interviewing|Reference|/ˈrefrəns/|Người tham chiếu xác nhận năng lực của bạn|Provide three professional references.|Recommendation, Referral|N/A
+Applying & Interviewing|Resume|/ˈrezəmeɪ/|Sơ yếu lý lịch liệt kê kinh nghiệm và kỹ năng|Update your resume regularly.|CV, Curriculum Vitae|N/A
+Applying & Interviewing|Strength|/streŋθ/|Điểm mạnh, thế mạnh của ứng viên|Discuss your strengths and weaknesses.|Advantage, Asset|Weakness
+Hiring & Training|Conduct|/kənˈdʌkt/|Tiến hành, thực hiện (đào tạo, họp)|Conduct training sessions for new hires.|Carry out, Perform|Neglect
+Hiring & Training|Develop|/dɪˈveləp/|Phát triển kỹ năng hoặc chương trình đào tạo|Develop employee skills through workshops.|Improve, Enhance|Stagnate
+Hiring & Training|Effectively|/ɪˈfektɪvli/|Một cách hiệu quả, đạt kết quả tốt|Train employees effectively.|Efficiently, Successfully|Ineffectively
+Hiring & Training|Evaluate|/ɪˈvæljueɪt/|Đánh giá hiệu suất hoặc kết quả đào tạo|Evaluate employee performance annually.|Assess, Appraise|Ignore
+Hiring & Training|Hire|/ˈhaɪər/|Tuyển dụng, thuê người làm việc|We plan to hire 10 new employees.|Employ, Recruit|Fire
+Hiring & Training|Mentor|/ˈmentɔːr/|Người cố vấn, hướng dẫn nhân viên mới|Assign a mentor to each trainee.|Coach, Advisor|Student
+Hiring & Training|Onboarding|/ˈɑːnbɔːrdɪŋ/|Quá trình đưa nhân viên mới vào làm việc|Onboarding takes two weeks.|Orientation, Integration|Offboarding
+Hiring & Training|Orientation|/ˌɔːriənˈteɪʃn/|Định hướng, giới thiệu công ty cho nhân viên mới|Attend orientation on your first day.|Introduction, Training|N/A
+Hiring & Training|Probation|/proʊˈbeɪʃn/|Thời gian thử việc trước khi chính thức|Complete a 3-month probation period.|Trial period, Evaluation|Permanent status
+Hiring & Training|Retain|/rɪˈteɪn/|Giữ chân nhân viên, duy trì lực lượng lao động|Retain talented employees with benefits.|Keep, Maintain|Lose
+Hiring & Training|Skill|/skɪl/|Kỹ năng, khả năng thực hiện công việc cụ thể|Improve technical skills through training.|Ability, Expertise|Inability
+Hiring & Training|Train|/treɪn/|Đào tạo, huấn luyện nhân viên|Train staff on new software.|Teach, Instruct|Ignore
+Salaries & Benefits|Basis|/ˈbeɪsɪs/|Cơ sở, nền tảng để tính toán hoặc quyết định điều gì|Salary is paid on a monthly basis.|Foundation, Base|N/A
+Salaries & Benefits|Benefit|/ˈbenɪfɪt/|Phúc lợi, lợi ích ngoài lương như bảo hiểm, nghỉ phép|The company offers excellent health benefits.|Advantage, Perk|Disadvantage
+Salaries & Benefits|Bonus|/ˈboʊnəs/|Tiền thưởng thêm ngoài lương cơ bản|Employees receive a year-end bonus.|Incentive, Extra payment|Penalty
+Salaries & Benefits|Compensate|/ˈkɑːmpenseɪt/|Bồi thường, đền bù cho thiệt hại hoặc công sức|The company compensates for overtime work.|Reimburse, Pay|Withhold
+Salaries & Benefits|Compensation|/ˌkɑːmpenˈseɪʃn/|Toàn bộ tiền lương và phúc lợi nhận được|Total compensation includes salary and benefits.|Remuneration, Payment|N/A
+Salaries & Benefits|Deduct|/dɪˈdʌkt/|Khấu trừ, trừ đi một phần từ lương|Taxes are deducted from monthly salary.|Subtract, Withhold|Add
+Salaries & Benefits|Dental|/ˈdentl/|Liên quan đến răng, bảo hiểm nha khoa|We provide dental insurance coverage.|Tooth-related|N/A
+Salaries & Benefits|Eligible|/ˈelɪdʒəbl/|Đủ điều kiện, được phép hưởng quyền lợi|Full-time employees are eligible for benefits.|Qualified, Entitled|Ineligible
+Salaries & Benefits|Flex time|/fleks taɪm/|Thời gian làm việc linh hoạt theo nhu cầu|Employees enjoy flex time arrangements.|Flexible hours|Fixed schedule
+Salaries & Benefits|Gross|/ɡroʊs/|Tổng thu nhập trước khi khấu trừ thuế và bảo hiểm|Her gross salary is $5,000 per month.|Total, Before deductions|Net
+Salaries & Benefits|Hourly|/ˈaʊərli/|Theo giờ, được tính theo số giờ làm việc|She earns $20 on an hourly basis.|Per hour, By the hour|Salaried
+Salaries & Benefits|Net|/net/|Lương thực nhận sau khi đã trừ thuế và các khoản khấu trừ|Net pay is lower than gross pay.|Take-home, After deductions|Gross
+Salaries & Benefits|Overtime|/ˈoʊvərtaɪm/|Làm thêm giờ, thời gian làm việc ngoài giờ quy định|Overtime is paid at 1.5 times the regular rate.|Extra hours, Additional time|Regular hours
+Salaries & Benefits|Package|/ˈpækɪdʒ/|Gói lương và phúc lợi toàn diện|The benefits package is very competitive.|Bundle, Set of benefits|N/A
+Salaries & Benefits|Pension|/ˈpenʃn/|Lương hưu, tiền trả cho người về hưu|He receives a monthly pension after retirement.|Retirement fund|N/A
+Salaries & Benefits|Raise|/reɪz/|Tăng lương, sự gia tăng tiền lương|She got a 5% raise this year.|Pay increase, Salary increment|Pay cut
+Salaries & Benefits|Retirement|/rɪˈtaɪərmənt/|Nghỉ hưu, thời gian không còn làm việc|He plans for early retirement.|Pension age, Post-work life|Employment
+Salaries & Benefits|Salary|/ˈsæləri/|Tiền lương cố định trả theo tháng hoặc năm|Annual salary is negotiable.|Wages, Pay|N/A
+Salaries & Benefits|Vacation|/veɪˈkeɪʃn/|Kỳ nghỉ có hưởng lương|Employees get 15 days paid vacation.|Holiday, Leave|Work
+Salaries & Benefits|Wage|/weɪdʒ/|Tiền công trả theo giờ hoặc ngày làm việc|Minimum wage has increased.|Pay, Earnings|N/A
+Promotions, Pensions & Awards|Achievement|/əˈtʃiːvmənt/|Thành tích, điều đạt được qua nỗ lực|Her achievements earned her a promotion.|Accomplishment, Success|Failure
+Promotions, Pensions & Awards|Advancement|/ədˈvænsmənt/|Sự thăng tiến trong sự nghiệp|Seek career advancement opportunities.|Progress, Promotion|Demotion
+Promotions, Pensions & Awards|Contribute|/kənˈtrɪbjuːt/|Đóng góp công sức, tiền bạc vào quỹ hoặc dự án|Employees contribute to the pension fund.|Give, Donate|Withhold
+Promotions, Pensions & Awards|Criteria|/kraɪˈtɪriə/|Tiêu chí, các yêu cầu để đánh giá hoặc lựa chọn|Meet the criteria for promotion.|Standards, Requirements|N/A
+Promotions, Pensions & Awards|Deserving|/dɪˈzɜːrvɪŋ/|Xứng đáng, đáng được nhận thưởng hoặc ghi nhận|A deserving candidate for the award.|Worthy, Meritorious|Undeserving
+Promotions, Pensions & Awards|Distribute|/dɪˈstrɪbjuːt/|Phân phối, trao tặng giải thưởng hoặc lợi nhuận|Distribute bonuses to all employees.|Hand out, Allocate|Collect
+Promotions, Pensions & Awards|Employee of the month|/ɪmˈplɔɪiː əv ðə mʌnθ/|Nhân viên xuất sắc của tháng|She was named employee of the month.|Monthly award winner|N/A
+Promotions, Pensions & Awards|Exceed|/ɪkˈsiːd/|Vượt qua, làm tốt hơn mong đợi|Exceed performance targets.|Surpass, Outperform|Fall short
+Promotions, Pensions & Awards|Promote|/prəˈmoʊt/|Thăng chức, đề bạt lên vị trí cao hơn|He was promoted to manager.|Advance, Elevate|Demote
+Promotions, Pensions & Awards|Promotion|/prəˈmoʊʃn/|Sự thăng chức, lên chức vụ cao hơn|She earned a promotion to director.|Advancement, Elevation|Demotion
+Promotions, Pensions & Awards|Recognize|/ˈrekəɡnaɪz/|Công nhận, ghi nhận thành tích của ai đó|Recognize outstanding employee contributions.|Acknowledge, Appreciate|Ignore
+Promotions, Pensions & Awards|Recognition|/ˌrekəɡˈnɪʃn/|Sự công nhận, ghi nhận giá trị hoặc đóng góp|Employee recognition boosts morale.|Acknowledgment, Appreciation|Neglect
+Promotions, Pensions & Awards|Reward|/rɪˈwɔːrd/|Phần thưởng cho thành tích hoặc hành vi tốt|Reward employees for excellent performance.|Prize, Incentive|Punishment
+Promotions, Pensions & Awards|Seniority|/siːniˈɔːrəti/|Thâm niên, thời gian phục vụ trong tổ chức|Promotions are based on seniority.|Length of service, Tenure|N/A
+Shopping|Bargain|/ˈbɑːrɡən/|Món hời, sản phẩm có giá rẻ hơn bình thường|I got a great bargain on this coat.|Good deal, Discount|Rip-off
+Shopping|Browse|/braʊz/|Dạo xem, xem qua các sản phẩm không có mục đích mua cụ thể|I like to browse online stores.|Look around, Survey|Buy immediately
+Shopping|Cart|/kɑːrt/|Xe đẩy hàng trong siêu thị|Put items in your shopping cart.|Trolley, Basket|N/A
+Shopping|Cash|/kæʃ/|Tiền mặt, thanh toán bằng tiền giấy hoặc xu|Pay in cash or by card.|Currency, Money|Credit
+Shopping|Checkout|/ˈtʃekaʊt/|Quầy thanh toán trong cửa hàng|Wait in line at the checkout.|Cashier, Payment counter|Entrance
+Shopping|Clearance|/ˈklɪrəns/|Bán thanh lý hàng tồn kho với giá giảm mạnh|Shop the clearance section for deals.|Sale, Liquidation|Regular price
+Shopping|Consumer|/kənˈsuːmər/|Người tiêu dùng, người mua và sử dụng sản phẩm|Consumer rights must be protected.|Buyer, Customer|Seller
+Shopping|Discount|/ˈdɪskaʊnt/|Giảm giá, khấu trừ một phần giá bán|Get a 20% discount on all items.|Reduction, Markdown|Markup
+Shopping|Exchange|/ɪksˈtʃeɪndʒ/|Đổi hàng, thay sản phẩm khác cùng giá trị|Exchange the shirt for a different size.|Swap, Trade|Keep
+Shopping|Item|/ˈaɪtəm/|Món hàng, sản phẩm riêng lẻ|Each item is carefully inspected.|Product, Article|N/A
+Shopping|Mall|/mɔːl/|Trung tâm mua sắm lớn|Let's go to the shopping mall.|Shopping center, Plaza|N/A
+Shopping|Purchase|/ˈpɜːrtʃəs/|Mua hàng, việc mua sản phẩm hoặc dịch vụ|Complete your purchase online.|Buy, Acquisition|Sale
+Shopping|Receipt|/rɪˈsiːt/|Hóa đơn, giấy chứng nhận đã mua hàng|Keep your receipt for returns
+Ordering Supplies|Catalog|/ˈkætəlɔːɡ/|Danh mục, sách giới thiệu sản phẩm để đặt hàng|Browse the catalog for office supplies.|Brochure, Product list|N/A
+Ordering Supplies|Compile|/kəmˈpaɪl/|Tập hợp, lập danh sách các mục cần đặt|Compile a list of needed supplies.|Assemble, Collect|Scatter
+Ordering Supplies|Delivery|/dɪˈlɪvəri/|Việc giao hàng đến địa chỉ khách hàng|Expect delivery within 5 business days.|Shipment, Transport|Pickup
+Ordering Supplies|Estimate|/ˈestɪmeɪt/|Ước tính chi phí hoặc thời gian giao hàng|Estimate shipping costs before ordering.|Approximate, Calculate|Know exactly
+Ordering Supplies|Fulfill|/fʊlˈfɪl/|Hoàn thành, thực hiện đầy đủ đơn hàng|Fulfill orders within 24 hours.|Complete, Execute|Neglect
+Ordering Supplies|Inventory|/ˈɪnvəntɔːri/|Hàng tồn kho, danh sách hàng hóa hiện có|Check inventory before placing orders.|Stock, Supplies|N/A
+Ordering Supplies|Order form|/ˈɔːrdər fɔːrm/|Mẫu đơn đặt hàng cần điền thông tin sản phẩm|Fill out the order form completely.|Purchase form|N/A
+Ordering Supplies|Place an order|/pleɪs ən ˈɔːrdər/|Đặt hàng, gửi yêu cầu mua hàng|Place an order online or by phone.|Submit an order, Buy|Cancel order
+Ordering Supplies|Quantity|/ˈkwɑːntəti/|Số lượng, khối lượng hàng hóa đặt mua|Specify the quantity needed.|Amount, Volume|Quality
+Ordering Supplies|Reorder|/ˌriːˈɔːrdər/|Đặt hàng lại, mua thêm hàng đã từng mua|Reorder supplies when stock is low.|Order again, Replenish|N/A
+Ordering Supplies|Stationery|/ˈsteɪʃəneri/|Văn phòng phẩm như giấy, bút, phong bì|Order stationery for the office.|Office supplies, Writing materials|N/A
+Ordering Supplies|Supplier|/səˈplaɪər/|Nhà cung cấp hàng hóa hoặc dịch vụ|Find a reliable supplier for materials.|Vendor, Provider|Customer
+Ordering Supplies|Supply|/səˈplaɪ/|Cung cấp hàng hóa hoặc vật tư; nguồn cung|Supply office materials monthly.|Provide, Furnish|Demand
+Shipping|Carrier|/ˈkæriər/|Hãng vận chuyển, công ty chuyên chở hàng hóa|Choose a reliable shipping carrier.|Transporter, Delivery company|Receiver
+Shipping|Consignment|/kənˈsaɪnmənt/|Lô hàng gửi đi, hàng hóa ký gửi|Track the consignment until delivery.|Shipment, Cargo|N/A
+Shipping|Courier|/ˈkʊriər/|Dịch vụ chuyển phát nhanh hoặc người đưa thư|Send documents by courier service.|Express delivery, Messenger|Regular mail
+Shipping|Destination|/ˌdestɪˈneɪʃn/|Điểm đến, nơi hàng hóa được giao|The package reached its destination.|Final location, Endpoint|Origin
+Shipping|Dispatch|/dɪˈspætʃ/|Gửi đi, phát hàng từ kho|Dispatch orders within 24 hours.|Send out, Ship|Receive
+Shipping|Excursion|/ɪkˈskɜːrʒn/|Chuyến đi ngắn, hành trình vận chuyển|Plan the shipping excursion route.|Trip, Journey|N/A
+Shipping|Fragile|/ˈfrædʒəl/|Dễ vỡ, cần xử lý cẩn thận khi vận chuyển|Mark the box as fragile.|Delicate, Breakable|Sturdy
+Shipping|Insure|/ɪnˈʃʊr/|Mua bảo hiểm cho hàng hóa trong vận chuyển|Insure valuable shipments.|Protect, Cover|Risk
+Shipping|Notify|/ˈnoʊtɪfaɪ/|Thông báo cho người nhận về tình trạng vận chuyển|Notify customers when orders ship.|Inform, Alert|Conceal
+Shipping|Package|/ˈpækɪdʒ/|Kiện hàng, bưu kiện được đóng gói để gửi|Track your package online.|Parcel, Box|N/A
+Shipping|Postage|/ˈpoʊstɪdʒ/|Phí bưu chính, tiền gửi hàng qua đường bưu điện|Calculate postage before mailing.|Shipping fee, Mailing cost|N/A
+Shipping|Tracking number|/ˈtrækɪŋ ˈnʌmbər/|Mã số tra cứu để theo dõi hành trình hàng|Use the tracking number to check status.|Shipment ID, Trace code|N/A
+Shipping|Transit|/ˈtrænzɪt/|Quá trình vận chuyển, đang trên đường giao hàng|The package is currently in transit.|Transportation, En route|Delivered
+Shipping|Warehouse|/ˈwerhaʊs/|Nhà kho, nơi chứa hàng trước khi giao|Store goods in the warehouse.|Storage facility, Depot|Store
+Invoices|Account|/əˈkaʊnt/|Tài khoản khách hàng ghi nhận giao dịch mua bán|Pay your account balance by the due date.|Customer record, Ledger|N/A
+Invoices|Charge|/tʃɑːrdʒ/|Tính tiền, thu phí cho sản phẩm hoặc dịch vụ|Additional charges apply for rush orders.|Fee, Cost|Refund
+Invoices|Compile|/kəmˈpaɪl/|Tập hợp, lập danh sách các khoản phí trong hóa đơn|Compile all expenses into one invoice.|Gather, Assemble|Separate
+Invoices|Customer|/ˈkʌstəmər/|Khách hàng, người mua hàng hoặc sử dụng dịch vụ|Send invoices to customers promptly.|Client, Buyer|Seller
+Invoices|Discount|/ˈdɪskaʊnt/|Giảm giá cho khách hàng thanh toán sớm|Offer a 5% discount for early payment.|Reduction, Deduction|Surcharge
+Invoices|Due date|/duː deɪt/|Ngày đến hạn thanh toán hóa đơn|Payment is due by the due date.|Deadline, Payment date|N/A
+Invoices|Efficient|/ɪˈfɪʃnt/|Hiệu quả, xử lý nhanh chóng và chính xác|An efficient invoicing system saves time.|Effective, Productive|Inefficient
+Invoices|Impose|/ɪmˈpoʊz/|Áp đặt, đưa ra phí hoặc hình phạt bổ sung|Impose late fees on overdue accounts.|Levy, Enforce|Waive
+Invoices|Mistake|/mɪˈsteɪk/|Lỗi, sai sót trong tính toán hoặc thông tin|Correct any mistakes on the invoice.|Error, Inaccuracy|Accuracy
+Invoices|Order|/ˈɔːrdər/|Đơn hàng, yêu cầu mua sản phẩm|The invoice matches the purchase order.|Purchase, Request|Cancellation
+Invoices|Promptly|/ˈprɑːmptli/|Một cách nhanh chóng, kịp thời|Pay invoices promptly to avoid penalties.|Quickly, Immediately|Slowly
+Invoices|Record|/ˈrekərd/|Ghi chép, lưu lại thông tin giao dịch|Record all transactions for accounting.|Document, Register|Forget
+Invoices|Terms|/tɜːrmz/|Điều khoản thanh toán như thời hạn, phương thức|Read the payment terms carefully.|Conditions, Stipulations|N/A
         `;
 
         const parseData = (str) => {
@@ -913,3 +1080,4 @@ Procedures|Verbally|/’və:bəli/|Bằng lời nói|Agreed verbally.|Orally|Wri
     </script>
 </body>
 </html>
+
