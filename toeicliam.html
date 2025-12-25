@@ -553,7 +553,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -581,7 +581,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1356,14 +1356,49 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
         // --- SOUND HELPER ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Sound Effects URLs (Free CDN sounds)
+        const SOUND_URLS = {
+            flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',      // Card flip
+            match: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',     // Success chime
+            miss: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',      // Error buzz
+            coin: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',      // Coin = match sound
+            levelup: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',   // Level up fanfare
+        };
+        
+        // Preload và cache sounds
+        const soundCache = {};
+        Object.keys(SOUND_URLS).forEach(key => {
+            const audio = new Audio();
+            audio.src = SOUND_URLS[key];
+            audio.preload = 'auto';
+            audio.volume = 0.5;
+            soundCache[key] = audio;
+        });
+
         const playSound = (type) => {
+            try {
+                // Thử dùng cached sound trước
+                if (soundCache[type]) {
+                    const sound = soundCache[type].cloneNode();
+                    sound.volume = type === 'flip' ? 0.3 : 0.5;
+                    sound.play().catch(() => playFallbackSound(type));
+                    return;
+                }
+                playFallbackSound(type);
+            } catch (e) {
+                playFallbackSound(type);
+            }
+        };
+        
+        // Fallback: Web Audio API (nếu CDN lỗi)
+        const playFallbackSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
 
-            const createOsc = (freq, type, startTime, duration, gainStart = 0.1, gainEnd = 0.01) => {
+            const createOsc = (freq, oscType, startTime, duration, gainStart = 0.1, gainEnd = 0.01) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = type;
+                osc.type = oscType;
                 osc.frequency.setValueAtTime(freq, startTime);
                 gain.gain.setValueAtTime(gainStart, startTime);
                 gain.gain.exponentialRampToValueAtTime(gainEnd, startTime + duration);
@@ -1374,22 +1409,54 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             if (type === 'flip') {
-                createOsc(600, 'sine', now, 0.1, 0.05, 0.001); // Soft click
-            } else if (type === 'match') {
-                // Happy Major Triad Arpeggio (C - E - G)
-                createOsc(523.25, 'sine', now, 0.2, 0.1, 0.001); // C5
-                createOsc(659.25, 'sine', now + 0.1, 0.2, 0.1, 0.001); // E5
-                createOsc(783.99, 'sine', now + 0.2, 0.4, 0.1, 0.001); // G5
+                createOsc(600, 'sine', now, 0.1, 0.05, 0.001);
+            } else if (type === 'match' || type === 'coin') {
+                createOsc(523.25, 'sine', now, 0.2, 0.1, 0.001);
+                createOsc(659.25, 'sine', now + 0.1, 0.2, 0.1, 0.001);
+                createOsc(783.99, 'sine', now + 0.2, 0.4, 0.1, 0.001);
             } else if (type === 'miss') {
-                // Sad Thud
-                createOsc(150, 'triangle', now, 0.3, 0.1, 0.001); // Low tone
-                createOsc(100, 'sawtooth', now + 0.05, 0.3, 0.05, 0.001); // Dissonance
+                createOsc(150, 'triangle', now, 0.3, 0.1, 0.001);
+                createOsc(100, 'sawtooth', now + 0.05, 0.3, 0.05, 0.001);
             }
         };
 
         // --- COMPONENTS ---
-        // Audio cache để không phải tải lại
-        const audioCache = {};
+        // Global TTS function - sử dụng nhiều nguồn để đảm bảo giọng chuẩn
+        const playTTS = (text, lang = 'US') => {
+            return new Promise((resolve, reject) => {
+                // Ưu tiên 1: Google Translate TTS (miễn phí, giọng chuẩn)
+                const tl = lang === 'UK' ? 'en-gb' : 'en';
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${tl}&client=tw-ob`;
+                
+                const audio = new Audio(url);
+                audio.onended = resolve;
+                audio.onerror = () => {
+                    // Fallback: SpeechSynthesis
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const msg = new SpeechSynthesisUtterance(text);
+                        msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
+                        msg.rate = 0.9;
+                        msg.onend = resolve;
+                        msg.onerror = reject;
+                        window.speechSynthesis.speak(msg);
+                    } else {
+                        reject();
+                    }
+                };
+                audio.play().catch(() => {
+                    // Fallback nếu play() thất bại
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const msg = new SpeechSynthesisUtterance(text);
+                        msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
+                        msg.rate = 0.9;
+                        msg.onend = resolve;
+                        window.speechSynthesis.speak(msg);
+                    }
+                });
+            });
+        };
         
         const SpeakerButton = ({ text, lang = 'US', className = "" }) => {
             const [isPlaying, setIsPlaying] = React.useState(false);
@@ -1399,50 +1466,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (isPlaying) return;
                 
                 setIsPlaying(true);
-                
                 try {
-                    // Sử dụng Google Translate TTS - giọng chuẩn, miễn phí
-                    const tl = lang === 'UK' ? 'en-GB' : 'en-US';
-                    const cacheKey = `${text}_${tl}`;
-                    
-                    let audio;
-                    if (audioCache[cacheKey]) {
-                        audio = audioCache[cacheKey];
-                        audio.currentTime = 0;
-                    } else {
-                        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${tl === 'en-GB' ? 'en-gb' : 'en'}&client=tw-ob`;
-                        audio = new Audio(url);
-                        audioCache[cacheKey] = audio;
-                    }
-                    
-                    audio.onended = () => setIsPlaying(false);
-                    audio.onerror = () => {
-                        // Fallback về SpeechSynthesis nếu Google TTS lỗi
-                        if ('speechSynthesis' in window) {
-                            window.speechSynthesis.cancel();
-                            const msg = new SpeechSynthesisUtterance(text);
-                            msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
-                            msg.rate = 0.9;
-                            msg.onend = () => setIsPlaying(false);
-                            window.speechSynthesis.speak(msg);
-                        } else {
-                            setIsPlaying(false);
-                        }
-                    };
-                    
-                    await audio.play();
+                    await playTTS(text, lang);
                 } catch (err) {
-                    // Fallback về SpeechSynthesis
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const msg = new SpeechSynthesisUtterance(text);
-                        msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
-                        msg.rate = 0.9;
-                        msg.onend = () => setIsPlaying(false);
-                        window.speechSynthesis.speak(msg);
-                    } else {
-                        setIsPlaying(false);
-                    }
+                    console.log('TTS error:', err);
+                } finally {
+                    setIsPlaying(false);
                 }
             };
 
@@ -2361,27 +2390,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Functions Definitions (Moved outside effects)
             const speak = (text) => {
-                // Sử dụng Google TTS
-                try {
-                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
-                    const audio = new Audio(url);
-                    audio.play().catch(() => {
-                        // Fallback về SpeechSynthesis
-                        if ('speechSynthesis' in window) {
-                            window.speechSynthesis.cancel();
-                            const u = new SpeechSynthesisUtterance(text);
-                            u.lang = 'en-US';
-                            window.speechSynthesis.speak(u);
-                        }
-                    });
-                } catch (e) {
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance(text);
-                        u.lang = 'en-US';
-                        window.speechSynthesis.speak(u);
-                    }
-                }
+                playTTS(text, 'US').catch(() => {});
             };
 
             const toggleTopic = (topic) => {
@@ -3276,27 +3285,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const speakWord = (text) => {
-                // Sử dụng Google TTS
-                try {
-                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
-                    const audio = new Audio(url);
-                    audio.play().catch(() => {
-                        // Fallback về SpeechSynthesis
-                        if ('speechSynthesis' in window) {
-                            window.speechSynthesis.cancel();
-                            const u = new SpeechSynthesisUtterance(text);
-                            u.lang = 'en-US';
-                            window.speechSynthesis.speak(u);
-                        }
-                    });
-                } catch (e) {
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance(text);
-                        u.lang = 'en-US';
-                        window.speechSynthesis.speak(u);
-                    }
-                }
+                playTTS(text, 'US').catch(() => {});
             };
 
             const startReviewSession = (wordsToReview) => {
