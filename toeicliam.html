@@ -2908,15 +2908,40 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         )}
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-lg mx-auto">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 sm:gap-3 max-w-lg mx-auto px-1">
                         {cards.map((card, index) => {
                             const isFlipped = flippedIndices.includes(index); const isMatched = matchedIndices.includes(index);
                             if (isMatched) return <div key={card.id} className="aspect-square opacity-0 transition-opacity duration-500"></div>;
+                            
+                            // Tính toán font size dựa trên độ dài content
+                            const len = card.content.length;
+                            let fontClass = 'text-sm'; // default
+                            if (len > 35) fontClass = 'text-[8px]';
+                            else if (len > 25) fontClass = 'text-[9px]';
+                            else if (len > 18) fontClass = 'text-[10px]';
+                            else if (len > 12) fontClass = 'text-xs';
+                            
                             return (
                                 <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-square cursor-pointer perspective-1000 group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`}>
                                     <div className={`w-full h-full transition-all duration-300 transform-style-3d relative shadow-sm rounded-lg ${isFlipped ? 'rotate-y-180' : ''}`}>
-                                        <div className={`absolute inset-0 backface-hidden border-2 rounded-lg flex items-center justify-center transition-colors shadow-inner ${card.type === 'word' ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'}`}> {card.type === 'word' ? (<div className="text-center"> <i className="fas fa-flag-usa text-3xl text-blue-300 dark:text-blue-500 mb-1 opacity-50"></i> <span className="block text-xs font-black text-blue-400 dark:text-blue-300 mt-1">EN</span> </div>) : (<div className="text-center"> <i className="fas fa-star text-3xl text-red-300 dark:text-red-500 mb-1 opacity-50"></i> <span className="block text-xs font-black text-red-400 dark:text-red-300 mt-1">VN</span> </div>)} </div>
-                                        <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-1.5 text-center shadow-lg overflow-hidden"> <span className="text-[8px] font-bold text-indigo-400 uppercase">{card.type === 'word' ? 'EN' : 'VN'}</span> <p className={`font-bold text-slate-800 dark:text-white leading-tight break-words w-full px-0.5 ${card.content.length > 30 ? 'text-[9px]' : card.content.length > 20 ? 'text-[10px]' : card.content.length > 12 ? 'text-xs' : 'text-sm'}`} style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{card.content}</p> </div>
+                                        {/* Mặt trước - chưa lật */}
+                                        <div className={`absolute inset-0 backface-hidden border-2 rounded-lg flex items-center justify-center transition-colors shadow-inner ${card.type === 'word' ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'}`}>
+                                            {card.type === 'word' ? (
+                                                <div className="text-center">
+                                                    <i className="fas fa-flag-usa text-2xl sm:text-3xl text-blue-300 dark:text-blue-500 opacity-50"></i>
+                                                    <span className="block text-[10px] sm:text-xs font-black text-blue-400 dark:text-blue-300 mt-1">EN</span>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center">
+                                                    <i className="fas fa-star text-2xl sm:text-3xl text-red-300 dark:text-red-500 opacity-50"></i>
+                                                    <span className="block text-[10px] sm:text-xs font-black text-red-400 dark:text-red-300 mt-1">VN</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* Mặt sau - đã lật */}
+                                        <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-1 text-center shadow-lg overflow-hidden">
+                                            <p className={`font-bold text-slate-800 dark:text-white leading-tight break-words w-full hyphens-auto ${fontClass}`} style={{display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word'}}>{card.content}</p>
+                                        </div>
                                     </div>
                                 </div>
                             );
