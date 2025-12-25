@@ -2557,10 +2557,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             }, [onlineStatus]);
 
             // NEW: Presence / Online Players list (Active in lobby and waiting)
-            // FIX: Chạy listener ngay khi vào màn hình Game (gameMode === null) hoặc khi đã chọn pvp_online
             React.useEffect(() => {
-                if (!db || (gameMode !== null && gameMode !== 'pvp_online')) return;
-                console.log("Starting presence listener for Game tab...");
+                if (!db || !user) return;
+                console.log("Starting presence listener...");
                 const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence');
 
                 const unsubscribe = colRef.onSnapshot(snap => {
@@ -2579,7 +2578,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     console.error("Presence listen error:", err);
                 });
                 return () => unsubscribe();
-            }, [db, gameMode, user?.uid]);
+            }, [db, user?.uid]);
 
             // AI Logic Hook 1
             React.useEffect(() => {
@@ -2705,40 +2704,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </button>
                             <button onClick={() => startGameWithTopics('pvp_online')} className="p-4 bg-white dark:bg-slate-800 border-2 border-orange-100 dark:border-slate-700 hover:border-orange-500 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
                                 <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center group-hover:bg-orange-100"><i className="fas fa-globe text-xl text-orange-600 dark:text-orange-400"></i></div>
-                                <div className="text-left flex-1">
-                                    <span className="font-bold block text-slate-800 dark:text-white">Online PvP (Cược {200 * betMultiplier})</span>
-                                    <span className="text-xs text-slate-400">Đấu với người thật (x{betMultiplier})</span>
-                                </div>
-                                {onlinePlayers.length > 0 && (
-                                    <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full text-[10px] font-black">
-                                        <i className="fas fa-circle text-[6px] animate-pulse"></i>
-                                        {onlinePlayers.length} online
-                                    </div>
-                                )}
+                                <div className="text-left"><span className="font-bold block text-slate-800 dark:text-white">Online PvP (Cược {200 * betMultiplier})</span><span className="text-xs text-slate-400">Đấu với người thật (x{betMultiplier})</span></div>
                             </button>
-
-                            {/* Preview Online Players */}
-                            {onlinePlayers.length > 0 && (
-                                <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-slate-800 dark:to-slate-700 rounded-xl border border-orange-100 dark:border-slate-600">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-2">
-                                            <i className="fas fa-users"></i> Cao thủ đang online
-                                        </span>
-                                        <span className="bg-orange-200 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-[10px] font-black">{onlinePlayers.length}</span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 justify-center">
-                                        {onlinePlayers.slice(0, 6).map(p => (
-                                            <div key={p.uid} className="flex flex-col items-center gap-1">
-                                                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm ${p.uid === user?.uid ? 'bg-indigo-600 ring-2 ring-indigo-300' : 'bg-gradient-to-br from-orange-400 to-amber-500'}`}>
-                                                    {(p.displayName || '?').charAt(0).toUpperCase()}
-                                                </div>
-                                                <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 truncate w-12 text-center">{p.uid === user?.uid ? 'BẠN' : (p.displayName || 'Khách')}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <p className="text-[10px] text-center text-orange-500 dark:text-orange-400 mt-3 italic">Bấm "Online PvP" để mời họ đấu!</p>
-                                </div>
-                            )}
                         </div>
                     </div>
                 );
@@ -3027,17 +2994,30 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         uid: user.uid,
                         displayName: nickname,
                         lastSeen: Date.now(),
-                        status: view === 'memory' ? 'playing' : 'online'
+                        status: (view === 'memory' && gameMode === 'pvp_online' && onlineStatus === 'playing') ? 'playing' : 'online'
                     }, { merge: true }).catch(e => console.error("Presence write error:", e));
+                };
+
+                const removePresence = () => {
+                    const presenceRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence').doc(user.uid);
+                    presenceRef.delete().catch(e => console.error("Presence delete error:", e));
                 };
 
                 updatePresence();
                 const interval = setInterval(updatePresence, 15000);
 
+                // Cleanup on tab close/refresh
+                const handleBeforeUnload = () => {
+                    removePresence();
+                };
+                window.addEventListener('beforeunload', handleBeforeUnload);
+
                 return () => {
                     clearInterval(interval);
+                    removePresence();
+                    window.removeEventListener('beforeunload', handleBeforeUnload);
                 };
-            }, [user, view]);
+            }, [user, view, gameMode, onlineStatus]);
 
             // Invitation Listener
             React.useEffect(() => {
