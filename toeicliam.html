@@ -553,7 +553,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -581,7 +581,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -2559,19 +2559,22 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // Presence / Online Players list
             React.useEffect(() => {
                 if (!db || onlineStatus !== 'waiting' || !isHost) return;
+                console.log("Starting presence listener...");
                 const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence');
                 const unsubscribe = colRef.onSnapshot(snap => {
                     const players = [];
                     const now = Date.now();
                     snap.forEach(doc => {
                         const p = doc.data();
-                        // Only show if online in last 2 mins and not self
-                        if (p.uid !== user.uid && (now - p.lastSeen < 120000)) {
+                        // Increase window to 10 mins to account for clock skew
+                        // And for debugging, show YOURSELF too if you want to test on 2 machines
+                        if (now - p.lastSeen < 600000) {
                             players.push(p);
                         }
                     });
+                    console.log("Online players found:", players.length);
                     setOnlinePlayers(players);
-                });
+                }, err => console.error("Presence listen error:", err));
                 return () => unsubscribe();
             }, [db, onlineStatus, isHost, user.uid]);
 
@@ -2744,9 +2747,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         <div key={p.uid} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700 transition-all hover:border-indigo-300">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-black shadow-sm">
-                                                    {p.displayName.charAt(0).toUpperCase()}
+                                                    {(p.displayName || '?').charAt(0).toUpperCase()}
                                                 </div>
-                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.displayName}</span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.displayName}</span>
+                                                    <span className="text-[10px] text-slate-400">{p.uid === user.uid ? '(Bạn)' : (p.status === 'playing' ? 'Đang chơi' : 'Đang rảnh')}</span>
+                                                </div>
                                             </div>
                                             <button
                                                 onClick={() => inviteUser(p.uid)}
@@ -2959,12 +2965,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 const presenceRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence').doc(user.uid);
 
                 const updatePresence = () => {
+                    if (!presenceRef) return;
+                    console.log("Updating presence...");
                     presenceRef.set({
                         uid: user.uid,
                         displayName: user.displayName || 'Người dùng ẩn danh',
                         lastSeen: Date.now(),
                         status: view === 'memory' ? 'playing' : 'online'
-                    }, { merge: true });
+                    }, { merge: true }).catch(e => console.error("Presence write error:", e));
                 };
 
                 updatePresence();
