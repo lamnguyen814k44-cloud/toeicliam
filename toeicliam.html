@@ -2508,32 +2508,27 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 } catch (error) { console.error("Lỗi tạo phòng:", error); alert("Lỗi tạo phòng. Hãy kiểm tra mạng."); }
             };
 
+            const [isJoining, setIsJoining] = React.useState(false);
+
             const joinRoom = async () => {
                 if (!user || !db) return alert("Vui lòng đăng nhập!");
                 if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
                 if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
+                if (isJoining) return; // Prevent double click
+                
+                setIsJoining(true);
                 try {
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
                     const doc = await roomRef.get();
-                    if (!doc.exists) return alert("Phòng không tồn tại!");
+                    if (!doc.exists) { setIsJoining(false); return alert("Phòng không tồn tại!"); }
                     const roomData = doc.data();
                     const multiplier = roomData.multiplier || 1;
-                    if (coins < 200 * multiplier) return alert(`Bạn không đủ ${200 * multiplier} xu để vào phòng cược x${multiplier} này!`);
+                    if (coins < 200 * multiplier) { setIsJoining(false); return alert(`Bạn không đủ ${200 * multiplier} xu để vào phòng cược x${multiplier} này!`); }
 
-                    if (roomData.hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình!");
-                    if (roomData.status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+                    if (roomData.hostId === user.uid) { setIsJoining(false); return alert("Bạn không thể tự vào phòng của chính mình!"); }
+                    if (roomData.status !== 'waiting') { setIsJoining(false); return alert("Phòng đang chơi hoặc đã đầy!"); }
                     
-                    // Update room với guestId và status
-                    await roomRef.update({ guestId: user.uid, status: 'playing' });
-                    
-                    // Set local state - đảm bảo gameMode được set đúng
-                    setGameMode('pvp_online');
-                    setRoomId(inputRoomId);
-                    setIsHost(false);
-                    setOnlineStatus('playing');
-                    setHasPaid(false);
-                    
-                    // Load cards ngay lập tức từ room data
+                    // Load cards TRƯỚC khi update room để giảm delay
                     if (roomData.board) {
                         setCards(roomData.board);
                         setFlippedIndices(roomData.flipped || []);
@@ -2542,8 +2537,22 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         setCurrentPlayer(roomData.turn === roomData.hostId ? 1 : 2);
                     }
                     
-                    console.log("Joined room successfully:", inputRoomId);
-                } catch (error) { console.error("Lỗi vào phòng:", error); alert("Lỗi kết nối phòng."); }
+                    // Set local state ngay lập tức
+                    setGameMode('pvp_online');
+                    setRoomId(inputRoomId);
+                    setIsHost(false);
+                    setOnlineStatus('playing');
+                    setHasPaid(false);
+                    
+                    // Update room sau cùng (async, không block UI)
+                    roomRef.update({ guestId: user.uid, status: 'playing' });
+                    
+                    setIsJoining(false);
+                } catch (error) { 
+                    console.error("Lỗi vào phòng:", error); 
+                    setIsJoining(false);
+                    alert("Lỗi kết nối phòng."); 
+                }
             };
 
             const inviteUser = async (targetUserId) => {
@@ -2579,23 +2588,19 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // FIX: Chạy listener ngay khi vào màn hình Game (gameMode === null) hoặc khi đã chọn pvp_online
             React.useEffect(() => {
                 if (!db || (gameMode !== null && gameMode !== 'pvp_online')) return;
-                console.log("Starting presence listener for Game tab...");
                 const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence');
 
                 const unsubscribe = colRef.onSnapshot(snap => {
                     const players = [];
                     const now = Date.now();
-                    console.log(`Presence snapshot: ${snap.size} documents total`);
                     snap.forEach(doc => {
                         const p = doc.data();
                         const timeDiff = now - p.lastSeen;
-                        console.log(`Player ${p.displayName} (${p.uid}): lastSeen ${Math.round(timeDiff/1000)}s ago`);
                         // 15-minute window for extreme safety
                         if (timeDiff < 900000) {
                             players.push(p);
                         }
                     });
-                    console.log(`Presence Update: Found ${players.length} online players.`);
                     setOnlinePlayers(players);
                 }, err => {
                     console.error("Presence listen error:", err);
@@ -2797,7 +2802,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <p className="text-sm font-bold text-orange-600 bg-orange-50 py-2 rounded-lg mb-4"><i className="fas fa-coins"></i> Phí tham gia: 200 Xu</p>
                                 <button onClick={createRoom} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"> <i className="fas fa-plus-circle"></i> Tạo Phòng Mới </button>
                                 <div className="relative"> <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div> <div className="relative flex justify-center text-sm"><span className="px-2 bg-[#f0f4f8] text-gray-500">Hoặc vào phòng</span></div> </div>
-                                <div className="flex gap-2"> <input type="text" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 font-bold text-center tracking-widest" placeholder="Nhập mã phòng" maxLength="6" value={inputRoomId} onChange={(e) => setInputRoomId(e.target.value)} /> <button id="join-btn-trigger" onClick={joinRoom} className="bg-white border-2 border-indigo-100 text-indigo-600 px-4 py-2 rounded-xl font-bold hover:bg-indigo-50">Vào</button> </div>
+                                <div className="flex gap-2"> <input type="text" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 font-bold text-center tracking-widest" placeholder="Nhập mã phòng" maxLength="6" value={inputRoomId} onChange={(e) => setInputRoomId(e.target.value)} disabled={isJoining} /> <button id="join-btn-trigger" onClick={joinRoom} disabled={isJoining} className={`px-4 py-2 rounded-xl font-bold transition ${isJoining ? 'bg-indigo-400 text-white cursor-wait' : 'bg-white border-2 border-indigo-100 text-indigo-600 hover:bg-indigo-50'}`}>{isJoining ? <i className="fas fa-spinner fa-spin"></i> : 'Vào'}</button> </div>
 
                                 {/* Lobby Online List - chỉ hiện người khác */}
                                 <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-4">
@@ -2911,7 +2916,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-square cursor-pointer perspective-1000 group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`}>
                                     <div className={`w-full h-full transition-all duration-300 transform-style-3d relative shadow-sm rounded-lg ${isFlipped ? 'rotate-y-180' : ''}`}>
                                         <div className={`absolute inset-0 backface-hidden border-2 rounded-lg flex items-center justify-center transition-colors shadow-inner ${card.type === 'word' ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'}`}> {card.type === 'word' ? (<div className="text-center"> <i className="fas fa-flag-usa text-3xl text-blue-300 dark:text-blue-500 mb-1 opacity-50"></i> <span className="block text-xs font-black text-blue-400 dark:text-blue-300 mt-1">EN</span> </div>) : (<div className="text-center"> <i className="fas fa-star text-3xl text-red-300 dark:text-red-500 mb-1 opacity-50"></i> <span className="block text-xs font-black text-red-400 dark:text-red-300 mt-1">VN</span> </div>)} </div>
-                                        <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-2 text-center shadow-lg"> <span className="text-[10px] font-bold text-indigo-400 uppercase mb-1">{card.type === 'word' ? 'EN' : 'VN'}</span> <p className={`${card.content.length > 20 ? 'text-xs' : 'text-sm'} font-bold text-slate-800 dark:text-white`}>{card.content}</p> </div>
+                                        <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-1.5 text-center shadow-lg overflow-hidden"> <span className="text-[8px] font-bold text-indigo-400 uppercase">{card.type === 'word' ? 'EN' : 'VN'}</span> <p className={`font-bold text-slate-800 dark:text-white leading-tight break-words w-full px-0.5 ${card.content.length > 30 ? 'text-[9px]' : card.content.length > 20 ? 'text-[10px]' : card.content.length > 12 ? 'text-xs' : 'text-sm'}`} style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{card.content}</p> </div>
                                     </div>
                                 </div>
                             );
@@ -3053,7 +3058,6 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                 const updatePresence = () => {
                     const presenceRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence').doc(user.uid);
-                    console.log("Presence Heartbeat...");
                     // Use localStorage as fallback for name if user.displayName is null (common with anonymous)
                     const nickname = localStorage.getItem('toeic_user_name') || user.displayName || 'Khách';
 
