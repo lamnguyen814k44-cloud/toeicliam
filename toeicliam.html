@@ -2320,6 +2320,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [onlineStatus, setOnlineStatus] = React.useState('idle');
             const [inputRoomId, setInputRoomId] = React.useState('');
             const [hasPaid, setHasPaid] = React.useState(false);
+            const [betMultiplier, setBetMultiplier] = React.useState(1);
+            const [onlinePlayers, setOnlinePlayers] = React.useState([]);
+            const [showInviteModal, setShowInviteModal] = React.useState(false);
 
             // Functions Definitions (Moved outside effects)
             const speak = (text) => {
@@ -2500,7 +2503,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     cardSet.sort(() => Math.random() - 0.5);
 
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
-                    await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString() });
+                    await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString(), multiplier: betMultiplier });
                     setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting'); setHasPaid(false);
                 } catch (error) { console.error("Lỗi tạo phòng:", error); alert("Lỗi tạo phòng. Hãy kiểm tra mạng."); }
             };
@@ -2513,14 +2516,64 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
                     const doc = await roomRef.get();
                     if (!doc.exists) return alert("Phòng không tồn tại!");
-                    if (doc.data().hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình!");
-                    if (doc.data().status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
+                    const roomData = doc.data();
+                    const multiplier = roomData.multiplier || 1;
+                    if (coins < 200 * multiplier) return alert(`Bạn không đủ ${200 * multiplier} xu để vào phòng cược x${multiplier} này!`);
+
+                    if (roomData.hostId === user.uid) return alert("Bạn không thể tự vào phòng của chính mình!");
+                    if (roomData.status !== 'waiting') return alert("Phòng đang chơi hoặc đã đầy!");
                     await roomRef.update({ guestId: user.uid, status: 'playing' });
                     setRoomId(inputRoomId); setIsHost(false); setOnlineStatus('playing'); setHasPaid(false);
                 } catch (error) { console.error("Lỗi vào phòng:", error); alert("Lỗi kết nối phòng."); }
             };
 
+            const inviteUser = async (targetUserId) => {
+                if (!db || !user || !roomId) return;
+                const multiplier = betMultiplier;
+                const inviteRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('invitations').doc(targetUserId);
+                await inviteRef.set({
+                    hostId: user.uid,
+                    hostName: user.displayName || 'Bạn của bạn',
+                    roomId: roomId,
+                    multiplier: multiplier,
+                    createdAt: Date.now()
+                });
+                alert("Đã gửi lời mời!");
+            };
+
             // --- EFFECTS ---
+            // Auto Join from Invite
+            React.useEffect(() => {
+                if (window.pendingRoomJoin && onlineStatus === 'idle') {
+                    const rid = window.pendingRoomJoin;
+                    window.pendingRoomJoin = null;
+                    setInputRoomId(rid);
+                    // Trigger join
+                    setTimeout(() => {
+                        const joinBtn = document.getElementById('join-btn-trigger');
+                        if (joinBtn) joinBtn.click();
+                    }, 500);
+                }
+            }, [onlineStatus]);
+
+            // Presence / Online Players list
+            React.useEffect(() => {
+                if (!db || onlineStatus !== 'waiting' || !isHost) return;
+                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence');
+                const unsubscribe = colRef.onSnapshot(snap => {
+                    const players = [];
+                    const now = Date.now();
+                    snap.forEach(doc => {
+                        const p = doc.data();
+                        // Only show if online in last 2 mins and not self
+                        if (p.uid !== user.uid && (now - p.lastSeen < 120000)) {
+                            players.push(p);
+                        }
+                    });
+                    setOnlinePlayers(players);
+                });
+                return () => unsubscribe();
+            }, [db, onlineStatus, isHost, user.uid]);
 
             // AI Logic Hook 1
             React.useEffect(() => {
@@ -2567,13 +2620,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     setPvPWinner(winner);
                                     setHasPaid(true);
 
-                                    let betAmount = 200;
-                                    let newCoinBalance = coins;
-
                                     if (winner !== 'draw') {
                                         const amIHost = isHost;
                                         const iWon = (amIHost && winner === 1) || (!amIHost && winner === 2);
+                                        const multiplier = data.multiplier || 1;
+                                        const betAmount = 200 * multiplier;
+
                                         if (iWon) newCoinBalance += betAmount; else newCoinBalance -= betAmount;
+
                                         setCoins(newCoinBalance);
                                         if (user && db) {
                                             const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
@@ -2621,6 +2675,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         </div>
 
                         <div className="flex flex-col gap-4 w-full max-w-sm">
+                            <div className="mb-2">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Chọn mức cược (Nhân hệ số)</label>
+                                <div className="flex justify-between gap-2">
+                                    {[1, 2, 3, 5, 10].map(m => (
+                                        <button
+                                            key={m}
+                                            onClick={() => setBetMultiplier(m)}
+                                            className={`flex-1 py-2 rounded-xl text-xs font-black transition-all border-2 ${betMultiplier === m ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-100 hover:border-indigo-200'}`}
+                                        >
+                                            x{m}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             <button onClick={() => startGameWithTopics('solo')} className="p-4 bg-white dark:bg-slate-800 border-2 border-indigo-100 dark:border-slate-700 hover:border-indigo-500 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
                                 <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center group-hover:bg-indigo-100"><i className="fas fa-user text-xl text-indigo-600 dark:text-indigo-400"></i></div>
                                 <div className="text-left"><span className="font-bold block text-slate-800 dark:text-white">Luyện tập (1 người)</span><span className="text-xs text-slate-400">Kiếm xu, qua màn</span></div>
@@ -2631,7 +2699,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </button>
                             <button onClick={() => startGameWithTopics('pvp_online')} className="p-4 bg-white dark:bg-slate-800 border-2 border-orange-100 dark:border-slate-700 hover:border-orange-500 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
                                 <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center group-hover:bg-orange-100"><i className="fas fa-globe text-xl text-orange-600 dark:text-orange-400"></i></div>
-                                <div className="text-left"><span className="font-bold block text-slate-800 dark:text-white">Online PvP (Cược 200)</span><span className="text-xs text-slate-400">Đấu với người thật</span></div>
+                                <div className="text-left"><span className="font-bold block text-slate-800 dark:text-white">Online PvP (Cược {200 * betMultiplier})</span><span className="text-xs text-slate-400">Đấu với người thật (x{betMultiplier})</span></div>
                             </button>
                         </div>
                     </div>
@@ -2658,7 +2726,43 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <p className="text-sm font-bold text-orange-600 bg-orange-50 py-2 rounded-lg mb-4"><i className="fas fa-coins"></i> Phí tham gia: 200 Xu</p>
                                 <button onClick={createRoom} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"> <i className="fas fa-plus-circle"></i> Tạo Phòng Mới </button>
                                 <div className="relative"> <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div> <div className="relative flex justify-center text-sm"><span className="px-2 bg-[#f0f4f8] text-gray-500">Hoặc vào phòng</span></div> </div>
-                                <div className="flex gap-2"> <input type="text" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 font-bold text-center tracking-widest" placeholder="Nhập mã phòng" maxLength="6" value={inputRoomId} onChange={(e) => setInputRoomId(e.target.value)} /> <button onClick={joinRoom} className="bg-white border-2 border-indigo-100 text-indigo-600 px-4 py-2 rounded-xl font-bold hover:bg-indigo-50">Vào</button> </div>
+                                <div className="flex gap-2"> <input type="text" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 font-bold text-center tracking-widest" placeholder="Nhập mã phòng" maxLength="6" value={inputRoomId} onChange={(e) => setInputRoomId(e.target.value)} /> <button id="join-btn-trigger" onClick={joinRoom} className="bg-white border-2 border-indigo-100 text-indigo-600 px-4 py-2 rounded-xl font-bold hover:bg-indigo-50">Vào</button> </div>
+                            </div>
+                        )}
+                        {/* Invitation Modal */}
+                        {onlineStatus === 'waiting' && isHost && (
+                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border-2 border-indigo-500 dark:border-indigo-400 w-full max-w-sm mt-4 animate-slideUp">
+                                <h4 className="font-black text-indigo-900 dark:text-white mb-4 flex items-center justify-between uppercase tracking-tighter">
+                                    <span>Mời cao thủ ({onlinePlayers.length})</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[8px] font-bold text-green-500 uppercase tracking-widest">Online</span>
+                                        <i className="fas fa-circle text-[8px] text-green-500 animate-pulse"></i>
+                                    </div>
+                                </h4>
+                                <div className="space-y-3 max-h-56 overflow-y-auto custom-scrollbar pr-2 text-left">
+                                    {onlinePlayers.map(p => (
+                                        <div key={p.uid} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700 transition-all hover:border-indigo-300">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-black shadow-sm">
+                                                    {p.displayName.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.displayName}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => inviteUser(p.uid)}
+                                                className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition transform active:scale-95"
+                                            >
+                                                MỜI
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {onlinePlayers.length === 0 && (
+                                        <div className="text-center py-6 opacity-40">
+                                            <i className="fas fa-ghost text-3xl mb-2"></i>
+                                            <p className="text-[10px] uppercase font-black">Không có ai online</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -2773,6 +2877,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const [darkMode, setDarkMode] = React.useState(false);
             const [isAuthChecking, setIsAuthChecking] = React.useState(true);
+            const [incomingInvitation, setIncomingInvitation] = React.useState(null);
+            const [customReviewList, setCustomReviewList] = React.useState(null);
 
             React.useEffect(() => {
                 const isDark = localStorage.getItem('toeic_dark_mode') === 'true';
@@ -2798,8 +2904,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 });
             };
 
-            // Custom Review Session State
-            const [customReviewList, setCustomReviewList] = React.useState(null);
+            // 1. DATA LOADING & AUTH PERSISTENCE ---
 
             React.useEffect(() => {
                 const storedLearned = localStorage.getItem('toeic_learned_words');
@@ -2847,6 +2952,77 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }) : () => { };
                 return () => unsubscribe();
             }, []);
+
+            // Real-time Presence
+            React.useEffect(() => {
+                if (!user || !db) return;
+                const presenceRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('presence').doc(user.uid);
+
+                const updatePresence = () => {
+                    presenceRef.set({
+                        uid: user.uid,
+                        displayName: user.displayName || 'Người dùng ẩn danh',
+                        lastSeen: Date.now(),
+                        status: view === 'memory' ? 'playing' : 'online'
+                    }, { merge: true });
+                };
+
+                updatePresence();
+                const interval = setInterval(updatePresence, 30000); // Every 30s
+
+                // Cleanup on tab close/nav
+                const handleUnload = () => {
+                    // Note: set lastSeen to old value or remove if possible, 
+                    // but Firestore doesn't have a perfect 'onDisconnect' like RTDB here 
+                    // without cloud functions. We'll rely on lastSeen timestamp.
+                };
+                window.addEventListener('beforeunload', handleUnload);
+
+                return () => {
+                    clearInterval(interval);
+                    window.removeEventListener('beforeunload', handleUnload);
+                };
+            }, [user, view]);
+
+            // Invitation Listener
+            React.useEffect(() => {
+                if (!user || !db) return;
+                const inviteRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('invitations').doc(user.uid);
+
+                const unsubscribe = inviteRef.onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        // Only show if invite is fresh (last 2 mins)
+                        if (Date.now() - data.createdAt < 120000) {
+                            setIncomingInvitation(data);
+                            playSound('coin'); // Reusing coin sound for alert
+                        }
+                    }
+                });
+                return () => unsubscribe();
+            }, [user]);
+
+            const acceptInvitation = async () => {
+                if (!incomingInvitation || !db) return;
+                const inviteRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('invitations').doc(user.uid);
+                const roomId = incomingInvitation.roomId;
+
+                // Move to memory game and join
+                setIncomingInvitation(null);
+                await inviteRef.delete();
+
+                // We need a way to tell MemoryGameView to join this room
+                // We can use a global state or force view + props
+                window.pendingRoomJoin = roomId;
+                setView('memory');
+            };
+
+            const declineInvitation = async () => {
+                if (!incomingInvitation || !db) return;
+                const inviteRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('invitations').doc(user.uid);
+                setIncomingInvitation(null);
+                await inviteRef.delete();
+            };
 
             React.useEffect(() => { localStorage.setItem('toeic_learned_words', JSON.stringify([...learnedWords])); }, [learnedWords]);
             React.useEffect(() => { localStorage.setItem('toeic_difficult_words', JSON.stringify([...difficultWords])); }, [difficultWords]);
@@ -3029,6 +3205,40 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             )}
                         </div>
                     </nav>
+
+                    <div className="max-w-4xl mx-auto px-4 mt-4">
+                        {/* Invitation Toast */}
+                        {incomingInvitation && (
+                            <div className="bg-indigo-600 text-white p-4 rounded-2xl shadow-xl animate-bounce flex items-center justify-between gap-4 mb-4 border-2 border-indigo-400">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-indigo-600 text-xl font-bold">
+                                        <i className="fas fa-gamepad"></i>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm">{incomingInvitation.hostName} mời bạn chơi Memory Game!</p>
+                                        <p className="text-[10px] opacity-80">Cược x{incomingInvitation.multiplier || 1} - Ăn trọn điểm đối thủ!</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={acceptInvitation} className="bg-white text-indigo-600 px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-slate-100 transition shadow-md">Chấp nhận</button>
+                                    <button onClick={declineInvitation} className="bg-indigo-500 text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-indigo-400 transition">Từ chối</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Debt Notification */}
+                        {coins < 0 && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-900 border-dashed p-4 rounded-2xl flex items-center gap-4 mb-4">
+                                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 text-2xl">
+                                    <i className="fas fa-skull-crossbones"></i>
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-black text-red-800 dark:text-red-300 uppercase tracking-tight">Cảnh báo: Bạn đang mắc nợ! ({coins.toLocaleString()} Xu)</h3>
+                                    <p className="text-xs text-red-600 dark:text-red-400 font-medium">Bạn cần ít nhất 200 xu để chơi PvP. Hãy hoàn thành Quiz hoặc học thẻ nhớ để kiếm tiền trả nợ!</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     <main className="max-w-4xl mx-auto p-4">
                         {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} difficultWords={difficultWords} toggleLearned={toggleLearned} toggleDifficult={toggleDifficult} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} jumpToWord={jumpToWord} />}
