@@ -2837,7 +2837,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 setCoins(prev => Math.max(prev, data.coins || 0));
                                 localStorage.setItem('toeic_user_coins', data.coins || 0);
                             } else {
-                                userRef.set({ userId: u.uid, coins: parseInt(localStorage.getItem('toeic_user_coins') || 0), updatedAt: new Date().toISOString() }, { merge: true });
+                                // New User Welcome Bonus: 500 coins
+                                const initialCoins = parseInt(localStorage.getItem('toeic_user_coins') || 500);
+                                userRef.set({ userId: u.uid, coins: initialCoins, updatedAt: new Date().toISOString() }, { merge: true });
+                                setCoins(initialCoins);
                             }
                         });
                     }
@@ -3055,5 +3058,3 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 </body>
 
 </html>
-
-
