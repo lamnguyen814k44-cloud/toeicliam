@@ -2958,18 +2958,18 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     {/* Game Area with 3D Perspective */}
                     <div
-                        className="relative flex-1 bg-slate-900 rounded-xl overflow-hidden perspective-1000 group w-full mb-16 border-2 border-slate-700 shadow-2xl"
+                        className="relative flex-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black rounded-xl overflow-hidden perspective-1000 group w-full mb-16 border-2 border-slate-700/50 shadow-2xl shadow-indigo-500/10"
                         style={{ perspective: '800px' }}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                     >
                         {/* The Road - transformed for 3D effect */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-slate-800 to-slate-900 origin-bottom transform-style-3d rotate-x-20 scale-y-125">
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#1e293b] to-[#020617] origin-bottom transform-style-3d rotate-x-20 scale-y-125">
                             {/* Grid lines / Speed lines */}
                             <div className="absolute inset-0 opacity-20"
                                 style={{
-                                    backgroundImage: 'linear-gradient(0deg, transparent 24%, #ffffff 25%, #ffffff 26%, transparent 27%, transparent 74%, #ffffff 75%, #ffffff 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #ffffff 25%, #ffffff 26%, transparent 27%, transparent 74%, #ffffff 75%, #ffffff 76%, transparent 77%, transparent)',
-                                    backgroundSize: '50px 50px',
+                                    backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(99, 102, 241, 0.3) 25%, rgba(99, 102, 241, 0.3) 27%, transparent 28%, transparent 74%, rgba(99, 102, 241, 0.3) 75%, rgba(99, 102, 241, 0.3) 77%, transparent 78%, transparent), linear-gradient(90deg, transparent 24%, rgba(99, 102, 241, 0.3) 25%, rgba(99, 102, 241, 0.3) 27%, transparent 28%, transparent 74%, rgba(99, 102, 241, 0.3) 75%, rgba(99, 102, 241, 0.3) 77%, transparent 78%, transparent)',
+                                    backgroundSize: '80px 80px',
                                     animation: gameState === 'playing' ? 'moveGrid 1s linear infinite' : 'none'
                                 }}
                             ></div>
@@ -2977,8 +2977,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             {/* Lane Markers */}
                             <div className="absolute inset-0 flex justify-center">
                                 <div className="w-full max-w-sm flex h-full">
-                                    <div className="flex-1 border-r-2 border-dashed border-slate-600/50"></div>
-                                    <div className="flex-1 border-r-2 border-dashed border-slate-600/50"></div>
+                                    <div className="flex-1 border-r-2 border-dashed border-indigo-500/20"></div>
+                                    <div className="flex-1 border-r-2 border-dashed border-indigo-500/20"></div>
                                     <div className="flex-1"></div>
                                 </div>
                             </div>
@@ -3031,28 +3031,28 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <div key={idx} className="flex-1 flex justify-center">
                                         {opt?.type === 'coin' ? (
                                             // Coin Item
-                                            <div className={`w-12 h-12 bg-yellow-400 rounded-full border-4 border-yellow-600 flex items-center justify-center shadow-lg animate-spin-slow transition-opacity duration-200
+                                            <div className={`w-12 h-12 bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-spin-slow transition-opacity duration-200
                                                 ${collectedCoinsEffect?.visible && collectedCoinsEffect?.lane === idx ? 'opacity-0 scale-150' : 'opacity-100'}
                                             `}>
                                                 <div className="text-yellow-700 font-bold text-xl">$</div>
                                             </div>
                                         ) : opt?.type === 'magnet' ? (
                                             // Magnet Item
-                                            <div className="w-12 h-12 bg-red-500 rounded-full border-4 border-red-700 flex items-center justify-center shadow-lg animate-pulse">
+                                            <div className="w-12 h-12 bg-red-500 rounded-full border-4 border-red-400 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-pulse">
                                                 <i className="fas fa-magnet text-white text-xl"></i>
                                             </div>
                                         ) : opt?.type === 'shield' ? (
                                             // Shield Item
-                                            <div className="w-12 h-12 bg-blue-500 rounded-full border-4 border-blue-700 flex items-center justify-center shadow-lg animate-pulse">
+                                            <div className="w-12 h-12 bg-blue-500 rounded-full border-4 border-blue-400 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse">
                                                 <i className="fas fa-shield-alt text-white text-xl"></i>
                                             </div>
                                         ) : (
                                             // Word Gate
                                             <div
-                                                className={`w-full h-24 rounded-lg shadow-xl flex items-center justify-center text-center p-1 border-b-4 transition-transform
-                                                    ${lastResult && idx === correctLane ? 'bg-green-500 border-green-700 scale-110 z-10' : ''}
-                                                    ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500 border-red-700 opacity-50' : ''}
-                                                    ${!lastResult ? 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-blue-500/50' : ''}
+                                                className={`w-full h-24 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.2)] flex items-center justify-center text-center p-2 border-2 transition-transform backdrop-blur-md
+                                                    ${lastResult && idx === correctLane ? 'bg-green-500/90 border-green-400 scale-110 z-10 shadow-[0_0_20px_rgba(34,197,94,0.6)]' : ''}
+                                                    ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500/90 border-red-400 opacity-80' : ''}
+                                                    ${!lastResult ? 'bg-slate-800/80 border-indigo-500/30' : ''}
                                                     ${roundType === 'coin' || roundType === 'powerup' ? 'opacity-0' : ''} 
                                                 `}
                                             >
@@ -3101,7 +3101,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         )}
 
                                         {/* Character Body */}
-                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg border-2 z-10 relative
+                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(255,255,255,0.4)] border-2 z-10 relative
                                             ${lastResult === 'correct' ? 'bg-green-500 border-white text-white rotate-[360deg]' : ''}
                                             ${lastResult === 'wrong' ? 'bg-red-500 border-white text-white animate-shake' : ''}
                                             ${!lastResult ? 'bg-white border-slate-200' : ''}
@@ -3536,18 +3536,70 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </div>
                         </div>
 
-                        {/* Bow & Arrow */}
-                        <div className={`absolute left-6 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-shake' : ''}`}>
-                            <div className="relative">
-                                {/* Bow */}
-                                <div className="w-8 h-24 border-r-4 border-amber-700 rounded-r-full"></div>
-                                {/* Arrow */}
-                                <div className={`absolute top-1/2 left-4 -translate-y-1/2 transition-all duration-500 ${arrowFlying ? 'translate-x-48 opacity-0' : ''}`}>
-                                    <div className="flex items-center">
-                                        <div className="w-16 h-1 bg-amber-600"></div>
-                                        <div className="w-0 h-0 border-l-8 border-l-amber-800 border-y-4 border-y-transparent"></div>
-                                    </div>
-                                </div>
+                        {/* Bow & Arrow - Dynamic SVG */}
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-shake' : ''} pointer-events-none`}>
+                            <div className="relative w-64 h-64 -translate-x-8">
+                                <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                                    <defs>
+                                        <marker id="archery-arrowhead" markerWidth="6" markerHeight="4" refX="0" refY="2" orient="auto">
+                                            <polygon points="0 0, 6 2, 0 4" fill="#d97706" />
+                                        </marker>
+                                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                            <feGaussianBlur stdDeviation="2" result="blur" />
+                                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                        </filter>
+                                    </defs>
+
+                                    {(() => {
+                                        // Calculations
+                                        const maxDraw = 40; // Max pixels to pull back
+                                        const neutralX = 60; // Neutral position of string/nock
+                                        const drawAmount = (power / 100) * maxDraw;
+                                        const currentNockX = neutralX - drawAmount; // Moves left as power increases
+
+                                        // String Logic: Snaps back when flying
+                                        const stringX = arrowFlying ? neutralX : currentNockX;
+
+                                        // Arrow Logic: Stays drawn until flying start, then animates away
+                                        // We use an outer group for Draw Position, and inner for Flight Animation
+
+                                        return (
+                                            <>
+                                                {/* Bow Riser (The handle) */}
+                                                <path d="M 60 20 Q 80 50 60 80" stroke="#92400e" strokeWidth="4" fill="none" strokeLinecap="round" />
+                                                <path d="M 60 20 Q 80 50 60 80" stroke="#f59e0b" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.5" />
+
+                                                {/* Bow String */}
+                                                <path
+                                                    d={`M 60 20 L ${stringX} 50 L 60 80`}
+                                                    stroke="#e2e8f0"
+                                                    strokeWidth="1.5"
+                                                    fill="none"
+                                                    className="transition-all duration-75"
+                                                />
+
+                                                {/* Arrow Group */}
+                                                {/* Outer Group: Handles Draw Position (Follows Power) */}
+                                                <g transform={`translate(${currentNockX}, 50)`} className="transition-transform duration-100 ease-out">
+
+                                                    {/* Inner Group: Handles Flight Animation */}
+                                                    <g
+                                                        className={`transition-transform ease-in ${arrowFlying ? 'duration-300 translate-x-[300px] opacity-0' : 'duration-0'}`}
+                                                    >
+                                                        {/* Arrow Shaft & Head */}
+                                                        {/* Arrow length 50px. Head is handled by marker or manual polygon if marker fails in some browsers, but marker is standard. Let's use manual polygon for robust styling */}
+                                                        <line x1="0" y1="0" x2="50" y2="0" stroke="#d97706" strokeWidth="2.5" />
+                                                        <polygon points="50,0 60,3 50,6" fill="#d97706" transform="translate(0, -3)" />
+
+                                                        {/* Fletching (Feathers) */}
+                                                        <path d="M 0 0 L -8 -4 M 2 0 L -6 -4" stroke="#dc2626" strokeWidth="2" />
+                                                        <path d="M 0 0 L -8 4 M 2 0 L -6 4" stroke="#dc2626" strokeWidth="2" />
+                                                    </g>
+                                                </g>
+                                            </>
+                                        );
+                                    })()}
+                                </svg>
                             </div>
                         </div>
 
