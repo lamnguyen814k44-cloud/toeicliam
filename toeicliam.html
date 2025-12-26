@@ -3067,7 +3067,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         // RUNNER GAME - Endless Runner Vocabulary Game
         // ============================================
-        const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default' }) => {
+        const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default', view }) => {
             const [gameState, setGameState] = React.useState('setup'); // setup, countdown, playing, gameover
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
@@ -6182,7 +6182,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} difficultWords={difficultWords} toggleLearned={toggleLearned} toggleDifficult={toggleDifficult} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} jumpToWord={jumpToWord} />}
                         {view === 'flashcard' && <FlashcardView allData={toeicData} learnedWords={learnedWords} difficultWords={difficultWords} learnedTimestamps={learnedTimestamps} markAsEasy={markAsEasy} markAsHard={markAsHard} customReviewList={customReviewList} jumpToWord={jumpToWord} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
-                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} />}
+                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} view={view} />}
                         {view === 'archery' && <ArcheryGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'shop' && <ShopView coins={coins} setCoins={setCoins} unlockedSkins={unlockedSkins} setUnlockedSkins={setUnlockedSkins} equippedSkin={equippedSkin} setEquipSkin={setEquipSkin} buyingItem={buyingItem} setBuyingItem={setBuyingItem} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
