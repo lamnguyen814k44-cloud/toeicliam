@@ -2464,7 +2464,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         );
 
         // --- NEW COMPONENT: PERSONAL PROFILE MODAL ---
-        const ProfileModal = ({ isOpen, onClose, data, learnedWords, learnedTimestamps, startReviewSession }) => {
+        const ProfileModal = ({ isOpen, onClose, data, learnedWords, learnedTimestamps, startReviewSession, onAdminOpen }) => {
             if (!isOpen) return null;
 
             // 1. Calculate Stats
@@ -2504,7 +2504,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
                         <div className="p-5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex justify-between items-center">
                             <h2 className="text-xl font-black flex items-center gap-2"><i className="fas fa-id-card"></i> Hồ sơ học tập</h2>
-                            <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition"><i className="fas fa-times"></i></button>
+                            <div className="flex gap-2">
+                                <button onClick={onAdminOpen} className="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded text-xs font-bold">Admin</button>
+                                <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition"><i className="fas fa-times"></i></button>
+                            </div>
                         </div>
 
                         <div className="p-5 overflow-y-auto custom-scrollbar space-y-6">
@@ -3067,7 +3070,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         // FLAPPY VOCAB BIRD GAME VIEW
         // ============================================
-        const FlappyGameView = ({ allData, coins, setCoins, user }) => {
+        // ============================================
+        // FLAPPY VOCAB BIRD GAME VIEW
+        // ============================================
+        const FlappyGameView = ({ allData, coins, setCoins, user, config }) => {
             const [gameState, setGameState] = React.useState('start'); // start, playing, gameover
             const [birdY, setBirdY] = React.useState(300);
             const [birdVelocity, setBirdVelocity] = React.useState(0);
@@ -3084,10 +3090,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const birdVelRef = React.useRef(0);
 
             // Constants
-            const GRAVITY = 0.5;
-            const JUMP_STRENGTH = -8;
-            const PIPE_SPEED = 1.5;
-            const PIPE_SPAWN_RATE = 2500;
+            const GRAVITY = config?.gravity || 0.5;
+            const JUMP_STRENGTH = config?.jumpStrength || -8;
+            const PIPE_SPEED = config?.pipeSpeed || 1.5;
+            const PIPE_SPAWN_RATE = config?.pipeSpawnRate || 2500;
             const BIRD_X = 80;
             const GAME_HEIGHT = 600;
 
@@ -3405,10 +3411,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         // RUNNER GAME - Endless Runner Vocabulary Game
         // ============================================
-        const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default', view }) => {
+        const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default', view, config }) => {
             const [gameState, setGameState] = React.useState('setup'); // setup, countdown, playing, gameover
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
+
+            // Game config
+            const DUCK_SPEED = config?.duckSpeed || 12;
+            const OBSTACLE_RATE = config?.obstacleSpawnRate || 2000;
 
             // Game state
             const [playerLane, setPlayerLane] = React.useState(1); // 0=left, 1=center, 2=right
@@ -3422,7 +3432,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [gamePool, setGamePool] = React.useState([]);
             const [isChecking, setIsChecking] = React.useState(false);
             const [lastResult, setLastResult] = React.useState(null); // 'correct' | 'wrong' | null
-            const [speed, setSpeed] = React.useState(1);
+            const [speed, setSpeed] = React.useState(config?.speed || 1); // Use config speed if available
             const [countdown, setCountdown] = React.useState(3);
 
             // New states for Coin & Powerups feature
@@ -3549,7 +3559,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         id: Date.now() + Math.random() + idx,
                         x: -20 - (idx * 50), // Staggered start off-screen
                         y: 10 + Math.random() * 60,
-                        speed: 1.5 + Math.random(),
+                        speed: (DUCK_SPEED * 0.1) + Math.random(), // Scale down for pixels/frame, or use directly if loop handles delta
                         direction: 1, // Moving right
                         type: Math.random() > 0.8 ? 'gold' : 'normal',
                         isDead: false,
@@ -6035,6 +6045,147 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             );
         };
 
+        // ============================================
+        // GAME CONFIGURATION CONTEXT
+        // ============================================
+        const GameConfigContext = React.createContext();
+
+        const DEFAULT_GAME_CONFIG = {
+            flappy: {
+                gravity: 0.5,
+                jumpStrength: -8,
+                pipeSpeed: 1.5,
+                pipeSpawnRate: 2500,
+                pipeGap: 180,
+            },
+            runner: {
+                speed: 5,
+                duckSpeed: 12, // Initial velocity for ducks
+                obstacleSpawnRate: 2000,
+            },
+            memory: {
+                flipDuration: 0.6,
+            }
+        };
+
+        // ============================================
+        // ADMIN SETTINGS MODAL
+        // ============================================
+        const AdminSettingsModal = ({ isOpen, onClose, config, setConfig }) => {
+            const [localConfig, setLocalConfig] = React.useState(config);
+            const [password, setPassword] = React.useState('');
+            const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+            React.useEffect(() => {
+                setLocalConfig(config);
+            }, [config, isOpen]);
+
+            if (!isOpen) return null;
+
+            const handleLogin = () => {
+                if (password === 'admin1905') {
+                    setIsAuthenticated(true);
+                } else {
+                    alert('Sai mật khẩu!');
+                }
+            };
+
+            const handleChange = (section, key, value) => {
+                setLocalConfig(prev => ({
+                    ...prev,
+                    [section]: {
+                        ...prev[section],
+                        [key]: parseFloat(value)
+                    }
+                }));
+            };
+
+            const handleSave = () => {
+                setConfig(localConfig);
+                alert('Đã lưu cấu hình!');
+                onClose();
+            };
+
+            const handleReset = () => {
+                if (confirm('Bạn có chắc muốn reset về mặc định không?')) {
+                    setConfig(DEFAULT_GAME_CONFIG);
+                    setLocalConfig(DEFAULT_GAME_CONFIG);
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-black text-slate-800 dark:text-white"><i className="fas fa-cogs text-indigo-500 mr-2"></i>Admin Dashboard</h2>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition">
+                                <i className="fas fa-times text-slate-500 dark:text-slate-300"></i>
+                            </button>
+                        </div>
+
+                        {!isAuthenticated ? (
+                            <div className="flex flex-col gap-4">
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Vui lòng nhập mật khẩu quản trị viên.</p>
+                                <input
+                                    type="password"
+                                    placeholder="Mật khẩu..."
+                                    className="p-3 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                />
+                                <button onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg">Đăng Nhập</button>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Flappy Bird Config */}
+                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <h3 className="font-bold text-lg mb-3 text-sky-500 border-b border-slate-200 dark:border-slate-700 pb-2">Vocab Bird</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500">Pipe Speed</label>
+                                            <input type="number" step="0.1" value={localConfig.flappy.pipeSpeed} onChange={e => handleChange('flappy', 'pipeSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500">Gravity</label>
+                                            <input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500">Jump Strength (Negative)</label>
+                                            <input type="number" step="1" value={localConfig.flappy.jumpStrength} onChange={e => handleChange('flappy', 'jumpStrength', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500">Spawn Rate (ms)</label>
+                                            <input type="number" step="100" value={localConfig.flappy.pipeSpawnRate} onChange={e => handleChange('flappy', 'pipeSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Runner Config */}
+                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <h3 className="font-bold text-lg mb-3 text-green-500 border-b border-slate-200 dark:border-slate-700 pb-2">Duck Hunter</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500">Duck Speed</label>
+                                            <input type="number" step="1" value={localConfig.runner.duckSpeed} onChange={e => handleChange('runner', 'duckSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500">Obstacle Rate (ms)</label>
+                                            <input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3 pt-4 border-t border-slate-700">
+                                    <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
+                                    <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition shadow-lg">Lưu Cấu Hình</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             // Safer JSON parse helper
             const safeJSON = (key, fallback) => {
@@ -6499,8 +6650,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'flashcard' && <FlashcardView allData={toeicData} learnedWords={learnedWords} difficultWords={difficultWords} learnedTimestamps={learnedTimestamps} markAsEasy={markAsEasy} markAsHard={markAsHard} customReviewList={customReviewList} jumpToWord={jumpToWord} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
-                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} view={view} />}
-                        {view === 'flappy' && <FlappyGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
+                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} view={view} config={gameConfig.runner} />}
+                        {view === 'flappy' && <FlappyGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} config={gameConfig.flappy} />}
                         {view === 'archery' && <ArcheryGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'shop' && <ShopView coins={coins} setCoins={setCoins} unlockedSkins={unlockedSkins} setUnlockedSkins={setUnlockedSkins} equippedSkin={equippedSkin} setEquipSkin={setEquipSkin} buyingItem={buyingItem} setBuyingItem={setBuyingItem} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
@@ -6521,6 +6672,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     <LeaderboardModal isOpen={isLeaderboardOpen} onClose={() => setIsLeaderboardOpen(false)} user={user} coins={coins} />
                     <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} data={toeicData} learnedWords={learnedWords} learnedTimestamps={learnedTimestamps} startReviewSession={startReviewSession} />
+
+                    {/* Admin Trigger (Button hidden in Profile, but we can also add a secret trigger or just pass prop to Profile) */}
+                    {/* For now let's pass setIsAdminOpen to ProfileModal or add a discrete button in ProfileModal */}
+                    <AdminSettingsModal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} config={gameConfig} setConfig={setGameConfig} />
+
+                    {/* Pass config to games */}
+                    <div style={{ display: 'none' }}>Debug: Config Loaded</div>
                 </div>
             );
         };
