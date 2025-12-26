@@ -1999,6 +1999,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 const currentItem = sessionData[currentIndex];
 
                 setSlideAnimation(direction === 'left' ? 'slide-left' : 'slide-right');
+                playSound('flashcard', 'next'); // Sound effect khi chuyển thẻ
 
                 setTimeout(() => {
                     if (direction === 'left') {
@@ -2012,6 +2013,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         setIsFlipped(false);
                         setSlideAnimation('');
                     } else {
+                        playSound('flashcard', 'complete');
                         alert("Đã hoàn thành bộ thẻ!");
                         if (!customReviewList) setIsSetup(true);
                         else window.location.reload();
@@ -2106,7 +2108,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <span className="dark:text-indigo-400">{item.topic}</span>
                     </div>
 
-                    <div className={`perspective-1000 w-full max-w-sm h-96 cursor-pointer relative ${slideAnimation}`} onClick={() => !isFlipped && setIsFlipped(true)} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+                    <div className={`perspective-1000 w-full max-w-sm h-96 cursor-pointer relative ${slideAnimation}`} onClick={() => { if (!isFlipped) { setIsFlipped(true); playSound('flip'); } }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
                         <div className={`relative w-full h-full text-center transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : 'rotate-y-0'}`}>
                             <div className="card-face bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-indigo-300 transition-colors z-20">
                                 <div className="absolute top-4 right-4 flex gap-1">
@@ -2181,6 +2183,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             const generateQuestion = (queue) => {
                 if (!queue || queue.length === 0) {
+                    playSound('quiz', 'complete');
                     alert("Đã hoàn thành phiên ôn tập! Bạn đã trả lời hết câu hỏi có sẵn.");
                     setIsSetup(true);
                     return;
@@ -2248,11 +2251,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             const handleAnswer = (option) => {
                 if (selectedOption) return;
+                playSound('quiz', 'tick');
                 setSelectedOption(option);
                 const correct = option.id === currentQuestion.id;
                 setIsCorrect(correct);
                 if (correct) {
-                    playSound('match');
+                    playSound('quiz', 'correct');
                     let earned = 20;
                     let streakBonus = 0;
                     if (streak >= 2) streakBonus = 5;
@@ -2273,7 +2277,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     // Valid answer: Auto move next
                     setTimeout(() => generateQuestion(quizQueue), 1500);
                 } else {
-                    playSound('miss');
+                    playSound('quiz', 'wrong');
                     setStreak(0);
                     markAsHard(currentQuestion.id);
                     // Wrong answer: Stay for explanation
@@ -2648,6 +2652,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         } else { setScores(prev => ({ ...prev, [currentPlayer]: prev[currentPlayer] + 100 })); }
 
                         if (newMatched.length === cards.length) {
+                            playSound('win'); // Sound effect khi thắng
                             if (gameMode === 'solo') { setTimeout(() => setLevelComplete(true), 500); }
                             else { setTimeout(() => { const winner = scores[1] > scores[2] ? 1 : (scores[2] > scores[1] ? 2 : 'draw'); setPvPWinner(winner); }, 500); }
                         }
@@ -2690,6 +2695,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             const newMatched = [...matchedIndices, ...newFlipped];
                             const newScores = { ...scores };
                             if (amIHost) newScores.host += 100; else newScores.guest += 100;
+
+                            // Check if game is complete and play win sound
+                            if (newMatched.length === cards.length) {
+                                playSound('win');
+                            }
+
                             await roomRef.update({ matched: newMatched, flipped: [], scores: newScores, processing: false });
                         }, 600);
                     } else {
@@ -2912,6 +2923,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 setCurrentPlayer(data.turn === data.hostId ? 1 : 2); setProcessing(data.processing || false);
 
                                 if ((data.matched || []).length === (data.board || []).length && (data.board || []).length > 0 && !hasPaid) {
+                                    playSound('win'); // Sound effect khi thắng PvP Online
                                     const s = data.scores;
                                     const winner = s.host > s.guest ? 1 : (s.guest > s.host ? 2 : 'draw');
                                     setPvPWinner(winner);
