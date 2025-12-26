@@ -2268,7 +2268,6 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             const handleAnswer = (option) => {
                 if (selectedOption) return;
-                playSound('quiz', 'tick');
                 setSelectedOption(option);
                 const correct = option.id === currentQuestion.id;
                 setIsCorrect(correct);
@@ -2383,6 +2382,403 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     }
 
                 </div >
+            );
+        };
+
+        // ============================================
+        // RUNNER GAME - Endless Runner Vocabulary Game
+        // ============================================
+        const RunnerGameView = ({ allData, coins, setCoins, user }) => {
+            const [gameState, setGameState] = React.useState('setup'); // setup, playing, gameover
+            const [selectedTopics, setSelectedTopics] = React.useState([]);
+            const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
+
+            // Game state
+            const [playerLane, setPlayerLane] = React.useState(1); // 0=left, 1=center, 2=right
+            const [score, setScore] = React.useState(0);
+            const [streak, setStreak] = React.useState(0);
+            const [highScore, setHighScore] = React.useState(() => parseInt(localStorage.getItem('runner_high_score') || '0'));
+            const [currentWord, setCurrentWord] = React.useState(null);
+            const [options, setOptions] = React.useState([null, null, null]);
+            const [correctLane, setCorrectLane] = React.useState(1);
+            const [obstaclePosition, setObstaclePosition] = React.useState(-100); // % from top
+            const [gamePool, setGamePool] = React.useState([]);
+            const [isChecking, setIsChecking] = React.useState(false);
+            const [lastResult, setLastResult] = React.useState(null); // 'correct' | 'wrong' | null
+            const [speed, setSpeed] = React.useState(1);
+
+            const gameLoopRef = React.useRef(null);
+            const lastTimeRef = React.useRef(0);
+
+            const toggleTopic = (topic) => {
+                setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]);
+            };
+
+            const toggleAllTopics = () => {
+                if (selectedTopics.length === uniqueTopics.length) setSelectedTopics([]);
+                else setSelectedTopics(uniqueTopics);
+            };
+
+            const generateNewRound = (pool) => {
+                if (pool.length < 4) {
+                    // Not enough words, reset pool
+                    let newPool = allData;
+                    if (selectedTopics.length > 0) newPool = allData.filter(i => selectedTopics.includes(i.topic));
+                    pool = [...newPool].sort(() => Math.random() - 0.5);
+                }
+
+                const correctItem = pool.pop();
+                const wrongItems = allData
+                    .filter(i => i.id !== correctItem.id)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 2);
+
+                const correctLaneIdx = Math.floor(Math.random() * 3);
+                const newOptions = [null, null, null];
+                newOptions[correctLaneIdx] = correctItem;
+
+                let wrongIdx = 0;
+                for (let i = 0; i < 3; i++) {
+                    if (i !== correctLaneIdx) {
+                        newOptions[i] = wrongItems[wrongIdx++];
+                    }
+                }
+
+                setCurrentWord(correctItem);
+                setOptions(newOptions);
+                setCorrectLane(correctLaneIdx);
+                setObstaclePosition(-20);
+                setGamePool(pool);
+                setIsChecking(false);
+                setLastResult(null);
+            };
+
+            const startGame = () => {
+                let pool = allData;
+                if (selectedTopics.length > 0) pool = allData.filter(i => selectedTopics.includes(i.topic));
+
+                if (pool.length < 4) {
+                    alert("Cần ít nhất 4 từ để chơi! Vui lòng chọn thêm chủ đề.");
+                    return;
+                }
+
+                const shuffled = [...pool].sort(() => Math.random() - 0.5);
+                setGamePool(shuffled);
+                setScore(0);
+                setStreak(0);
+                setSpeed(1);
+                setPlayerLane(1);
+                setGameState('playing');
+                generateNewRound(shuffled);
+            };
+
+            const checkCollision = () => {
+                if (isChecking) return;
+                setIsChecking(true);
+
+                if (playerLane === correctLane) {
+                    // Correct!
+                    playSound('quiz', 'correct');
+                    const baseScore = 50;
+                    const multiplier = streak >= 10 ? 3 : (streak >= 5 ? 2 : 1);
+                    const earned = baseScore * multiplier;
+
+                    setScore(prev => prev + earned);
+                    setStreak(prev => prev + 1);
+                    setCoins(prev => prev + earned);
+                    setLastResult('correct');
+                    setSpeed(prev => Math.min(prev + 0.05, 2.5));
+
+                    // Save to Firebase
+                    if (user && db) {
+                        const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                        const currentCoins = parseInt(localStorage.getItem('toeic_user_coins') || 0) + earned;
+                        userRef.set({ coins: currentCoins }, { merge: true });
+                    }
+
+                    setTimeout(() => generateNewRound([...gamePool]), 500);
+                } else {
+                    // Wrong - Game Over
+                    playSound('quiz', 'wrong');
+                    setLastResult('wrong');
+
+                    if (score > highScore) {
+                        setHighScore(score);
+                        localStorage.setItem('runner_high_score', score.toString());
+                    }
+
+                    setTimeout(() => {
+                        setGameState('gameover');
+                        cancelAnimationFrame(gameLoopRef.current);
+                    }, 800);
+                }
+            };
+
+            // Game loop
+            React.useEffect(() => {
+                if (gameState !== 'playing') return;
+
+                const gameLoop = (timestamp) => {
+                    if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+                    const delta = timestamp - lastTimeRef.current;
+                    lastTimeRef.current = timestamp;
+
+                    setObstaclePosition(prev => {
+                        const newPos = prev + (delta * 0.05 * speed);
+
+                        // Check collision zone (70-85%)
+                        if (newPos >= 70 && newPos <= 85 && !isChecking) {
+                            checkCollision();
+                        }
+
+                        return newPos;
+                    });
+
+                    gameLoopRef.current = requestAnimationFrame(gameLoop);
+                };
+
+                gameLoopRef.current = requestAnimationFrame(gameLoop);
+
+                return () => {
+                    if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+                };
+            }, [gameState, speed, playerLane, correctLane, isChecking]);
+
+            // Keyboard controls
+            React.useEffect(() => {
+                if (gameState !== 'playing') return;
+
+                const handleKeyDown = (e) => {
+                    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                        setPlayerLane(prev => Math.max(0, prev - 1));
+                        playSound('memory', 'flip');
+                    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                        setPlayerLane(prev => Math.min(2, prev + 1));
+                        playSound('memory', 'flip');
+                    }
+                };
+
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [gameState]);
+
+            // Touch controls
+            const handleLaneClick = (lane) => {
+                if (gameState !== 'playing') return;
+                setPlayerLane(lane);
+                playSound('memory', 'flip');
+            };
+
+            // Setup Screen
+            if (gameState === 'setup') {
+                return (
+                    <div className="max-w-xl mx-auto py-6 px-4 animate-fadeIn">
+                        <div className="text-center mb-6">
+                            <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                <i className="fas fa-running text-4xl text-white"></i>
+                            </div>
+                            <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Runner Game</h2>
+                            <p className="text-slate-500 dark:text-slate-400">Chạy và chọn đúng lane!</p>
+                            <div className="mt-2 text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 rounded-full inline-block">
+                                <i className="fas fa-trophy mr-1"></i> Kỷ lục: {highScore} điểm
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 mb-6">
+                            <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-700">
+                                <h3 className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                    <i className="fas fa-tags text-indigo-500"></i> Chủ đề
+                                </h3>
+                                <button onClick={toggleAllTopics} className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition">
+                                    {selectedTopics.length === uniqueTopics.length ? 'Bỏ chọn hết' : 'Chọn tất cả'}
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                {uniqueTopics.map(topic => (
+                                    <button
+                                        key={topic}
+                                        onClick={() => toggleTopic(topic)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-indigo-300'}`}
+                                    >
+                                        {topic}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl mb-6 text-sm text-slate-600 dark:text-slate-400">
+                            <h4 className="font-bold mb-2 text-slate-700 dark:text-slate-300"><i className="fas fa-gamepad mr-2"></i>Cách chơi:</h4>
+                            <ul className="space-y-1 text-xs">
+                                <li>• Từ tiếng Anh hiện trên màn hình</li>
+                                <li>• 3 lane có 3 nghĩa khác nhau đang tiến đến</li>
+                                <li>• Di chuyển đến lane có nghĩa đúng!</li>
+                                <li>• <b>Desktop:</b> A/D hoặc ←/→</li>
+                                <li>• <b>Mobile:</b> Chạm vào lane</li>
+                            </ul>
+                        </div>
+
+                        <button
+                            onClick={startGame}
+                            className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+                        >
+                            <i className="fas fa-play"></i> Bắt Đầu Chạy!
+                        </button>
+                    </div>
+                );
+            }
+
+            // Game Over Screen
+            if (gameState === 'gameover') {
+                return (
+                    <div className="max-w-md mx-auto py-10 px-4 animate-fadeIn text-center">
+                        <div className="w-24 h-24 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i className="fas fa-skull text-5xl text-red-500"></i>
+                        </div>
+                        <h2 className="text-3xl font-black text-red-600 dark:text-red-400 mb-2">Game Over!</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mb-6">Bạn đã chọn sai lane</p>
+
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 mb-6">
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">{score}</div>
+                                    <div className="text-xs text-slate-500">Điểm số</div>
+                                </div>
+                                <div>
+                                    <div className="text-3xl font-black text-orange-600">{streak}</div>
+                                    <div className="text-xs text-slate-500">Streak cao nhất</div>
+                                </div>
+                            </div>
+                            {score >= highScore && score > 0 && (
+                                <div className="mt-4 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-xl text-yellow-700 dark:text-yellow-400 font-bold text-sm">
+                                    <i className="fas fa-crown mr-2"></i> Kỷ lục mới!
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setGameState('setup')}
+                                className="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition"
+                            >
+                                <i className="fas fa-cog mr-2"></i> Setup
+                            </button>
+                            <button
+                                onClick={startGame}
+                                className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
+                            >
+                                <i className="fas fa-redo mr-2"></i> Chơi lại
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Playing Screen
+            return (
+                <div className="max-w-md mx-auto py-4 px-2 select-none">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-4 px-2">
+                        <button onClick={() => { setGameState('setup'); cancelAnimationFrame(gameLoopRef.current); }} className="text-slate-400 hover:text-slate-600 text-sm font-bold">
+                            <i className="fas fa-times"></i>
+                        </button>
+                        <div className="flex items-center gap-4">
+                            <div className="text-orange-500 font-bold flex items-center gap-1">
+                                <i className="fas fa-fire"></i> {streak > 0 ? `x${streak}` : '0'}
+                            </div>
+                            <div className="text-indigo-600 dark:text-indigo-400 font-black text-xl">{score}</div>
+                        </div>
+                    </div>
+
+                    {/* Word Display */}
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-2xl text-center mb-4 shadow-lg">
+                        <div className="text-xs opacity-70 mb-1">{currentWord?.topic}</div>
+                        <div className="text-3xl font-black">{currentWord?.word}</div>
+                        <div className="text-sm opacity-70 mt-1">{currentWord?.ipa}</div>
+                    </div>
+
+                    {/* Game Area */}
+                    <div className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden" style={{ height: '400px' }}>
+                        {/* Speed lines background */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            {[...Array(10)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute w-0.5 bg-slate-300 dark:bg-slate-600 opacity-30 animate-pulse"
+                                    style={{
+                                        left: `${10 + i * 10}%`,
+                                        height: '100%',
+                                        animationDelay: `${i * 0.1}s`
+                                    }}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Lane dividers */}
+                        <div className="absolute inset-0 flex">
+                            <div className="flex-1 border-r border-slate-200 dark:border-slate-700"></div>
+                            <div className="flex-1 border-r border-slate-200 dark:border-slate-700"></div>
+                            <div className="flex-1"></div>
+                        </div>
+
+                        {/* Obstacles (meanings) */}
+                        <div
+                            className="absolute left-0 right-0 flex gap-2 px-2 transition-all duration-75"
+                            style={{ top: `${obstaclePosition}%` }}
+                        >
+                            {options.map((opt, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => handleLaneClick(idx)}
+                                    className={`flex-1 p-3 rounded-xl text-center font-bold text-sm cursor-pointer transition-all
+                                        ${lastResult && idx === correctLane ? 'bg-green-500 text-white scale-105' : ''}
+                                        ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500 text-white animate-shake' : ''}
+                                        ${!lastResult ? 'bg-white dark:bg-slate-700 shadow-lg border-2 border-slate-200 dark:border-slate-600' : ''}
+                                    `}
+                                >
+                                    {opt?.meaning || '...'}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Player zone indicator */}
+                        <div className="absolute bottom-20 left-0 right-0 h-16 bg-gradient-to-t from-indigo-500/20 to-transparent border-t-2 border-indigo-400 border-dashed"></div>
+
+                        {/* Player */}
+                        <div
+                            className={`absolute bottom-8 transition-all duration-150 flex flex-col items-center
+                                ${playerLane === 0 ? 'left-[16.67%] -translate-x-1/2' : ''}
+                                ${playerLane === 1 ? 'left-1/2 -translate-x-1/2' : ''}
+                                ${playerLane === 2 ? 'left-[83.33%] -translate-x-1/2' : ''}
+                            `}
+                        >
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-xl transition-all
+                                ${lastResult === 'correct' ? 'bg-green-500 text-white scale-110' : ''}
+                                ${lastResult === 'wrong' ? 'bg-red-500 text-white' : ''}
+                                ${!lastResult ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' : ''}
+                            `}>
+                                <i className={`fas ${lastResult === 'correct' ? 'fa-check' : lastResult === 'wrong' ? 'fa-times' : 'fa-running'}`}></i>
+                            </div>
+                            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">Bạn</div>
+                        </div>
+
+                        {/* Lane tap zones (mobile) */}
+                        <div className="absolute inset-0 flex">
+                            {[0, 1, 2].map(lane => (
+                                <div
+                                    key={lane}
+                                    onClick={() => handleLaneClick(lane)}
+                                    className="flex-1 cursor-pointer"
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Controls hint */}
+                    <div className="text-center text-xs text-slate-400 mt-3">
+                        <span className="hidden sm:inline"><b>A</b> ← Di chuyển → <b>D</b></span>
+                        <span className="sm:hidden">Chạm vào lane để di chuyển</span>
+                    </div>
+                </div>
             );
         };
 
@@ -3648,15 +4044,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} difficultWords={difficultWords} toggleLearned={toggleLearned} toggleDifficult={toggleDifficult} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} jumpToWord={jumpToWord} />}
                         {view === 'flashcard' && <FlashcardView allData={toeicData} learnedWords={learnedWords} difficultWords={difficultWords} learnedTimestamps={learnedTimestamps} markAsEasy={markAsEasy} markAsHard={markAsHard} customReviewList={customReviewList} jumpToWord={jumpToWord} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
+                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
                     </main>
 
                     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-2 z-40 transition-colors duration-300 pb-safe">
                         <div className="max-w-md mx-auto flex justify-around">
-                            <button onClick={() => { setView('list'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-16 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[10px] font-bold">Từ vựng</span> </button>
-                            <button onClick={() => { setView('flashcard'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-16 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[10px] font-bold">Thẻ nhớ</span> </button>
-                            <button onClick={() => { setView('quiz'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-16 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[10px] font-bold">Quiz</span> </button>
-                            <button onClick={() => { setView('memory'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-16 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[10px] font-bold">Game</span> </button>
+                            <button onClick={() => { setView('list'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[10px] font-bold">Từ vựng</span> </button>
+                            <button onClick={() => { setView('flashcard'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[10px] font-bold">Thẻ nhớ</span> </button>
+                            <button onClick={() => { setView('quiz'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[10px] font-bold">Quiz</span> </button>
+                            <button onClick={() => { setView('runner'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[10px] font-bold">Runner</span> </button>
+                            <button onClick={() => { setView('memory'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[10px] font-bold">Game</span> </button>
                         </div>
                     </div>
 
