@@ -1385,6 +1385,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             flashcard: ['flip', 'next', 'prev', 'complete'],
             memory: ['flip', 'match', 'miss', 'win', 'coin'],
             quiz: ['correct', 'wrong', 'complete', 'tick'],
+            runner: ['start', 'move', 'correct', 'wrong', 'speedup', 'gameover'],
+            archery: ['draw', 'release', 'hit', 'miss', 'hint', 'complete'],
             general: ['click', 'success', 'error', 'levelup', 'coin'],
         };
 
@@ -1410,6 +1412,16 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             complete: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
             win: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
             tick: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            // Runner sounds
+            start: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            move: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            speedup: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
+            gameover: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
+            // Archery sounds
+            draw: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            release: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            hit: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            hint: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
         };
 
         // Cache sounds đã load thành công - lưu array cho mỗi loại
@@ -2575,7 +2587,35 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [gameState]);
 
-            // Touch controls
+            // Touch/Swipe controls
+            const touchStartRef = React.useRef(null);
+
+            const handleTouchStart = (e) => {
+                touchStartRef.current = e.touches[0].clientX;
+            };
+
+            const handleTouchEnd = (e) => {
+                if (!touchStartRef.current || gameState !== 'playing') return;
+
+                const touchEnd = e.changedTouches[0].clientX;
+                const diff = touchEnd - touchStartRef.current;
+
+                // Minimum swipe distance: 50px
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        // Swipe right
+                        setPlayerLane(prev => Math.min(2, prev + 1));
+                        playSound('memory', 'flip');
+                    } else {
+                        // Swipe left
+                        setPlayerLane(prev => Math.max(0, prev - 1));
+                        playSound('memory', 'flip');
+                    }
+                }
+
+                touchStartRef.current = null;
+            };
+
             const handleLaneClick = (lane) => {
                 if (gameState !== 'playing') return;
                 setPlayerLane(lane);
@@ -2710,7 +2750,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     </div>
 
                     {/* Game Area */}
-                    <div className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden" style={{ height: '400px' }}>
+                    <div
+                        className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden"
+                        style={{ height: '400px' }}
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                    >
 
                         {/* Countdown Overlay */}
                         {gameState === 'countdown' && (
@@ -2826,6 +2871,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [isShaking, setIsShaking] = React.useState(false);
             const [arrowFlying, setArrowFlying] = React.useState(false);
             const [hitTarget, setHitTarget] = React.useState(false);
+            const [scrambledLetters, setScrambledLetters] = React.useState([]);
+            const [usedIndices, setUsedIndices] = React.useState([]);
 
             const inputRef = React.useRef(null);
 
@@ -2854,6 +2901,15 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setGamePool(pool);
                 setArrowFlying(false);
                 setHitTarget(false);
+                setUsedIndices([]);
+
+                // Create scrambled letters (without spaces)
+                if (word) {
+                    const letters = word.word.toLowerCase().replace(/\s/g, '').split('');
+                    const shuffled = letters.map((char, idx) => ({ char, originalIdx: idx }))
+                        .sort(() => Math.random() - 0.5);
+                    setScrambledLetters(shuffled);
+                }
 
                 setTimeout(() => inputRef.current?.focus(), 100);
             };
@@ -2878,22 +2934,26 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const handleInput = (e) => {
                 if (gameState !== 'playing' || !currentWord) return;
 
-                const input = e.target.value.toLowerCase();
+                const rawInput = e.target.value.toLowerCase();
                 const target = currentWord.word.toLowerCase();
 
-                // Check if input matches target so far
-                if (target.startsWith(input)) {
-                    setTypedText(input);
-                    const newPower = Math.round((input.length / target.length) * 100);
+                // Remove spaces for comparison (allow typing compound words without spaces)
+                const inputNoSpace = rawInput.replace(/\s/g, '');
+                const targetNoSpace = target.replace(/\s/g, '');
+
+                // Check if input matches target so far (ignoring spaces)
+                if (targetNoSpace.startsWith(inputNoSpace)) {
+                    setTypedText(rawInput);
+                    const newPower = Math.round((inputNoSpace.length / targetNoSpace.length) * 100);
                     setPower(newPower);
 
                     // Correct character
-                    if (input.length > typedText.length) {
+                    if (rawInput.length > typedText.length) {
                         playSound('memory', 'flip');
                     }
 
                     // Complete word!
-                    if (input === target) {
+                    if (inputNoSpace === targetNoSpace) {
                         shootArrow();
                     }
                 } else {
@@ -2905,26 +2965,69 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }
             };
 
+            // Mobile: tap on scrambled letters
+            const handleLetterTap = (letter, scrambledIdx) => {
+                if (gameState !== 'playing' || !currentWord) return;
+                if (usedIndices.includes(scrambledIdx)) return; // Already used
+
+                const target = currentWord.word.toLowerCase().replace(/\s/g, '');
+                const currentLength = typedText.replace(/\s/g, '').length;
+                const expectedChar = target[currentLength];
+
+                if (letter === expectedChar) {
+                    // Correct letter!
+                    const newTyped = typedText + letter;
+                    setTypedText(newTyped);
+                    setUsedIndices(prev => [...prev, scrambledIdx]);
+
+                    const newPower = Math.round(((currentLength + 1) / target.length) * 100);
+                    setPower(newPower);
+                    playSound('memory', 'flip');
+
+                    // Complete word!
+                    if (currentLength + 1 === target.length) {
+                        shootArrow();
+                    }
+                } else {
+                    // Wrong letter
+                    playSound('quiz', 'wrong');
+                    setIsShaking(true);
+                    setWrongCount(prev => prev + 1);
+                    setTimeout(() => setIsShaking(false), 300);
+                }
+            };
+
             const useHint = () => {
                 if (!currentWord || gameState !== 'playing') return;
                 const target = currentWord.word.toLowerCase();
+                const targetNoSpace = target.replace(/\s/g, '');
+                const typedNoSpace = typedText.replace(/\s/g, '');
 
-                if (typedText.length >= target.length) return; // Already complete
+                if (typedNoSpace.length >= targetNoSpace.length) return; // Already complete
 
-                // Reveal next character
-                const nextChar = target[typedText.length];
+                // Reveal next character (skip spaces in target)
+                const nextChar = targetNoSpace[typedNoSpace.length];
                 const newTyped = typedText + nextChar;
                 setTypedText(newTyped);
                 setHintCount(prev => prev + 1);
 
+                // Find and mark a scrambled letter with this char as used
+                const unusedIdx = scrambledLetters.findIndex((item, idx) =>
+                    item.char === nextChar && !usedIndices.includes(idx)
+                );
+                if (unusedIdx !== -1) {
+                    setUsedIndices(prev => [...prev, unusedIdx]);
+                }
+
                 // Update power
-                const newPower = Math.round((newTyped.length / target.length) * 100);
+                const newTypedNoSpace = newTyped.replace(/\s/g, '');
+                const newPower = Math.round((newTypedNoSpace.length / targetNoSpace.length) * 100);
                 setPower(newPower);
 
                 playSound('memory', 'flip');
 
                 // Check if complete
-                if (newTyped === target) {
+                if (newTypedNoSpace === targetNoSpace) {
                     shootArrow();
                 }
 
@@ -3154,23 +3257,44 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <div
                                     key={idx}
                                     className={`w-8 h-10 flex items-center justify-center border-2 rounded font-bold text-lg uppercase transition-all
-                                        ${idx < typedText.length
+                                        ${idx < typedText.replace(/\s/g, '').length
                                             ? 'bg-green-100 border-green-500 text-green-700'
                                             : 'bg-slate-50 dark:bg-slate-600 border-slate-200 dark:border-slate-500 text-slate-300 dark:text-slate-500'
                                         }
                                     `}
                                 >
-                                    {idx < typedText.length ? typedText[idx] : char === ' ' ? '·' : '_'}
+                                    {idx < typedText.replace(/\s/g, '').length ? typedText.replace(/\s/g, '')[idx] : char === ' ' ? '·' : '_'}
                                 </div>
                             ))}
                         </div>
+
+                        {/* Scrambled Letters - Mobile Tap */}
+                        <div className="flex flex-wrap justify-center gap-2 mb-4">
+                            {scrambledLetters.map((item, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleLetterTap(item.char, idx)}
+                                    disabled={usedIndices.includes(idx) || gameState !== 'playing'}
+                                    className={`w-10 h-10 rounded-lg font-bold text-lg uppercase transition-all shadow-md
+                                        ${usedIndices.includes(idx)
+                                            ? 'bg-slate-200 dark:bg-slate-600 text-slate-400 cursor-not-allowed opacity-50'
+                                            : 'bg-indigo-500 text-white hover:bg-indigo-600 active:scale-95'
+                                        }
+                                    `}
+                                >
+                                    {item.char}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Text input - for desktop/keyboard */}
                         <input
                             ref={inputRef}
                             type="text"
                             value={typedText}
                             onChange={handleInput}
-                            className="w-full p-3 text-center text-lg font-bold border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-green-500 focus:outline-none dark:bg-slate-800 dark:text-white"
-                            placeholder="Nhập từ tiếng Anh..."
+                            className="w-full p-3 text-center text-lg font-bold border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-green-500 focus:outline-none dark:bg-slate-800 dark:text-white hidden sm:block"
+                            placeholder="Hoặc gõ trên bàn phím..."
                             autoComplete="off"
                             autoCapitalize="off"
                         />
@@ -3178,7 +3302,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {/* Hint button */}
                         <button
                             onClick={useHint}
-                            disabled={gameState !== 'playing' || typedText.length >= currentWord?.word.length}
+                            disabled={gameState !== 'playing' || typedText.replace(/\s/g, '').length >= currentWord?.word.replace(/\s/g, '').length}
                             className="w-full mt-3 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 py-2 rounded-xl font-bold text-sm hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <i className="fas fa-lightbulb mr-2"></i>
