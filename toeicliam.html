@@ -11,15 +11,20 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: { 850: '#151e2e' } // Custom darker slate
+        // Check if Tailwind loaded successfully before configuring
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        colors: {
+                            slate: { 850: '#151e2e' } // Custom darker slate
+                        }
                     }
                 }
             }
+        } else {
+            console.warn('Tailwind CSS failed to load. Some styles may not work correctly.');
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -5093,10 +5098,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             document.getElementById('music-btn').classList.toggle('text-slate-400', !enabled);
                                         }}
                                         id="music-btn"
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition ${musicEnabled ? 'text-indigo-500' : 'text-slate-400'}`}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition ${SoundManager.musicEnabled ? 'text-indigo-500' : 'text-slate-400'}`}
                                         title="Bật/Tắt nhạc nền"
                                     >
-                                        <i id="music-icon" className={`fas ${musicEnabled ? 'fa-music' : 'fa-slash'}`}></i>
+                                        <i id="music-icon" className={`fas ${SoundManager.musicEnabled ? 'fa-music' : 'fa-slash'}`}></i>
                                     </button>
                                     <button
                                         onClick={() => setIsLeaderboardOpen(true)}
