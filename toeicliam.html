@@ -1361,8 +1361,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         const AUDIO_CONFIG = {
             // Đường dẫn đến folder chứa file audio từ vựng
-            // Ví dụ: './audio' hoặc 'https://your-domain.com/audio'
-            audioBasePath: './audio',  // Folder chứa file audio của bạn
+            // Cấu trúc: audio/Topic/Word.wav
+            audioBasePath: './audio',  // hoặc 'https://raw.githubusercontent.com/lamnguyen814k44-cloud/toeicliam/main/audio'
             
             // Đường dẫn đến folder sounds effects
             soundsBasePath: './sounds',
@@ -1452,9 +1452,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // Cache audio đã tải
         const ttsCache = {};
         
-        // Chuyển từ thành tên file (lowercase, bỏ ký tự đặc biệt)
+        // Chuyển từ thành tên file - giữ nguyên tên gốc
         const wordToFilename = (word) => {
-            return word.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+            // Giữ nguyên tên, chỉ trim
+            return word.trim();
         };
 
         // Định dạng file audio (mp3 hoặc wav)
@@ -1462,7 +1463,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
         // --- COMPONENTS ---
         // Global TTS function - đọc từ folder audio local
-        const playTTS = (text) => {
+        // Hỗ trợ cấu trúc: audio/Topic/Word.wav hoặc audio/Word.wav
+        const playTTS = (text, topic = null) => {
             return new Promise((resolve, reject) => {
                 const cacheKey = text;
                 
@@ -1474,41 +1476,64 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     return;
                 }
                 
-                // Đọc từ folder audio local
-                if (AUDIO_CONFIG.audioBasePath) {
-                    const filename = wordToFilename(text);
-                    const localUrl = `${AUDIO_CONFIG.audioBasePath}/${filename}.${audioExt}`;
-                    
-                    const audio = new Audio(localUrl);
-                    audio.onended = resolve;
-                    audio.onerror = () => {
-                        // Thử format khác
-                        const altExt = audioExt === 'wav' ? 'mp3' : 'wav';
-                        const altUrl = `${AUDIO_CONFIG.audioBasePath}/${filename}.${altExt}`;
-                        
-                        const altAudio = new Audio(altUrl);
-                        altAudio.onended = resolve;
-                        altAudio.onerror = () => {
-                            console.log('Audio not found:', filename);
-                            reject();
-                        };
-                        altAudio.oncanplaythrough = () => {
-                            ttsCache[cacheKey] = altAudio;
-                        };
-                        altAudio.play().catch(reject);
-                    };
-                    audio.oncanplaythrough = () => {
-                        ttsCache[cacheKey] = audio;
-                    };
-                    audio.play().catch(reject);
+                if (!AUDIO_CONFIG.audioBasePath) {
+                    reject('No audio configured');
                     return;
                 }
                 
-                reject('No audio configured');
+                const filename = wordToFilename(text);
+                const basePath = AUDIO_CONFIG.audioBasePath;
+                
+                // Tạo danh sách URLs để thử (theo thứ tự ưu tiên)
+                const urlsToTry = [];
+                
+                // 1. Nếu có topic, thử trong subfolder topic trước
+                if (topic) {
+                    urlsToTry.push(`${basePath}/${topic}/${filename}.${audioExt}`);
+                    urlsToTry.push(`${basePath}/${topic}/${filename}.${audioExt === 'wav' ? 'mp3' : 'wav'}`);
+                }
+                
+                // 2. Thử trực tiếp trong folder audio
+                urlsToTry.push(`${basePath}/${filename}.${audioExt}`);
+                urlsToTry.push(`${basePath}/${filename}.${audioExt === 'wav' ? 'mp3' : 'wav'}`);
+                
+                // 3. Thử với tên lowercase
+                const lowercaseName = text.toLowerCase().trim();
+                if (lowercaseName !== filename) {
+                    if (topic) {
+                        urlsToTry.push(`${basePath}/${topic}/${lowercaseName}.${audioExt}`);
+                    }
+                    urlsToTry.push(`${basePath}/${lowercaseName}.${audioExt}`);
+                }
+                
+                // Hàm thử load audio từ URL
+                const tryNextUrl = (index) => {
+                    if (index >= urlsToTry.length) {
+                        console.log('Audio not found for:', text, '- Tried:', urlsToTry);
+                        reject('Audio not found');
+                        return;
+                    }
+                    
+                    const url = urlsToTry[index];
+                    const audio = new Audio(url);
+                    
+                    audio.oncanplaythrough = () => {
+                        ttsCache[cacheKey] = audio;
+                        audio.onended = resolve;
+                        audio.play().catch(() => tryNextUrl(index + 1));
+                    };
+                    
+                    audio.onerror = () => tryNextUrl(index + 1);
+                    
+                    // Trigger load
+                    audio.load();
+                };
+                
+                tryNextUrl(0);
             });
         };
         
-        const SpeakerButton = ({ text, className = "" }) => {
+        const SpeakerButton = ({ text, topic = null, className = "" }) => {
             const [isPlaying, setIsPlaying] = React.useState(false);
             
             const speak = async (e) => {
@@ -1517,7 +1542,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 
                 setIsPlaying(true);
                 try {
-                    await playTTS(text);
+                    await playTTS(text, topic);
                 } catch (err) {
                     console.log('Audio error:', err);
                 } finally {
@@ -1572,7 +1597,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <div className="flex items-center gap-2 mb-2"> <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded tracking-wide">{item.topic}</span> </div>
                         <div className="flex items-center gap-3 flex-wrap mb-1">
                             <h3 className="text-xl font-black text-slate-800 dark:text-white">{item.word}</h3>
-                            <SpeakerButton text={item.word} />
+                            <SpeakerButton text={item.word} topic={item.topic} />
                         </div>
                         <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1">{item.ipa}</p>
                     </div>
@@ -1969,7 +1994,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <span className="text-lg text-slate-500 dark:text-slate-400 font-mono mb-6 bg-slate-50 dark:bg-slate-700 px-3 py-1 rounded">{item.ipa}</span>
                                 <p className="text-xs text-slate-400 animate-pulse mt-8"><i className="fas fa-tap"></i> Chạm để lật</p>
                                 <div className="flex gap-2 mt-6" onClick={(e) => e.stopPropagation()}>
-                                    <SpeakerButton text={item.word} className="scale-125" />
+                                    <SpeakerButton text={item.word} topic={item.topic} className="scale-125" />
                                 </div>
                             </div>
                             <div className="card-face rotate-y-180 bg-slate-800 text-white z-20 overflow-hidden relative">
@@ -2439,7 +2464,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Functions Definitions (Moved outside effects)
             const speak = (text) => {
-                playTTS(text).catch(() => {});
+                // Tìm topic của từ trong allData
+                const item = allData.find(i => i.word.toLowerCase() === text.toLowerCase());
+                const topic = item ? item.topic : null;
+                playTTS(text, topic).catch(() => {});
             };
 
             const toggleTopic = (topic) => {
@@ -3058,7 +3086,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     {matchedItem && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-                            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-indigo-100 dark:border-slate-700 relative text-center"> <div className="inline-block p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mb-3 text-2xl animate-bounce"><i className="fas fa-check"></i></div> <h3 className="text-2xl font-black text-indigo-900 dark:text-white mb-1">{matchedItem.word}</h3> <div className="flex justify-center gap-2 mb-3"><SpeakerButton text={matchedItem.word} /></div> <p className="text-slate-500 dark:text-slate-400 font-mono text-sm mb-3">{matchedItem.ipa}</p> <p className="text-lg font-bold text-yellow-600 dark:text-yellow-400 mb-4">{matchedItem.meaning}</p> <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 italic mb-5 border border-slate-100 dark:border-slate-600">"{matchedItem.example}"</div> <button onClick={() => setMatchedItem(null)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105">Tiếp tục</button> </div>
+                            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-indigo-100 dark:border-slate-700 relative text-center"> <div className="inline-block p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mb-3 text-2xl animate-bounce"><i className="fas fa-check"></i></div> <h3 className="text-2xl font-black text-indigo-900 dark:text-white mb-1">{matchedItem.word}</h3> <div className="flex justify-center gap-2 mb-3"><SpeakerButton text={matchedItem.word} topic={matchedItem.topic} /></div> <p className="text-slate-500 dark:text-slate-400 font-mono text-sm mb-3">{matchedItem.ipa}</p> <p className="text-lg font-bold text-yellow-600 dark:text-yellow-400 mb-4">{matchedItem.meaning}</p> <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 italic mb-5 border border-slate-100 dark:border-slate-600">"{matchedItem.example}"</div> <button onClick={() => setMatchedItem(null)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105">Tiếp tục</button> </div>
                         </div>
                     )}
 
@@ -3334,7 +3362,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const speakWord = (text) => {
-                playTTS(text).catch(() => {});
+                // Tìm topic của từ trong toeicData
+                const item = toeicData.find(i => i.word.toLowerCase() === text.toLowerCase());
+                const topic = item ? item.topic : null;
+                playTTS(text, topic).catch(() => {});
             };
 
             const startReviewSession = (wordsToReview) => {
