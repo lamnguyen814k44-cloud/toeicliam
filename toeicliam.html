@@ -1374,43 +1374,124 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             soundsFormat: 'wav',
         };
 
-        // Sound Effects URLs - hỗ trợ cả MP3 và WAV
-        const soundExt = AUDIO_CONFIG.soundsFormat || 'mp3';
-        const SOUND_URLS = AUDIO_CONFIG.soundsBasePath ? {
-            // Local files (MP3 hoặc WAV)
-            flip: `${AUDIO_CONFIG.soundsBasePath}/flip.${soundExt}`,
-            match: `${AUDIO_CONFIG.soundsBasePath}/match.${soundExt}`,
-            miss: `${AUDIO_CONFIG.soundsBasePath}/miss.${soundExt}`,
-            coin: `${AUDIO_CONFIG.soundsBasePath}/coin.${soundExt}`,
-            levelup: `${AUDIO_CONFIG.soundsBasePath}/levelup.${soundExt}`,
-        } : {
-            // CDN Fallback (Freesound) - chỉ có MP3
-            flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
-            match: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
-            miss: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
-            coin: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
-            levelup: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
+        // Sound Effects URLs - Phân theo từng Tab/View
+        // Cấu trúc folder: sounds/TabName/sound.wav hoặc sound.mp3
+        const soundsBase = AUDIO_CONFIG.soundsBasePath || './sounds';
+        
+        // Danh sách sounds theo tab
+        const SOUND_CONFIG = {
+            // === VOCABULARY TAB ===
+            vocabulary: ['click', 'open', 'close'],
+            
+            // === FLASHCARD TAB ===
+            flashcard: ['flip', 'next', 'prev', 'complete'],
+            
+            // === MEMORY GAME TAB ===
+            memory: ['flip', 'match', 'miss', 'win', 'coin'],
+            
+            // === QUIZ TAB ===
+            quiz: ['correct', 'wrong', 'complete', 'tick'],
+            
+            // === GENERAL (dùng chung) ===
+            general: ['click', 'success', 'error', 'levelup', 'coin'],
         };
         
-        // Preload và cache sounds
+        // CDN Fallback URLs (nếu local không có)
+        const FALLBACK_SOUNDS = {
+            flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            match: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            correct: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            miss: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
+            wrong: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
+            coin: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            levelup: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
+            click: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            success: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            error: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
+            open: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            close: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            next: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            prev: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            complete: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
+            win: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
+            tick: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+        };
+        
+        // Cache sounds đã load thành công
         const soundCache = {};
-        Object.keys(SOUND_URLS).forEach(key => {
-            const audio = new Audio();
-            audio.src = SOUND_URLS[key];
-            audio.preload = 'auto';
-            audio.volume = 0.5;
-            soundCache[key] = audio;
-        });
-
-        const playSound = (type) => {
-            try {
-                if (soundCache[type]) {
-                    const sound = soundCache[type].cloneNode();
-                    sound.volume = type === 'flip' ? 0.3 : 0.5;
-                    sound.play().catch(() => playFallbackSound(type));
+        
+        // Hàm load sound - thử wav trước, nếu lỗi thử mp3, nếu lỗi dùng fallback
+        const loadSound = (tab, sound) => {
+            return new Promise((resolve) => {
+                const key = `${tab}_${sound}`;
+                
+                // Đã có trong cache
+                if (soundCache[key]) {
+                    resolve(soundCache[key]);
                     return;
                 }
-                playFallbackSound(type);
+                
+                // Danh sách URLs để thử (wav -> mp3 -> fallback)
+                const urlsToTry = [
+                    `${soundsBase}/${tab}/${sound}.wav`,
+                    `${soundsBase}/${tab}/${sound}.mp3`,
+                    `${soundsBase}/general/${sound}.wav`,
+                    `${soundsBase}/general/${sound}.mp3`,
+                    FALLBACK_SOUNDS[sound]
+                ].filter(Boolean);
+                
+                const tryNextUrl = (index) => {
+                    if (index >= urlsToTry.length) {
+                        resolve(null);
+                        return;
+                    }
+                    
+                    const audio = new Audio();
+                    audio.src = urlsToTry[index];
+                    
+                    audio.oncanplaythrough = () => {
+                        soundCache[key] = audio;
+                        resolve(audio);
+                    };
+                    
+                    audio.onerror = () => tryNextUrl(index + 1);
+                    
+                    audio.load();
+                };
+                
+                tryNextUrl(0);
+            });
+        };
+        
+        // Preload tất cả sounds
+        Object.keys(SOUND_CONFIG).forEach(tab => {
+            SOUND_CONFIG[tab].forEach(sound => {
+                loadSound(tab, sound);
+            });
+        });
+
+        // Play sound theo tab và loại
+        // Ví dụ: playSound('memory', 'match') hoặc playSound('quiz', 'correct')
+        const playSound = async (tab, type) => {
+            // Hỗ trợ gọi kiểu cũ: playSound('match') -> tự map sang tab phù hợp
+            if (!type) {
+                type = tab;
+                // Auto-detect tab based on sound type
+                if (['flip', 'match', 'miss', 'win'].includes(type)) tab = 'memory';
+                else if (['correct', 'wrong', 'tick'].includes(type)) tab = 'quiz';
+                else if (['next', 'prev'].includes(type)) tab = 'flashcard';
+                else tab = 'general';
+            }
+            
+            try {
+                const audio = await loadSound(tab, type);
+                if (audio) {
+                    const sound = audio.cloneNode();
+                    sound.volume = type === 'flip' ? 0.3 : 0.5;
+                    sound.play().catch(() => playFallbackSound(type));
+                } else {
+                    playFallbackSound(type);
+                }
             } catch (e) {
                 playFallbackSound(type);
             }
