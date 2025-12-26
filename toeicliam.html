@@ -87,6 +87,11 @@
             transform: rotateY(0deg);
         }
 
+        /* Memory Card Flip */
+        .flip-card-flipped {
+            transform: rotateY(180deg);
+        }
+
         .card-face {
             position: absolute;
             width: 100%;
@@ -303,20 +308,20 @@
         /* Arrow flying animation for Archery */
         @keyframes arrowFly {
             0% {
-                transform: translateY(0) scale(1);
+                transform: translateX(0) translateY(-50%) scale(1);
                 opacity: 1;
             }
-            50% {
-                transform: translateY(-100px) scale(0.8);
-                opacity: 0.8;
+            60% {
+                transform: translateX(150px) translateY(-50%) scale(0.9);
+                opacity: 1;
             }
             100% {
-                transform: translateY(-200px) scale(0.5);
+                transform: translateX(200px) translateY(-50%) scale(0.7);
                 opacity: 0;
             }
         }
         .animate-arrow-fly {
-            animation: arrowFly 0.5s ease-out forwards;
+            animation: arrowFly 0.35s ease-in forwards;
         }
 
         /* Target hit animation */
@@ -911,7 +916,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -939,7 +944,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -3146,23 +3151,24 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     lastTimeRef.current = timestamp;
 
                     // Update position
-                    currentPosition += delta * 0.03 * speed;
+                    currentPosition += delta * 0.035 * speed;
                     
                     // Direct DOM update for smooth animation
                     if (obstacleRef.current) {
                         obstacleRef.current.style.transform = `translateY(${currentPosition}%)`;
                     }
 
-                    // Check collision zone (70-85%)
-                    if (currentPosition >= 70 && currentPosition <= 85 && !isChecking) {
+                    // Check collision zone - Player is at bottom 10%, obstacle height ~24%
+                    // So collision happens when obstacle top reaches ~55-70% of container
+                    if (currentPosition >= 55 && currentPosition <= 72 && !isChecking) {
                         setObstaclePosition(currentPosition);
                         checkCollision();
                     }
                     
                     // Reset when passed
-                    if (currentPosition > 120) {
-                        currentPosition = -20;
-                        setObstaclePosition(-20);
+                    if (currentPosition > 110) {
+                        currentPosition = -25;
+                        setObstaclePosition(-25);
                     }
 
                     gameLoopRef.current = requestAnimationFrame(gameLoop);
@@ -3588,6 +3594,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [hitTarget, setHitTarget] = React.useState(false);
             const [scrambledLetters, setScrambledLetters] = React.useState([]);
             const [usedIndices, setUsedIndices] = React.useState([]);
+            const [stuckArrows, setStuckArrows] = React.useState([]); // Mũi tên đã ghim trên target
 
             const inputRef = React.useRef(null);
 
@@ -3768,6 +3775,15 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setTimeout(() => {
                     setHitTarget(true);
                     playSound('archery', 'hit');
+                    
+                    // Thêm mũi tên ghim vào target với vị trí ngẫu nhiên
+                    const newArrow = {
+                        id: Date.now(),
+                        x: 15 + Math.random() * 70, // Random X position (15-85%)
+                        y: 15 + Math.random() * 70, // Random Y position (15-85%)
+                        rotation: -15 + Math.random() * 30, // Random rotation (-15 to 15 deg)
+                    };
+                    setStuckArrows(prev => [...prev, newArrow]);
 
                     // Calculate score (minus hints)
                     const baseScore = 100;
@@ -3934,17 +3950,63 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     <div className="relative bg-slate-100 dark:bg-slate-800 rounded-xl p-4 mb-3 overflow-hidden" style={{ height: '160px' }}>
                         {/* Target */}
                         <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'scale-110 animate-target-hit' : ''}`}>
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white border-[6px] sm:border-8 border-red-500 flex items-center justify-center relative gpu-accelerate">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white border-[6px] sm:border-8 border-red-500 flex items-center justify-center relative gpu-accelerate overflow-visible">
+                                {/* Target rings */}
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500 flex items-center justify-center">
                                     <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400"></div>
                                 </div>
+                                
+                                {/* Stuck Arrows on target */}
+                                {stuckArrows.map((arrow) => (
+                                    <div
+                                        key={arrow.id}
+                                        className="absolute pointer-events-none"
+                                        style={{
+                                            left: `${arrow.x}%`,
+                                            top: `${arrow.y}%`,
+                                            transform: `translate(-50%, -50%) rotate(${arrow.rotation}deg)`,
+                                        }}
+                                    >
+                                        {/* Arrow stuck in target */}
+                                        <svg width="24" height="8" viewBox="0 0 24 8" className="drop-shadow-md">
+                                            {/* Arrow shaft */}
+                                            <line x1="0" y1="4" x2="18" y2="4" stroke="#92400e" strokeWidth="2" />
+                                            {/* Arrow head */}
+                                            <polygon points="18,4 24,1 24,7" fill="#d97706" />
+                                            {/* Fletching */}
+                                            <path d="M 2 4 L 0 1 M 4 4 L 2 1" stroke="#dc2626" strokeWidth="1.5" />
+                                            <path d="M 2 4 L 0 7 M 4 4 L 2 7" stroke="#dc2626" strokeWidth="1.5" />
+                                        </svg>
+                                    </div>
+                                ))}
+                                
+                                {/* Hit checkmark */}
                                 {hitTarget && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="absolute inset-0 flex items-center justify-center z-20">
                                         <i className="fas fa-check text-green-500 text-2xl sm:text-3xl animate-victory"></i>
                                     </div>
                                 )}
                             </div>
+                            
+                            {/* Arrow count badge */}
+                            {stuckArrows.length > 0 && (
+                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg border-2 border-white">
+                                    {stuckArrows.length}
+                                </div>
+                            )}
                         </div>
+
+                        {/* Flying Arrow Animation */}
+                        {arrowFlying && (
+                            <div className="absolute left-1/4 top-1/2 -translate-y-1/2 z-20 pointer-events-none animate-arrow-fly">
+                                <svg width="40" height="12" viewBox="0 0 40 12">
+                                    <line x1="0" y1="6" x2="30" y2="6" stroke="#92400e" strokeWidth="3" />
+                                    <polygon points="30,6 40,2 40,10" fill="#d97706" />
+                                    <path d="M 3 6 L 0 2 M 6 6 L 3 2" stroke="#dc2626" strokeWidth="2" />
+                                    <path d="M 3 6 L 0 10 M 6 6 L 3 10" stroke="#dc2626" strokeWidth="2" />
+                                </svg>
+                            </div>
+                        )}
 
                         {/* Bow & Arrow - Dynamic SVG */}
                         <div className={`absolute left-0 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-screen-shake' : ''} pointer-events-none gpu-accelerate`}>
@@ -4935,10 +4997,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             else if (len > 12) fontClass = 'text-xs';
 
                             return (
-                                <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-square cursor-pointer perspective-1000 group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`}>
-                                    <div className={`w-full h-full transition-all duration-300 transform-style-3d relative shadow-sm rounded-lg gpu-accelerate ${isFlipped ? 'rotate-y-180 animate-card-flip-in' : ''}`}>
+                                <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-square cursor-pointer group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`} style={{ perspective: '1000px' }}>
+                                    <div className={`w-full h-full transition-all duration-500 relative shadow-sm rounded-lg ${isFlipped ? 'flip-card-flipped' : ''}`} style={{ transformStyle: 'preserve-3d' }}>
                                         {/* Mặt trước - chưa lật */}
-                                        <div className={`absolute inset-0 backface-hidden border-2 rounded-lg flex items-center justify-center transition-colors shadow-inner ${card.type === 'word' ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'}`}>
+                                        <div className={`absolute inset-0 border-2 rounded-lg flex items-center justify-center transition-colors shadow-inner ${card.type === 'word' ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'}`} style={{ backfaceVisibility: 'hidden' }}>
                                             {card.type === 'word' ? (
                                                 <div className="text-center">
                                                     <i className="fas fa-flag-usa text-2xl sm:text-3xl text-blue-300 dark:text-blue-500 opacity-50"></i>
@@ -4952,7 +5014,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             )}
                                         </div>
                                         {/* Mặt sau - đã lật */}
-                                        <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-1 text-center shadow-lg overflow-hidden">
+                                        <div className="absolute inset-0 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-1 text-center shadow-lg overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
                                             <p className={`font-bold text-slate-800 dark:text-white leading-tight break-words w-full hyphens-auto ${fontClass}`} style={{ display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word' }}>{card.content}</p>
                                         </div>
                                     </div>
