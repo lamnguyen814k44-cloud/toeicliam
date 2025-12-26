@@ -3091,6 +3091,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const obstacleRef = React.useRef(null); // Ref cho obstacle element
             const isCheckingRef = React.useRef(false); // Ref để tránh re-render
 
+            // Fix stale closure in game loop using Ref
+            const latestStateRef = React.useRef({ playerLane, correctLane, options, roundType, isChecking, bossState, streak, score, highScore, coins });
+            React.useEffect(() => {
+                latestStateRef.current = { playerLane, correctLane, options, roundType, isChecking, bossState, streak, score, highScore, coins };
+            }, [playerLane, correctLane, options, roundType, isChecking, bossState, streak, score, highScore, coins]);
+
             // Helper for stats
             const getSkinStats = () => {
                 const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
@@ -3238,13 +3244,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const checkCollision = () => {
-                if (isChecking) return;
+                if (isCheckingRef.current) return;
+
+                // Use latest state from ref to avoid stale closure
+                const current = latestStateRef.current;
+
                 setIsChecking(true);
                 isCheckingRef.current = true;
 
-                if (roundType === 'coin') {
+                if (current.roundType === 'coin') {
                     // Coin Logic
-                    const itemInLane = options[playerLane];
+                    const itemInLane = current.options[current.playerLane];
                     if (itemInLane && itemInLane.type === 'coin') {
                         // Collected Coin!
                         playSound('general', 'coin');
@@ -3255,7 +3265,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                         setScore(prev => prev + coinsEarned);
                         setCoins(prev => prev + 1); // 1 Coin currency, Score is separate
-                        setCollectedCoinsEffect({ visible: true, lane: playerLane });
+                        setCollectedCoinsEffect({ visible: true, lane: current.playerLane });
 
                         // Visuals
                         spawnParticles(window.innerWidth / 2, window.innerHeight * 0.7, '#fbbf24', 15);
@@ -3278,15 +3288,15 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     return;
                 }
 
-                if (playerLane === correctLane) {
+                if (current.playerLane === current.correctLane) {
                     // Correct!
                     playSound('quiz', 'correct');
                     const baseScore = 50;
-                    const multiplier = streak >= 10 ? 3 : (streak >= 5 ? 2 : 1);
+                    const multiplier = current.streak >= 10 ? 3 : (current.streak >= 5 ? 2 : 1);
                     const earned = baseScore * multiplier;
 
                     setScore(prev => prev + earned);
-                    const newStreak = streak + 1;
+                    const newStreak = current.streak + 1;
                     setStreak(newStreak);
                     setCoins(prev => prev + earned);
 
@@ -3296,8 +3306,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     setSpeed(prev => Math.min(prev + 0.05, 2.5));
 
                     // Boss Logic
-                    if (bossState.active) {
-                        const newHp = bossState.hp - 1;
+                    if (current.bossState.active) {
+                        const newHp = current.bossState.hp - 1;
                         if (newHp <= 0) {
                             // Boss Defeated
                             playSound('general', 'levelup'); // Victory sound
@@ -3336,9 +3346,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     spawnParticles(window.innerWidth / 2, window.innerHeight * 0.7, '#ef4444', 30);
                     setLastResult('wrong');
 
-                    if (score > highScore) {
-                        setHighScore(score);
-                        localStorage.setItem('runner_high_score', score.toString());
+                    if (current.score > current.highScore) {
+                        setHighScore(current.score);
+                        localStorage.setItem('runner_high_score', current.score.toString());
                     }
 
                     setTimeout(() => {
@@ -3867,6 +3877,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setGamePool(shuffled);
                 setScore(0);
                 setStreak(0);
+                setStuckArrows([]); // Reset arrows on new game
                 setGameState('playing');
                 generateNewRound(shuffled);
 
@@ -3996,9 +4007,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const arrowY = 20 + Math.random() * 60;
 
                     // Tính góc xoay để mũi tên hướng vào tâm target
-                    const angleToCenter = Math.atan2(targetCenterY - arrowY, targetCenterX - arrowX) * (180 / Math.PI);
-                    // Thêm chút random để trông tự nhiên hơn
-                    const finalRotation = angleToCenter + (-5 + Math.random() * 10);
+                    // Calculate realistic entry angle (from bow on left to hit point)
+                    // Slope from (0, 50) to (arrowX, arrowY)
+                    // arrowX is % from 0 to 100.
+                    const angleToHit = Math.atan2(arrowY - 50, arrowX + 50) * (180 / Math.PI);
+                    // Add slight random variation
+                    const finalRotation = angleToHit + (-2 + Math.random() * 4);
 
                     // Tính khoảng cách từ tâm để xác định score zone
                     const distFromCenter = Math.sqrt(
@@ -4215,30 +4229,37 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             left: `${arrow.x}%`,
                                             top: `${arrow.y}%`,
                                             '--arrow-rotation': `${arrow.rotation}deg`,
-                                            transform: `translate(-50%, -50%) rotate(${arrow.rotation}deg)`,
+                                            // Anchor point near the tip (right side of SVG)
+                                            transform: `translate(-90%, -50%) rotate(${arrow.rotation}deg)`,
                                             zIndex: arrow.isNew ? 30 : 10,
                                         }}
                                     >
-                                        {/* Arrow stuck in target - More detailed */}
-                                        <svg width="28" height="10" viewBox="0 0 28 10" className="drop-shadow-md" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.4))' }}>
-                                            {/* Arrow shaft with wood grain */}
+                                        {/* Arrow stuck in target - More detailed & Buried effect */}
+                                        <svg width="40" height="12" viewBox="0 0 40 12" className="drop-shadow-sm" style={{ filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }}>
                                             <defs>
-                                                <linearGradient id={`shaft-${arrow.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                                                    <stop offset="0%" stopColor="#a16207" />
-                                                    <stop offset="50%" stopColor="#ca8a04" />
-                                                    <stop offset="100%" stopColor="#a16207" />
+                                                <linearGradient id={`shaft-${arrow.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stopColor="#78350f" />
+                                                    <stop offset="100%" stopColor="#b45309" />
                                                 </linearGradient>
                                             </defs>
-                                            <line x1="0" y1="5" x2="20" y2="5" stroke={`url(#shaft-${arrow.id})`} strokeWidth="2.5" />
-                                            {/* Arrow head - metallic */}
-                                            <polygon points="20,5 28,1.5 28,8.5" fill="#78716c" />
-                                            <polygon points="20,5 28,2.5 28,7.5" fill="#a8a29e" />
-                                            {/* Fletching (feathers) */}
-                                            <path d="M 2 5 L -1 1.5 M 4 5 L 1 1.5" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" />
-                                            <path d="M 2 5 L -1 8.5 M 4 5 L 1 8.5" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" />
-                                            {/* White feather accent */}
-                                            <path d="M 3 5 L 0 3" stroke="#fef2f2" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
-                                            <path d="M 3 5 L 0 7" stroke="#fef2f2" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+
+                                            {/* Shaft (Tail sticking out) */}
+                                            {/* Only show back part, head is buried */}
+                                            <line x1="0" y1="6" x2="35" y2="6" stroke={`url(#shaft-${arrow.id})`} strokeWidth="3" strokeLinecap="square" />
+
+                                            {/* Buried point shadow/hole */}
+                                            <ellipse cx="35" cy="6" rx="2" ry="3" fill="#000" opacity="0.3" />
+
+                                            {/* Fletching (feathers) - Larger and more visible */}
+                                            <path d="M 5 6 L 0 1 M 12 6 L 7 1" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
+                                            <path d="M 5 6 L 0 11 M 12 6 L 7 11" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
+
+                                            {/* Feather details */}
+                                            <path d="M 6 6 L 2 3" stroke="#fecaca" strokeWidth="1" opacity="0.8" />
+                                            <path d="M 6 6 L 2 9" stroke="#fecaca" strokeWidth="1" opacity="0.8" />
+
+                                            {/* Nock */}
+                                            <rect x="0" y="4" width="2" height="4" fill="#a16207" />
                                         </svg>
 
                                         {/* Impact mark */}
@@ -4869,7 +4890,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             const createRoom = async () => {
                 if (!user || !db) return alert("Vui lòng đăng nhập!");
-                if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
+                const requiredCoins = 200 * betMultiplier;
+                if (coins < requiredCoins) return alert(`Bạn cần ít nhất ${requiredCoins} xu để cược x${betMultiplier}!`);
                 try {
                     const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -5193,7 +5215,23 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         ) : (
                             <div className="space-y-4 w-full max-w-xs text-center">
                                 <h2 className="text-2xl font-black text-indigo-900 mb-6">Online PvP Lobby</h2>
-                                <p className="text-sm font-bold text-orange-600 bg-orange-50 py-2 rounded-lg mb-4"><i className="fas fa-coins"></i> Phí tham gia: 200 Xu</p>
+
+                                <div className="mb-4">
+                                    <label className="text-xs font-bold text-slate-500 block mb-2">Mức Cược (Multiplier):</label>
+                                    <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
+                                        {[1, 2, 3, 5].map(m => (
+                                            <button
+                                                key={m}
+                                                onClick={() => setBetMultiplier(m)}
+                                                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${betMultiplier === m ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                            >
+                                                x{m}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <p className="text-sm font-bold text-orange-600 bg-orange-50 py-2 rounded-lg mb-4"><i className="fas fa-coins"></i> Phí tham gia: {200 * betMultiplier} Xu</p>
                                 <button onClick={createRoom} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"> <i className="fas fa-plus-circle"></i> Tạo Phòng Mới </button>
                                 <div className="relative"> <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div> <div className="relative flex justify-center text-sm"><span className="px-2 bg-[#f0f4f8] text-gray-500">Hoặc vào phòng</span></div> </div>
                                 <div className="flex gap-2"> <input type="text" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 font-bold text-center tracking-widest" placeholder="Nhập mã phòng" maxLength="6" value={inputRoomId} onChange={(e) => setInputRoomId(e.target.value)} disabled={isJoining} /> <button id="join-btn-trigger" onClick={joinRoom} disabled={isJoining} className={`px-4 py-2 rounded-xl font-bold transition ${isJoining ? 'bg-indigo-400 text-white cursor-wait' : 'bg-white border-2 border-indigo-100 text-indigo-600 hover:bg-indigo-50'}`}>{isJoining ? <i className="fas fa-spinner fa-spin"></i> : 'Vào'}</button> </div>
