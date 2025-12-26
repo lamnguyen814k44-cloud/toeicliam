@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOEIC LIAM - Earn & Learn</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     <!-- React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -3219,11 +3221,6 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setGamePool(shuffled);
                 setScore(0);
                 setStreak(0);
-                setSpeed(1);
-                setPlayerLane(1);
-                setCountdown(3);
-                setObstaclePosition(-25);
-                setIsChecking(false); isCheckingRef.current = false;
                 setLastResult(null);
                 lastTimeRef.current = 0;
 
@@ -3231,11 +3228,34 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
                 if (countdownRef.current) clearInterval(countdownRef.current);
 
-                setGameState('countdown');
-                generateNewRound(shuffled);
+                if (view === 'archery') {
+                    // Space Defender Setup
+                    setPower(0);
+                    setStuckArrows([]);
+                    setArrowFlying(false);
+                    setHitTarget(false);
+                    setCountdown(3);
+                    generateNewRound(shuffled);
+                    playMusic('archery'); // Ensure this music exists or use a default
+                } else if (view === 'runner') {
+                    // Duck Hunt Setup
+                    // Use 'options' state to store Ducks: {id, x, y, speed, type, isDead, direction}
+                    // Reset ducks
+                    setOptions([]);
+                    setCountdown(3);
+                    playMusic('runner'); // Maybe change to 'duck' later
+                } else {
+                    // Legacy/Default
+                    setSpeed(1);
+                    setPlayerLane(1);
+                    setCountdown(3);
+                    setObstaclePosition(-25);
+                    setIsChecking(false); isCheckingRef.current = false;
+                    generateNewRound(shuffled);
+                    playMusic('runner');
+                }
 
-                // Start background music
-                playMusic('runner');
+                setGameState('countdown');
 
                 // Start countdown
                 let count = 3;
@@ -3378,23 +3398,53 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const delta = timestamp - lastTimeRef.current;
                     lastTimeRef.current = timestamp;
 
-                    // Update position - di chuyển xuống dưới
-                    setObstaclePosition(prev => {
-                        const newPos = prev + (delta * 0.02 * speed);
+                    if (view === 'runner') {
+                        // --- DUCK HUNT LOGIC ---
+                        setOptions(prevDucks => {
+                            // 1. Move Ducks
+                            let newDucks = prevDucks.map(d => {
+                                if (d.isDead) {
+                                    return { ...d, y: d.y + (delta * 0.05), deadTimer: (d.deadTimer || 0) + delta }; // Fall down
+                                }
+                                return { ...d, x: d.x + (d.speed * d.direction * delta * 0.05) };
+                            });
 
-                        // Check collision zone logic
-                        // Widen detection for safer collision: 60% -> 85%
-                        if (newPos >= 60 && newPos <= 85 && !isCheckingRef.current) {
-                            checkCollision(); // Just call, logic inside handles locking
-                        }
+                            // 2. Remove invalid ducks
+                            newDucks = newDucks.filter(d => {
+                                if (d.isDead && d.deadTimer > 1000) return false; // Remove dead ducks after 1s
+                                if (d.direction === 1 && d.x > 120) return false; // Off screen Right
+                                if (d.direction === -1 && d.x < -20) return false; // Off screen Left
+                                return true;
+                            });
 
-                        // Reset when off-screen
-                        if (newPos > 120) {
-                            return -25;
-                        }
-
-                        return newPos;
-                    });
+                            // 3. Spawn new ducks if < 3
+                            // Probability check to avoid instant spawn bombing
+                            if (newDucks.filter(d => !d.isDead).length < 3 && Math.random() < 0.05) {
+                                const direction = Math.random() > 0.5 ? 1 : -1;
+                                newDucks.push({
+                                    id: Date.now() + Math.random(),
+                                    x: direction === 1 ? -10 : 110,
+                                    y: 10 + Math.random() * 50, // 10% to 60% height
+                                    speed: 1 + Math.random() * 2, // Speed
+                                    direction: direction,
+                                    type: Math.random() > 0.8 ? 'gold' : 'normal',
+                                    isDead: false
+                                });
+                            }
+                            return newDucks;
+                        });
+                    } else {
+                        // Legacy Runner / Other logic fallback (if any)
+                        // This prevents errors if view is messed up
+                        setObstaclePosition(prev => {
+                            const newPos = prev + (delta * 0.02 * speed);
+                            if (newPos >= 60 && newPos <= 85 && !isCheckingRef.current) {
+                                checkCollision();
+                            }
+                            if (newPos > 120) return -25;
+                            return newPos;
+                        });
+                    }
 
                     gameLoopRef.current = requestAnimationFrame(gameLoop);
                 };
@@ -3466,6 +3516,55 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Setup Screen
             if (gameState === 'setup') {
+                if (view === 'runner') {
+                    // DUCK HUNT SETUP
+                    return (
+                        <div className="max-w-xl mx-auto py-6 px-4 animate-fadeIn">
+                            <div className="text-center mb-6">
+                                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                    <i className="fas fa-crosshairs text-4xl text-white"></i>
+                                </div>
+                                <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Duck Hunt</h2>
+                                <p className="text-slate-500 dark:text-slate-400">Bắn vịt bay qua ống ngắm!</p>
+                                <div className="mt-2 text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full inline-block">
+                                    <i className="fas fa-trophy mr-1"></i> Kỷ lục: {highScore} điểm
+                                </div>
+                            </div>
+
+                            {/* Topic Selection reused from generic code if needed, or simplified */}
+                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 mb-6">
+                                <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-700">
+                                    <h3 className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                        <i className="fas fa-tags text-indigo-500"></i> Chủ đề
+                                    </h3>
+                                    <button onClick={toggleAllTopics} className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition">
+                                        {selectedTopics.length === uniqueTopics.length ? 'Bỏ chọn hết' : 'Chọn tất cả'}
+                                    </button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                    {uniqueTopics.map(topic => (
+                                        <button
+                                            key={topic}
+                                            onClick={() => toggleTopic(topic)}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-indigo-300'}`}
+                                        >
+                                            {topic}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={startGame}
+                                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+                            >
+                                <i className="fas fa-play"></i> Bắt đầu săn!
+                            </button>
+                        </div>
+                    );
+                }
+
+                // Legacy Runner Setup (Fallback)
                 return (
                     <div className="max-w-xl mx-auto py-6 px-4 animate-fadeIn">
                         <div className="text-center mb-6">
@@ -3530,7 +3629,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <i className="fas fa-skull text-5xl text-red-500"></i>
                         </div>
                         <h2 className="text-3xl font-black text-red-600 dark:text-red-400 mb-2">Game Over!</h2>
-                        <p className="text-slate-500 dark:text-slate-400 mb-6">Bạn đã chọn sai lane</p>
+                        <p className="text-slate-500 dark:text-slate-400 mb-6">{view === 'runner' ? 'Hết giờ!' : 'Bạn đã chọn sai lane'}</p>
 
                         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 mb-6">
                             <div className="grid grid-cols-2 gap-4 text-center">
@@ -3584,216 +3683,308 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         </div>
                     </div>
 
-                    {/* Word Display - Hide during coin round */}
+                    {/* Word Display - Hide during Duck Hunt (unless we add words to ducks later) */}
                     <div className={`bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl text-center mb-3 shadow-lg transition-all duration-300 transform origin-top
-                        ${roundType === 'coin' ? 'opacity-0 scale-y-0 h-0 p-0 mb-0 overflow-hidden' : 'opacity-100 scale-y-100'}`}>
+                        ${roundType === 'coin' || view === 'runner' ? 'opacity-0 scale-y-0 h-0 p-0 mb-0 overflow-hidden' : 'opacity-100 scale-y-100'}`}>
                         <div className="text-xs opacity-70">{currentWord?.topic || '...'}</div>
                         <div className="text-2xl font-black">{currentWord?.word || '...'}</div>
                         <div className="text-xs opacity-70">{currentWord?.ipa || '...'}</div>
                     </div>
 
-                    {/* Game Area with 3D Perspective */}
-                    <div
-                        className={`relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black rounded-xl overflow-hidden perspective-1000 group w-full mb-16 border-2 border-slate-700/50 shadow-2xl shadow-indigo-500/10 ${gameState === 'playing' && speed > 1.5 ? 'speed-lines' : ''}`}
-                        style={{
-                            height: '60vh',
-                            minHeight: '350px',
-                            maxHeight: '500px'
-                        }}
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
-                    >
-                        {/* The Road - transformed for 3D effect */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-[#1e293b] to-[#020617] origin-bottom transform-style-3d rotate-x-20 scale-y-125">
-                            {/* Grid lines / Speed lines */}
-                            <div className="absolute inset-0 opacity-20"
-                                style={{
-                                    backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(99, 102, 241, 0.3) 25%, rgba(99, 102, 241, 0.3) 27%, transparent 28%, transparent 74%, rgba(99, 102, 241, 0.3) 75%, rgba(99, 102, 241, 0.3) 77%, transparent 78%, transparent), linear-gradient(90deg, transparent 24%, rgba(99, 102, 241, 0.3) 25%, rgba(99, 102, 241, 0.3) 27%, transparent 28%, transparent 74%, rgba(99, 102, 241, 0.3) 75%, rgba(99, 102, 241, 0.3) 77%, transparent 78%, transparent)',
-                                    backgroundSize: '80px 80px',
-                                    animation: gameState === 'playing' ? 'moveGrid 1s linear infinite' : 'none'
-                                }}
-                            ></div>
-
-                            {/* Lane Markers */}
-                            <div className="absolute inset-0 flex justify-center">
-                                <div className="w-full max-w-sm flex h-full">
-                                    <div className="flex-1 border-r-2 border-dashed border-indigo-500/20"></div>
-                                    <div className="flex-1 border-r-2 border-dashed border-indigo-500/20"></div>
-                                    <div className="flex-1"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Boss UI Layer */}
-                        {bossState.active && (
-                            <div className="absolute top-4 left-0 right-0 z-40 flex flex-col items-center animate-bounce-slow pointer-events-none">
-                                <div className="relative">
-                                    {/* Boss Avatar */}
-                                    <div className="w-24 h-24 bg-red-600 rounded-2xl border-4 border-red-800 shadow-2xl flex items-center justify-center transform rotate-3">
-                                        <i className="fas fa-robot text-5xl text-white animate-pulse"></i>
-                                    </div>
-                                    {/* Boss Name */}
-                                    <div className="absolute -top-3 -right-6 bg-black text-red-500 font-black text-xs px-2 py-1 rounded border border-red-500 transform rotate-12">
-                                        BOSS!
-                                    </div>
-                                </div>
-                                {/* HP Bar */}
-                                <div className="w-48 h-4 bg-slate-700 rounded-full mt-2 border-2 border-slate-600 overflow-hidden">
-                                    <div
-                                        className="h-full bg-red-500 transition-all duration-300"
-                                        style={{ width: `${(bossState.hp / bossState.maxHp) * 100}%` }}
-                                    ></div>
-                                </div>
-                                <div className="text-red-500 font-bold text-shadow text-sm mt-1">{bossState.hp}/{bossState.maxHp} HP</div>
-                            </div>
-                        )}
-
-                        {/* Red Atmosphere when Boss Active */}
-                        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${bossState.active ? 'opacity-100 animate-boss-warning' : 'opacity-0'}`}></div>
-
-                        {/* Countdown Overlay */}
-                        {gameState === 'countdown' && (
-                            <div className="absolute inset-0 bg-slate-900/90 z-50 flex items-center justify-center flex-col">
-                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-red-600 animate-countdown-pop" key={countdown}>
-                                    {countdown > 0 ? countdown : 'GO!'}
-                                </div>
-                                <div className="text-white/70 mt-4 text-lg font-bold animate-pulse">Sẵn sàng...</div>
-                            </div>
-                        )}
-
-                        {/* Obstacles (Word Gates or Coins) */}
-                        <div
-                            className="absolute left-0 right-0 flex justify-center transition-none"
-                            style={{
-                                top: `${obstaclePosition}%`,
-                                pointerEvents: 'none'
+                    {view === 'runner' ? (
+                        // --- DUCK HUNT GAME AREA ---
+                        <div className="relative w-full h-[60vh] bg-sky-300 dark:bg-sky-900 rounded-xl overflow-hidden shadow-xl border-4 border-slate-700 cursor-crosshair select-none touch-none"
+                            onTouchStart={(e) => {
+                                // Default touch handling
                             }}
                         >
-                            <div className="w-full max-w-sm flex gap-3 px-4">
-                                {options.map((opt, idx) => (
-                                    <div key={idx} className="flex-1 flex justify-center">
-                                        {opt?.type === 'coin' ? (
-                                            // Coin Item
-                                            <div className={`w-12 h-12 bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-spin-slow transition-opacity duration-200
-                                                ${collectedCoinsEffect?.visible && collectedCoinsEffect?.lane === idx ? 'opacity-0 scale-150' : 'opacity-100'}
-                                            `}>
-                                                <div className="text-yellow-700 font-bold text-xl">$</div>
-                                            </div>
-                                        ) : opt?.type === 'magnet' ? (
-                                            // Magnet Item
-                                            <div className="w-12 h-12 bg-red-500 rounded-full border-4 border-red-400 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-pulse">
-                                                <i className="fas fa-magnet text-white text-xl"></i>
-                                            </div>
-                                        ) : opt?.type === 'shield' ? (
-                                            // Shield Item
-                                            <div className="w-12 h-12 bg-blue-500 rounded-full border-4 border-blue-400 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse">
-                                                <i className="fas fa-shield-alt text-white text-xl"></i>
-                                            </div>
-                                        ) : (
-                                            // Word Gate
-                                            <div
-                                                className={`w-full h-24 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.2)] flex items-center justify-center text-center p-2 border-2 transition-transform backdrop-blur-md
-                                                    ${lastResult && idx === correctLane ? 'bg-green-500/90 border-green-400 scale-110 z-10 shadow-[0_0_20px_rgba(34,197,94,0.6)]' : ''}
-                                                    ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500/90 border-red-400 opacity-80' : ''}
-                                                    ${!lastResult ? 'bg-slate-800/80 border-indigo-500/30' : ''}
-                                                    ${roundType === 'coin' || roundType === 'powerup' ? 'opacity-0' : ''} 
-                                                `}
-                                            >
-                                                <span className="text-[10px] sm:text-xs font-bold leading-tight line-clamp-3 text-white drop-shadow-md">
-                                                    {opt?.meaning}
-                                                </span>
-                                            </div>
-                                        )}
+                            {/* Sky/Clouds */}
+                            <div className="absolute top-10 left-10 text-white/50 text-6xl animate-pulse"><i className="fas fa-cloud"></i></div>
+                            <div className="absolute top-20 right-20 text-white/40 text-4xl animate-bounce-slow"><i className="fas fa-cloud"></i></div>
+
+                            {/* Countdown */}
+                            {gameState === 'countdown' && (
+                                <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center flex-col">
+                                    <div className="text-8xl font-black text-white animate-ping">
+                                        {countdown > 0 ? countdown : 'GO!'}
                                     </div>
-                                ))}
+                                    <div className="text-white font-bold mt-4">Sẵn sàng bắn!</div>
+                                </div>
+                            )}
+
+                            {/* Ducks */}
+                            {options.map(duck => (
+                                <div
+                                    key={duck.id}
+                                    onMouseDown={(e) => {
+                                        if (duck.isDead) return;
+                                        e.preventDefault(); e.stopPropagation();
+                                        playSound('general', 'click');
+                                        setScore(s => s + 10);
+                                        setOptions(prev => prev.map(p => p.id === duck.id ? { ...p, isDead: true } : p));
+                                        // Simple particle effect at click
+                                        spawnParticles(e.clientX, e.clientY, '#fbbf24', 15);
+                                    }}
+                                    onTouchStart={(e) => {
+                                        if (duck.isDead) return;
+                                        e.preventDefault(); e.stopPropagation();
+                                        playSound('general', 'click');
+                                        setScore(s => s + 10);
+                                        setOptions(prev => prev.map(p => p.id === duck.id ? { ...p, isDead: true } : p));
+                                        // Simple particle effect at touch
+                                        spawnParticles(e.touches[0].clientX, e.touches[0].clientY, '#fbbf24', 15);
+                                    }}
+                                    className="absolute w-20 h-20 transition-transform duration-75 flex items-center justify-center p-2"
+                                    style={{
+                                        left: `${duck.x}%`,
+                                        top: `${duck.y}%`,
+                                        transform: `scaleX(${duck.direction === 1 ? -1 : 1}) ${duck.isDead ? 'scaleY(-1) translateY(-20px)' : ''}`,
+                                        transition: duck.isDead ? 'transform 0.5s ease-in, top 0.5s ease-in' : 'none'
+                                    }}
+                                >
+                                    {/* Duck SVG */}
+                                    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg filter overflow-visible">
+                                        <g className={duck.isDead ? "" : "animate-bounce"}>
+                                            {/* Body */}
+                                            <path d="M20,60 Q30,30 60,40 Q90,45 90,60 Q80,85 50,85 Q30,85 20,60 Z" fill={duck.type === 'gold' ? '#fbbf24' : '#6366f1'} stroke="white" strokeWidth="2" />
+                                            {/* Wing */}
+                                            <path d="M40,55 Q50,20 75,45 Z" fill={duck.type === 'gold' ? '#f59e0b' : '#4f46e5'} className={duck.isDead ? "" : "animate-wing-flap"} />
+                                            {/* Head Detail */}
+                                            <circle cx="75" cy="50" r="4" fill="white" />
+                                            <circle cx="77" cy="50" r="1.5" fill="black" />
+                                            {/* Beak */}
+                                            <path d="M90,55 Q98,58 98,65 Q90,68 85,65 Z" fill="#f97316" />
+                                        </g>
+                                    </svg>
+
+                                    {duck.isDead && (
+                                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-300 font-black text-2xl animate-bounce drop-shadow-md stroke-black text-stroke">+10</div>
+                                    )}
+                                </div>
+                            ))}
+
+                            {/* Foreground Grass/Bushes */}
+                            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-green-800 to-green-600 rounded-t-[30%] scale-x-150 pointer-events-none border-t-4 border-green-900"></div>
+                            <div className="absolute -bottom-10 left-10 w-32 h-32 bg-green-700 rounded-full blur-sm"></div>
+                            <div className="absolute -bottom-10 right-10 w-40 h-40 bg-green-700 rounded-full blur-sm"></div>
+
+                            {/* Crosshair Overlay (Visual Only) */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-red-500/30 rounded-full pointer-events-none flex items-center justify-center">
+                                <div className="w-1 h-4 bg-red-500/50"></div>
+                                <div className="h-1 w-4 bg-red-500/50 absolute"></div>
                             </div>
                         </div>
+                    ) : (
+                        // --- LEGACY RUNNER RENDER ---
+                        <div
+                            className={`relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black rounded-xl overflow-hidden perspective-1000 group w-full mb-16 border-2 border-slate-700/50 shadow-2xl shadow-indigo-500/10 ${gameState === 'playing' && speed > 1.5 ? 'speed-lines' : ''}`}
+                            style={{
+                                height: '60vh',
+                                minHeight: '350px',
+                                maxHeight: '500px'
+                            }}
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
+                        >
+                            {/* The Road - transformed for 3D effect */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-[#1e293b] to-[#020617] origin-bottom transform-style-3d rotate-x-20 scale-y-125">
+                                {/* Grid lines / Speed lines */}
+                                <div className="absolute inset-0 opacity-20"
+                                    style={{
+                                        backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(99, 102, 241, 0.3) 25%, rgba(99, 102, 241, 0.3) 27%, transparent 28%, transparent 74%, rgba(99, 102, 241, 0.3) 75%, rgba(99, 102, 241, 0.3) 77%, transparent 78%, transparent), linear-gradient(90deg, transparent 24%, rgba(99, 102, 241, 0.3) 25%, rgba(99, 102, 241, 0.3) 27%, transparent 28%, transparent 74%, rgba(99, 102, 241, 0.3) 75%, rgba(99, 102, 241, 0.3) 77%, transparent 78%, transparent)',
+                                        backgroundSize: '80px 80px',
+                                        animation: gameState === 'playing' ? 'moveGrid 1s linear infinite' : 'none'
+                                    }}
+                                ></div>
 
-                        {/* Collected Effect Overlay */}
-                        {collectedCoinsEffect?.visible && (
-                            <div className="absolute top-1/2 left-0 right-0 text-center pointer-events-none z-50 animate-bounce">
-                                <span className="text-3xl font-black text-yellow-400 drop-shadow-md">+10</span>
+                                {/* Lane Markers */}
+                                <div className="absolute inset-0 flex justify-center">
+                                    <div className="w-full max-w-sm flex h-full">
+                                        <div className="flex-1 border-r-2 border-dashed border-indigo-500/20"></div>
+                                        <div className="flex-1 border-r-2 border-dashed border-indigo-500/20"></div>
+                                        <div className="flex-1"></div>
+                                    </div>
+                                </div>
                             </div>
-                        )}
 
-                        {/* Player Character */}
-                        <div className="absolute inset-0 flex justify-center pointer-events-none">
-                            <div className="w-full max-w-sm h-full relative">
-                                <div
-                                    className={`absolute bottom-[10%] lane-transition player-character flex flex-col items-center
-                                        ${playerLane === 0 ? 'left-[16.66%] -translate-x-1/2' : ''}
-                                        ${playerLane === 1 ? 'left-[50%] -translate-x-1/2' : ''}
-                                        ${playerLane === 2 ? 'left-[83.33%] -translate-x-1/2' : ''}
-                                    `}
-                                >
-                                    <div className={`relative transition-all duration-300 ${lastResult === 'correct' ? 'scale-125 mb-4 animate-victory' : ''} ${lastResult === 'wrong' ? 'animate-defeat' : ''}`}>
-                                        {/* Aura Effect */}
-                                        <div className="absolute inset-0 bg-indigo-500 rounded-full blur-md opacity-50 animate-pulse"></div>
+                            {/* Boss UI Layer */}
+                            {bossState.active && (
+                                <div className="absolute top-4 left-0 right-0 z-40 flex flex-col items-center animate-bounce-slow pointer-events-none">
+                                    <div className="relative">
+                                        {/* Boss Avatar */}
+                                        <div className="w-24 h-24 bg-red-600 rounded-2xl border-4 border-red-800 shadow-2xl flex items-center justify-center transform rotate-3">
+                                            <i className="fas fa-robot text-5xl text-white animate-pulse"></i>
+                                        </div>
+                                        {/* Boss Name */}
+                                        <div className="absolute -top-3 -right-6 bg-black text-red-500 font-black text-xs px-2 py-1 rounded border border-red-500 transform rotate-12">
+                                            BOSS!
+                                        </div>
+                                    </div>
+                                    {/* HP Bar */}
+                                    <div className="w-48 h-4 bg-slate-700 rounded-full mt-2 border-2 border-slate-600 overflow-hidden">
+                                        <div
+                                            className="h-full bg-red-500 transition-all duration-300"
+                                            style={{ width: `${(bossState.hp / bossState.maxHp) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="text-red-500 font-bold text-shadow text-sm mt-1">{bossState.hp}/{bossState.maxHp} HP</div>
+                                </div>
+                            )}
 
-                                        {/* Active Power-up Effects */}
-                                        {powerups.shield && (
-                                            <>
-                                                <div className="absolute inset-0 -m-3 border-2 border-blue-400 rounded-full animate-ping opacity-30"></div>
-                                                <div className="absolute inset-0 -m-1 border-2 border-blue-500 bg-blue-500/10 rounded-full z-20 backdrop-blur-[1px]"></div>
-                                            </>
-                                        )}
-                                        {powerups.magnet > 0 && (
-                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full z-30 animate-bounce shadow-md whitespace-nowrap">
-                                                <i className="fas fa-magnet mr-1"></i> {powerups.magnet}s
-                                            </div>
-                                        )}
+                            {/* Red Atmosphere when Boss Active */}
+                            <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${bossState.active ? 'opacity-100 animate-boss-warning' : 'opacity-0'}`}></div>
 
-                                        {/* Character Body */}
-                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(255,255,255,0.4)] border-2 z-10 relative
-                                            ${lastResult === 'correct' ? 'bg-green-500 border-white text-white rotate-[360deg]' : ''}
-                                            ${lastResult === 'wrong' ? 'bg-red-500 border-white text-white animate-shake' : ''}
-                                            ${!lastResult ? 'bg-white border-slate-200' : ''}
-                                        `}>
-                                            {lastResult === 'correct' ? (
-                                                <i className="fas fa-check text-white"></i>
-                                            ) : lastResult === 'wrong' ? (
-                                                <i className="fas fa-bomb text-white"></i>
+                            {/* Countdown Overlay */}
+                            {gameState === 'countdown' && (
+                                <div className="absolute inset-0 bg-slate-900/90 z-50 flex items-center justify-center flex-col">
+                                    <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-red-600 animate-countdown-pop" key={countdown}>
+                                        {countdown > 0 ? countdown : 'GO!'}
+                                    </div>
+                                    <div className="text-white/70 mt-4 text-lg font-bold animate-pulse">Sẵn sàng...</div>
+                                </div>
+                            )}
+
+                            {/* Obstacles (Word Gates or Coins) */}
+                            <div
+                                className="absolute left-0 right-0 flex justify-center transition-none"
+                                style={{
+                                    top: `${obstaclePosition}%`,
+                                    pointerEvents: 'none'
+                                }}
+                            >
+                                <div className="w-full max-w-sm flex gap-3 px-4">
+                                    {options.map((opt, idx) => (
+                                        <div key={idx} className="flex-1 flex justify-center">
+                                            {opt?.type === 'coin' ? (
+                                                // Coin Item
+                                                <div className={`w-12 h-12 bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-spin-slow transition-opacity duration-200
+                                                    ${collectedCoinsEffect?.visible && collectedCoinsEffect?.lane === idx ? 'opacity-0 scale-150' : 'opacity-100'}
+                                                `}>
+                                                    <div className="text-yellow-700 font-bold text-xl">$</div>
+                                                </div>
+                                            ) : opt?.type === 'magnet' ? (
+                                                // Magnet Item
+                                                <div className="w-12 h-12 bg-red-500 rounded-full border-4 border-red-400 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-pulse">
+                                                    <i className="fas fa-magnet text-white text-xl"></i>
+                                                </div>
+                                            ) : opt?.type === 'shield' ? (
+                                                // Shield Item
+                                                <div className="w-12 h-12 bg-blue-500 rounded-full border-4 border-blue-400 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse">
+                                                    <i className="fas fa-shield-alt text-white text-xl"></i>
+                                                </div>
                                             ) : (
-                                                (() => {
-                                                    const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
-                                                    let textColor = 'text-indigo-600';
-                                                    if (skin.color.includes('slate')) textColor = 'text-slate-600';
-                                                    if (skin.color.includes('zinc')) textColor = 'text-zinc-800';
-                                                    if (skin.color.includes('orange')) textColor = 'text-orange-600';
-                                                    if (skin.color.includes('yellow')) textColor = 'text-yellow-600';
-                                                    return <i className={`fas ${skin.icon} ${textColor} text-3xl`}></i>;
-                                                })()
+                                                // Word Gate
+                                                <div
+                                                    className={`w-full h-24 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.2)] flex items-center justify-center text-center p-2 border-2 transition-transform backdrop-blur-md
+                                                        ${lastResult && idx === correctLane ? 'bg-green-500/90 border-green-400 scale-110 z-10 shadow-[0_0_20px_rgba(34,197,94,0.6)]' : ''}
+                                                        ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500/90 border-red-400 opacity-80' : ''}
+                                                        ${!lastResult ? 'bg-slate-800/80 border-indigo-500/30' : ''}
+                                                        ${roundType === 'coin' || roundType === 'powerup' ? 'opacity-0' : ''} 
+                                                    `}
+                                                >
+                                                    <span className="text-[10px] sm:text-xs font-bold leading-tight line-clamp-3 text-white drop-shadow-md">
+                                                        {opt?.meaning}
+                                                    </span>
+                                                </div>
                                             )}
                                         </div>
+                                    ))}
+                                </div>
+                            </div>
 
-                                        {/* Shadow */}
-                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-2 bg-black/40 rounded-full blur-sm"></div>
+                            {/* Collected Effect Overlay */}
+                            {collectedCoinsEffect?.visible && (
+                                <div className="absolute top-1/2 left-0 right-0 text-center pointer-events-none z-50 animate-bounce">
+                                    <span className="text-3xl font-black text-yellow-400 drop-shadow-md">+10</span>
+                                </div>
+                            )}
+
+                            {/* Player Character */}
+                            <div className="absolute inset-0 flex justify-center pointer-events-none">
+                                <div className="w-full max-w-sm h-full relative">
+                                    <div
+                                        className={`absolute bottom-[10%] lane-transition player-character flex flex-col items-center
+                                            ${playerLane === 0 ? 'left-[16.66%] -translate-x-1/2' : ''}
+                                            ${playerLane === 1 ? 'left-[50%] -translate-x-1/2' : ''}
+                                            ${playerLane === 2 ? 'left-[83.33%] -translate-x-1/2' : ''}
+                                        `}
+                                    >
+                                        <div className={`relative transition-all duration-300 ${lastResult === 'correct' ? 'scale-125 mb-4 animate-victory' : ''} ${lastResult === 'wrong' ? 'animate-defeat' : ''}`}>
+                                            {/* Aura Effect */}
+                                            <div className="absolute inset-0 bg-indigo-500 rounded-full blur-md opacity-50 animate-pulse"></div>
+
+                                            {/* Active Power-up Effects */}
+                                            {powerups.shield && (
+                                                <>
+                                                    <div className="absolute inset-0 -m-3 border-2 border-blue-400 rounded-full animate-ping opacity-30"></div>
+                                                    <div className="absolute inset-0 -m-1 border-2 border-blue-500 bg-blue-500/10 rounded-full z-20 backdrop-blur-[1px]"></div>
+                                                </>
+                                            )}
+                                            {powerups.magnet > 0 && (
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full z-30 animate-bounce shadow-md whitespace-nowrap">
+                                                    <i className="fas fa-magnet mr-1"></i> {powerups.magnet}s
+                                                </div>
+                                            )}
+
+                                            {/* Character Body */}
+                                            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(255,255,255,0.4)] border-2 z-10 relative
+                                                ${lastResult === 'correct' ? 'bg-green-500 border-white text-white rotate-[360deg]' : ''}
+                                                ${lastResult === 'wrong' ? 'bg-red-500 border-white text-white animate-shake' : ''}
+                                                ${!lastResult ? 'bg-white border-slate-200' : ''}
+                                            `}>
+                                                {lastResult === 'correct' ? (
+                                                    <i className="fas fa-check text-white"></i>
+                                                ) : lastResult === 'wrong' ? (
+                                                    <i className="fas fa-bomb text-white"></i>
+                                                ) : (
+                                                    (() => {
+                                                        const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
+                                                        let textColor = 'text-indigo-600';
+                                                        if (skin.color.includes('slate')) textColor = 'text-slate-600';
+                                                        if (skin.color.includes('zinc')) textColor = 'text-zinc-800';
+                                                        if (skin.color.includes('orange')) textColor = 'text-orange-600';
+                                                        if (skin.color.includes('yellow')) textColor = 'text-yellow-600';
+                                                        return <i className={`fas ${skin.icon} ${textColor} text-3xl`}></i>;
+                                                    })()
+                                                )}
+                                            </div>
+
+                                            {/* Shadow */}
+                                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-2 bg-black/40 rounded-full blur-sm"></div>
+                                        </div>
+
+                                        {/* Name Tag */}
+                                        {!lastResult && <div className="mt-1 px-2 py-0.5 bg-black/50 rounded text-[10px] text-white font-bold backdrop-blur-sm">Bạn</div>}
                                     </div>
+                                </div>
+                            </div>
 
-                                    {/* Name Tag */}
-                                    {!lastResult && <div className="mt-1 px-2 py-0.5 bg-black/50 rounded text-[10px] text-white font-bold backdrop-blur-sm">Bạn</div>}
+                            {/* Lane Tap Zones (Invisible) */}
+                            <div className="absolute inset-0 flex justify-center z-20">
+                                <div className="w-full max-w-sm flex h-full">
+                                    {[0, 1, 2].map(lane => (
+                                        <div
+                                            key={lane}
+                                            onClick={() => handleLaneClick(lane)}
+                                            className="flex-1 cursor-pointer hover:bg-white/5 transition-colors active:bg-white/10"
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         </div>
-
-                        {/* Lane Tap Zones (Invisible) */}
-                        <div className="absolute inset-0 flex justify-center z-20">
-                            <div className="w-full max-w-sm flex h-full">
-                                {[0, 1, 2].map(lane => (
-                                    <div
-                                        key={lane}
-                                        onClick={() => handleLaneClick(lane)}
-                                        className="flex-1 cursor-pointer hover:bg-white/5 transition-colors active:bg-white/10"
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                    )}
 
                     {/* Controls Hint */}
-                    <div className="text-center text-xs text-slate-400 mt-2 font-medium">
-                        <i className="fas fa-hand-pointer mr-1"></i> Vuốt hoặc chạm để di chuyển
-                    </div>
+                    {view !== 'runner' && (
+                        <div className="text-center text-xs text-slate-400 mt-2 font-medium">
+                            <i className="fas fa-hand-pointer mr-1"></i> Vuốt hoặc chạm để di chuyển
+                        </div>
+                    )}
+                    {view === 'runner' && (
+                        <div className="text-center text-xs text-slate-400 mt-2 font-medium">
+                            <i className="fas fa-crosshairs mr-1"></i> Chạm vào vịt để bắn!
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -5679,9 +5870,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     unlockedSkins: localData.unlockedSkins,
                                     equippedSkin: localData.equippedSkin,
                                     updatedAt: new Date().toISOString()
-                                }, { merge: true });
+                                }, { merge: true }).catch(err => { /* coin sync failed, expected on local without auth */ });
                                 setCoins(localData.coins);
                             }
+                        }, error => {
+                            if (error?.message?.includes('permission')) return;
+                            console.error("Snapshot error:", error);
                         });
                     }
                 }) : () => { };
@@ -5702,7 +5896,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         displayName: nickname,
                         lastSeen: Date.now(),
                         status: view === 'memory' ? 'playing' : 'online'
-                    }, { merge: true }).catch(e => console.error("Presence write error:", e));
+                    }, { merge: true }).catch(e => {
+                        if (e.message && e.message.includes("permission")) return; // Suppress permission errors in localdev
+                        console.error("Presence write error:", e);
+                    });
                 };
 
                 updatePresence();
@@ -5996,7 +6193,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <button onClick={() => { setView('list'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[9px] font-bold">Từ vựng</span> </button>
                             <button onClick={() => { setView('flashcard'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
                             <button onClick={() => { setView('quiz'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
-                            <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[9px] font-bold">Runner</span> </button>
+                            <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-crosshairs text-lg mb-1"></i> <span className="text-[9px] font-bold">Bắn Vịt</span> </button>
                             <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-rocket text-lg mb-1"></i> <span className="text-[9px] font-bold">Space Def</span> </button>
                             <button onClick={() => { setView('memory'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
                             <button onClick={() => { setView('shop'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'shop' ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-store text-lg mb-1"></i> <span className="text-[9px] font-bold">Shop</span> </button>
