@@ -305,23 +305,86 @@
             animation: floatUp 1s ease-out forwards;
         }
 
-        /* Arrow flying animation for Archery */
+        /* Arrow flying animation for Archery - Realistic trajectory */
         @keyframes arrowFly {
             0% {
-                transform: translateX(0) translateY(-50%) scale(1);
+                transform: translateX(0) translateY(-50%) rotate(0deg) scale(1);
                 opacity: 1;
             }
-            60% {
-                transform: translateX(150px) translateY(-50%) scale(0.9);
+            20% {
+                transform: translateX(60px) translateY(-55%) rotate(-2deg) scale(0.95);
                 opacity: 1;
+            }
+            50% {
+                transform: translateX(130px) translateY(-52%) rotate(-1deg) scale(0.85);
+                opacity: 1;
+            }
+            80% {
+                transform: translateX(180px) translateY(-50%) rotate(0deg) scale(0.75);
+                opacity: 0.9;
             }
             100% {
-                transform: translateX(200px) translateY(-50%) scale(0.7);
+                transform: translateX(200px) translateY(-50%) rotate(0deg) scale(0.6);
                 opacity: 0;
             }
         }
         .animate-arrow-fly {
-            animation: arrowFly 0.35s ease-in forwards;
+            animation: arrowFly 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+        }
+
+        /* Arrow stick animation - like hitting wood */
+        @keyframes arrowStick {
+            0% {
+                transform: translate(-50%, -50%) rotate(var(--arrow-rotation)) scale(0.3);
+                opacity: 0;
+            }
+            40% {
+                transform: translate(-50%, -50%) rotate(var(--arrow-rotation)) scale(1.15);
+                opacity: 1;
+            }
+            60% {
+                transform: translate(-50%, -50%) rotate(calc(var(--arrow-rotation) + 3deg)) scale(1);
+            }
+            80% {
+                transform: translate(-50%, -50%) rotate(calc(var(--arrow-rotation) - 2deg)) scale(1);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(var(--arrow-rotation)) scale(1);
+                opacity: 1;
+            }
+        }
+        .animate-arrow-stick {
+            animation: arrowStick 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Target shake when hit */
+        @keyframes targetShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-3px, 0) rotate(-2deg); }
+            40% { transform: translate(3px, 0) rotate(2deg); }
+            60% { transform: translate(-2px, 0) rotate(-1deg); }
+            80% { transform: translate(2px, 0) rotate(1deg); }
+        }
+        .animate-target-shake {
+            animation: targetShake 0.3s ease-out;
+        }
+
+        /* Impact particles */
+        @keyframes impactParticle {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(calc(-50% + var(--particle-x)), calc(-50% + var(--particle-y))) scale(1);
+                opacity: 0;
+            }
+        }
+        .animate-impact-particle {
+            animation: impactParticle 0.4s ease-out forwards;
         }
 
         /* Target hit animation */
@@ -916,7 +979,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -944,7 +1007,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1813,6 +1876,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     hit: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
                     miss: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
                     hint: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+                    bullseye: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
                 },
                 game_memory: {
                     flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
@@ -2863,7 +2927,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [currentWord, setCurrentWord] = React.useState(null);
             const [options, setOptions] = React.useState([null, null, null]);
             const [correctLane, setCorrectLane] = React.useState(1);
-            const [obstaclePosition, setObstaclePosition] = React.useState(-100); // % from top
+            const [obstaclePosition, setObstaclePosition] = React.useState(-30); // % from top
             const [gamePool, setGamePool] = React.useState([]);
             const [isChecking, setIsChecking] = React.useState(false);
             const [lastResult, setLastResult] = React.useState(null); // 'correct' | 'wrong' | null
@@ -2881,6 +2945,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const lastTimeRef = React.useRef(0);
             const countdownRef = React.useRef(null);
             const obstacleRef = React.useRef(null); // Ref cho obstacle element
+            const isCheckingRef = React.useRef(false); // Ref để tránh re-render
 
             // Helper for stats
             const getSkinStats = () => {
@@ -2918,9 +2983,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     setOptions(newOptions);
                     setCorrectLane(-1);
-                    setObstaclePosition(-20);
+                    setObstaclePosition(-30);
                     setGamePool(pool);
-                    setIsChecking(false);
+                    setIsChecking(false); isCheckingRef.current = false;
                     setLastResult(null);
                     return;
                 }
@@ -2943,9 +3008,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     // For coin round, no "correct" lane needed in same sense, 
                     // but we can use correctLane to store something else if needed.
                     setCorrectLane(-1);
-                    setObstaclePosition(-20);
+                    setObstaclePosition(-30);
                     setGamePool(pool);
-                    setIsChecking(false);
+                    setIsChecking(false); isCheckingRef.current = false;
                     setLastResult(null);
                     return;
                 }
@@ -2978,9 +3043,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setCurrentWord(correctItem);
                 setOptions(newOptions);
                 setCorrectLane(correctLaneIdx);
-                setObstaclePosition(-20);
+                setObstaclePosition(-30);
                 setGamePool(pool);
-                setIsChecking(false);
+                setIsChecking(false); isCheckingRef.current = false;
                 setLastResult(null);
             };
 
@@ -3000,8 +3065,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setSpeed(1);
                 setPlayerLane(1);
                 setCountdown(3);
-                setObstaclePosition(-20);
-                setIsChecking(false);
+                setObstaclePosition(-30);
+                setIsChecking(false); isCheckingRef.current = false;
                 setLastResult(null);
                 lastTimeRef.current = 0;
 
@@ -3031,6 +3096,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const checkCollision = () => {
                 if (isChecking) return;
                 setIsChecking(true);
+                isCheckingRef.current = true;
 
                 if (roundType === 'coin') {
                     // Coin Logic
@@ -3139,37 +3205,34 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }
             };
 
-            // Game loop - Optimized with direct DOM manipulation
+            // Game loop - Simple and working
             React.useEffect(() => {
                 if (gameState !== 'playing') return;
 
-                let currentPosition = obstaclePosition;
+                lastTimeRef.current = 0;
                 
                 const gameLoop = (timestamp) => {
                     if (!lastTimeRef.current) lastTimeRef.current = timestamp;
                     const delta = timestamp - lastTimeRef.current;
                     lastTimeRef.current = timestamp;
 
-                    // Update position
-                    currentPosition += delta * 0.035 * speed;
-                    
-                    // Direct DOM update for smooth animation
-                    if (obstacleRef.current) {
-                        obstacleRef.current.style.transform = `translateY(${currentPosition}%)`;
-                    }
-
-                    // Check collision zone - Player is at bottom 10%, obstacle height ~24%
-                    // So collision happens when obstacle top reaches ~55-70% of container
-                    if (currentPosition >= 55 && currentPosition <= 72 && !isChecking) {
-                        setObstaclePosition(currentPosition);
-                        checkCollision();
-                    }
-                    
-                    // Reset when passed
-                    if (currentPosition > 110) {
-                        currentPosition = -25;
-                        setObstaclePosition(-25);
-                    }
+                    // Update position using setState
+                    setObstaclePosition(prev => {
+                        const newPos = prev + (delta * 0.04 * speed);
+                        
+                        // Check collision zone (60-78%)
+                        if (newPos >= 60 && newPos <= 78 && !isCheckingRef.current) {
+                            isCheckingRef.current = true;
+                            setTimeout(() => checkCollision(), 0);
+                        }
+                        
+                        // Reset when passed
+                        if (newPos > 100) {
+                            return -30;
+                        }
+                        
+                        return newPos;
+                    });
 
                     gameLoopRef.current = requestAnimationFrame(gameLoop);
                 };
@@ -3179,7 +3242,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 return () => {
                     if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
                 };
-            }, [gameState, speed, isChecking]);
+            }, [gameState, speed]);
 
             // Keyboard controls
             React.useEffect(() => {
@@ -3434,11 +3497,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                         {/* Obstacles (Word Gates or Coins) */}
                         <div
-                            ref={obstacleRef}
-                            className="absolute left-0 right-0 flex justify-center will-change-transform"
+                            className="absolute left-0 right-0 flex justify-center transition-none"
                             style={{ 
-                                transform: `translateY(${obstaclePosition}%)`,
-                                top: 0,
+                                top: `${obstaclePosition}%`,
                                 pointerEvents: 'none'
                             }}
                         >
@@ -3773,22 +3834,55 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 playSound('archery', 'release');
 
                 setTimeout(() => {
+                    setArrowFlying(false);
                     setHitTarget(true);
                     playSound('archery', 'hit');
                     
-                    // Thêm mũi tên ghim vào target với vị trí ngẫu nhiên
+                    // Tính vị trí ngẫu nhiên trên target
+                    const targetCenterX = 50;
+                    const targetCenterY = 50;
+                    
+                    // Random position trong vùng target (15-85%)
+                    const arrowX = 20 + Math.random() * 60;
+                    const arrowY = 20 + Math.random() * 60;
+                    
+                    // Tính góc xoay để mũi tên hướng vào tâm target
+                    const angleToCenter = Math.atan2(targetCenterY - arrowY, targetCenterX - arrowX) * (180 / Math.PI);
+                    // Thêm chút random để trông tự nhiên hơn
+                    const finalRotation = angleToCenter + (-5 + Math.random() * 10);
+                    
+                    // Tính khoảng cách từ tâm để xác định score zone
+                    const distFromCenter = Math.sqrt(
+                        Math.pow(arrowX - targetCenterX, 2) + 
+                        Math.pow(arrowY - targetCenterY, 2)
+                    );
+                    const isBullseye = distFromCenter < 15;
+                    
                     const newArrow = {
                         id: Date.now(),
-                        x: 15 + Math.random() * 70, // Random X position (15-85%)
-                        y: 15 + Math.random() * 70, // Random Y position (15-85%)
-                        rotation: -15 + Math.random() * 30, // Random rotation (-15 to 15 deg)
+                        x: arrowX,
+                        y: arrowY,
+                        rotation: finalRotation,
+                        isNew: true, // Flag để trigger animation
+                        isBullseye: isBullseye,
                     };
                     setStuckArrows(prev => [...prev, newArrow]);
+                    
+                    // Remove "isNew" flag sau animation
+                    setTimeout(() => {
+                        setStuckArrows(prev => prev.map(a => 
+                            a.id === newArrow.id ? {...a, isNew: false} : a
+                        ));
+                    }, 500);
 
-                    // Calculate score (minus hints)
-                    const baseScore = 100;
+                    // Calculate score (bonus for bullseye)
+                    const baseScore = isBullseye ? 150 : 100;
                     const hintPenalty = hintCount * 20;
                     const earned = Math.max(0, baseScore - hintPenalty);
+                    
+                    if (isBullseye) {
+                        playSound('archery', 'bullseye');
+                    }
 
                     setScore(prev => prev + earned);
                     setStreak(prev => prev + 1);
@@ -3802,10 +3896,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     }
 
                     setTimeout(() => {
+                        setHitTarget(false);
                         setGameState('playing');
                         generateNewRound([...gamePool]);
-                    }, 1000);
-                }, 500);
+                    }, 1200);
+                }, 350); // Timing khớp với animation bay
             };
 
             const gameOver = () => {
@@ -3947,63 +4042,119 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     </div>
 
                     {/* Archery Area */}
-                    <div className="relative bg-slate-100 dark:bg-slate-800 rounded-xl p-4 mb-3 overflow-hidden" style={{ height: '160px' }}>
+                    <div className="relative bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 mb-3 overflow-hidden" style={{ height: '160px' }}>
+                        {/* Background grass/ground effect */}
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-green-800/20 to-transparent"></div>
+                        
                         {/* Target */}
-                        <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'scale-110 animate-target-hit' : ''}`}>
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white border-[6px] sm:border-8 border-red-500 flex items-center justify-center relative gpu-accelerate overflow-visible">
+                        <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'animate-target-shake' : ''}`}>
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 border-[6px] sm:border-8 border-red-600 flex items-center justify-center relative gpu-accelerate overflow-visible shadow-lg"
+                                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.3), inset 0 2px 10px rgba(255,255,255,0.5)' }}>
                                 {/* Target rings */}
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500 flex items-center justify-center">
-                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400"></div>
+                                <div className="absolute inset-2 rounded-full border-4 border-red-500 opacity-80"></div>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600 flex items-center justify-center shadow-inner">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400 shadow-md"
+                                        style={{ boxShadow: '0 0 10px rgba(250,204,21,0.8)' }}></div>
                                 </div>
                                 
                                 {/* Stuck Arrows on target */}
                                 {stuckArrows.map((arrow) => (
                                     <div
                                         key={arrow.id}
-                                        className="absolute pointer-events-none"
+                                        className={`absolute pointer-events-none ${arrow.isNew ? 'animate-arrow-stick' : ''}`}
                                         style={{
                                             left: `${arrow.x}%`,
                                             top: `${arrow.y}%`,
+                                            '--arrow-rotation': `${arrow.rotation}deg`,
                                             transform: `translate(-50%, -50%) rotate(${arrow.rotation}deg)`,
+                                            zIndex: arrow.isNew ? 30 : 10,
                                         }}
                                     >
-                                        {/* Arrow stuck in target */}
-                                        <svg width="24" height="8" viewBox="0 0 24 8" className="drop-shadow-md">
-                                            {/* Arrow shaft */}
-                                            <line x1="0" y1="4" x2="18" y2="4" stroke="#92400e" strokeWidth="2" />
-                                            {/* Arrow head */}
-                                            <polygon points="18,4 24,1 24,7" fill="#d97706" />
-                                            {/* Fletching */}
-                                            <path d="M 2 4 L 0 1 M 4 4 L 2 1" stroke="#dc2626" strokeWidth="1.5" />
-                                            <path d="M 2 4 L 0 7 M 4 4 L 2 7" stroke="#dc2626" strokeWidth="1.5" />
+                                        {/* Arrow stuck in target - More detailed */}
+                                        <svg width="28" height="10" viewBox="0 0 28 10" className="drop-shadow-md" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.4))' }}>
+                                            {/* Arrow shaft with wood grain */}
+                                            <defs>
+                                                <linearGradient id={`shaft-${arrow.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                                                    <stop offset="0%" stopColor="#a16207" />
+                                                    <stop offset="50%" stopColor="#ca8a04" />
+                                                    <stop offset="100%" stopColor="#a16207" />
+                                                </linearGradient>
+                                            </defs>
+                                            <line x1="0" y1="5" x2="20" y2="5" stroke={`url(#shaft-${arrow.id})`} strokeWidth="2.5" />
+                                            {/* Arrow head - metallic */}
+                                            <polygon points="20,5 28,1.5 28,8.5" fill="#78716c" />
+                                            <polygon points="20,5 28,2.5 28,7.5" fill="#a8a29e" />
+                                            {/* Fletching (feathers) */}
+                                            <path d="M 2 5 L -1 1.5 M 4 5 L 1 1.5" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" />
+                                            <path d="M 2 5 L -1 8.5 M 4 5 L 1 8.5" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" />
+                                            {/* White feather accent */}
+                                            <path d="M 3 5 L 0 3" stroke="#fef2f2" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+                                            <path d="M 3 5 L 0 7" stroke="#fef2f2" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
                                         </svg>
+                                        
+                                        {/* Impact mark */}
+                                        {arrow.isNew && (
+                                            <div className="absolute left-full top-1/2 -translate-y-1/2 -translate-x-1">
+                                                {[...Array(4)].map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="absolute w-1 h-1 bg-amber-200 rounded-full animate-impact-particle"
+                                                        style={{
+                                                            '--particle-x': `${(Math.random() - 0.5) * 20}px`,
+                                                            '--particle-y': `${(Math.random() - 0.5) * 20}px`,
+                                                            animationDelay: `${i * 0.05}s`,
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {/* Bullseye indicator */}
+                                        {arrow.isBullseye && arrow.isNew && (
+                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-500 text-xs font-black animate-float-up whitespace-nowrap">
+                                                🎯 BULLSEYE!
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 
-                                {/* Hit checkmark */}
+                                {/* Hit flash effect */}
                                 {hitTarget && (
-                                    <div className="absolute inset-0 flex items-center justify-center z-20">
-                                        <i className="fas fa-check text-green-500 text-2xl sm:text-3xl animate-victory"></i>
-                                    </div>
+                                    <div className="absolute inset-0 rounded-full bg-white/50 animate-ping"></div>
                                 )}
                             </div>
                             
                             {/* Arrow count badge */}
                             {stuckArrows.length > 0 && (
-                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg border-2 border-white">
+                                <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg border-2 border-white">
                                     {stuckArrows.length}
                                 </div>
                             )}
+                            
+                            {/* Target stand */}
+                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-2 h-8 bg-gradient-to-b from-amber-700 to-amber-900 rounded-b"></div>
                         </div>
 
                         {/* Flying Arrow Animation */}
                         {arrowFlying && (
-                            <div className="absolute left-1/4 top-1/2 -translate-y-1/2 z-20 pointer-events-none animate-arrow-fly">
-                                <svg width="40" height="12" viewBox="0 0 40 12">
-                                    <line x1="0" y1="6" x2="30" y2="6" stroke="#92400e" strokeWidth="3" />
-                                    <polygon points="30,6 40,2 40,10" fill="#d97706" />
-                                    <path d="M 3 6 L 0 2 M 6 6 L 3 2" stroke="#dc2626" strokeWidth="2" />
-                                    <path d="M 3 6 L 0 10 M 6 6 L 3 10" stroke="#dc2626" strokeWidth="2" />
+                            <div className="absolute left-1/4 top-1/2 z-20 pointer-events-none animate-arrow-fly">
+                                <svg width="50" height="14" viewBox="0 0 50 14" style={{ filter: 'drop-shadow(2px 2px 3px rgba(0,0,0,0.3))' }}>
+                                    {/* Motion blur effect */}
+                                    <defs>
+                                        <linearGradient id="motionBlur" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#92400e" stopOpacity="0.2" />
+                                            <stop offset="100%" stopColor="#92400e" stopOpacity="1" />
+                                        </linearGradient>
+                                    </defs>
+                                    {/* Shaft with motion blur */}
+                                    <line x1="-10" y1="7" x2="35" y2="7" stroke="url(#motionBlur)" strokeWidth="3" />
+                                    <line x1="10" y1="7" x2="35" y2="7" stroke="#a16207" strokeWidth="3" />
+                                    {/* Arrow head */}
+                                    <polygon points="35,7 50,2 50,12" fill="#78716c" />
+                                    <polygon points="35,7 48,3 48,11" fill="#a8a29e" />
+                                    {/* Fletching */}
+                                    <path d="M 5 7 L 0 2 M 10 7 L 5 2" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
+                                    <path d="M 5 7 L 0 12 M 10 7 L 5 12" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
                                 </svg>
                             </div>
                         )}
