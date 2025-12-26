@@ -2515,6 +2515,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const lastTimeRef = React.useRef(0);
             const countdownRef = React.useRef(null);
 
+            // Helper for stats
+            const getSkinStats = () => {
+                const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
+                return skin.stats || {};
+            };
+
             // Music control effect
             React.useEffect(() => {
                 if (gameState === 'setup' || gameState === 'gameover') {
@@ -4720,6 +4726,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         const App = () => {
+            // Safer JSON parse helper
+            const safeJSON = (key, fallback) => {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : fallback;
+                } catch (e) {
+                    console.error('JSON parse error for key:', key, e);
+                    return fallback;
+                }
+            };
+
             const [view, setView] = React.useState('list');
             const [learnedWords, setLearnedWords] = React.useState(new Set());
             const [difficultWords, setDifficultWords] = React.useState(new Set());
@@ -4735,17 +4752,18 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Init App
             React.useEffect(() => {
-                SoundManager.preload();
+                try {
+                    SoundManager.preload();
+                } catch (err) {
+                    console.warn('SoundManager preload failed:', err);
+                }
             }, []);
             const [isAuthChecking, setIsAuthChecking] = React.useState(true);
             const [incomingInvitation, setIncomingInvitation] = React.useState(null);
             const [customReviewList, setCustomReviewList] = React.useState(null);
 
             // Shop Data
-            const [unlockedSkins, setUnlockedSkins] = React.useState(() => {
-                const saved = localStorage.getItem('toeic_unlocked_skins');
-                return saved ? JSON.parse(saved) : ['skin_default'];
-            });
+            const [unlockedSkins, setUnlockedSkins] = React.useState(() => safeJSON('toeic_unlocked_skins', ['skin_default']));
             const [equippedSkin, setEquipSkin] = React.useState(() => localStorage.getItem('toeic_equipped_skin') || 'skin_default');
             const [buyingItem, setBuyingItem] = React.useState(null);
 
