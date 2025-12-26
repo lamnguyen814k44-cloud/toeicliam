@@ -3120,10 +3120,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const jump = () => {
-                if (gameState !== 'playing') {
-                    if (gameState === 'start') setGameState('playing');
+                if (gameState === 'ready') {
+                    setGameState('playing');
+                    birdVelRef.current = JUMP_STRENGTH;
+                    playSound('general', 'click');
                     return;
                 }
+                if (gameState !== 'playing') return;
+
                 birdVelRef.current = JUMP_STRENGTH;
                 playSound('general', 'click');
             };
@@ -3167,6 +3171,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                 const deltaTime = time - lastTimeRef.current;
                 lastTimeRef.current = time;
+
+                if (gameState === 'ready') {
+                    // Hover effect
+                    birdYRef.current = 300 + Math.sin(time / 300) * 10;
+                    setBirdY(birdYRef.current);
+                    requestRef.current = requestAnimationFrame(gameLoop);
+                    return;
+                }
 
                 // Physics
                 birdVelRef.current += GRAVITY;
@@ -3257,7 +3269,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             React.useEffect(() => {
-                if (gameState === 'playing') {
+                if (gameState === 'playing' || gameState === 'ready') {
                     lastTimeRef.current = performance.now();
                     requestRef.current = requestAnimationFrame(gameLoop);
                 }
@@ -3297,6 +3309,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         </div>
                     )}
 
+                    {/* Ready Hint */}
+                    {gameState === 'ready' && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center animate-pulse">
+                            <i className="fas fa-hand-pointer text-4xl text-white drop-shadow-md mb-2"></i>
+                            <div className="text-2xl font-black text-white drop-shadow-md">TAP TO FLY</div>
+                        </div>
+                    )}
+
                     {/* Game Over Screen */}
                     {gameState === 'gameover' && (
                         <div className="absolute inset-0 z-30 bg-black/70 flex flex-col items-center justify-center animate-fadeIn">
@@ -3305,7 +3325,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <div className="text-slate-500 font-bold mb-1">SCORE</div>
                                 <div className="text-5xl font-black text-indigo-900 mb-4">{score}</div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => { resetGame(); setGameState('playing'); }} className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition">
+                                    <button onClick={() => { resetGame(); setGameState('ready'); }} className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition">
                                         <i className="fas fa-redo mr-2"></i>RETRY
                                     </button>
                                     {/* Menu button handled by parent UI switch usually, but let's add helper */}
@@ -3322,7 +3342,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </div>
                             <h1 className="text-5xl font-black text-white drop-shadow-lg mb-2 stroke-black">VOCAB BIRD</h1>
                             <p className="text-white font-bold mb-8 text-lg bg-black/20 px-4 py-1 rounded-full">Fly through the correct meaning!</p>
-                            <button onClick={() => setGameState('playing')} className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-full font-black text-2xl shadow-xl border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1 transition animate-pulse">
+                            <button onClick={() => setGameState('ready')} className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-full font-black text-2xl shadow-xl border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1 transition animate-pulse">
                                 START
                             </button>
                         </div>
