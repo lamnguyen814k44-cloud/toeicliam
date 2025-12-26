@@ -2422,6 +2422,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             const gameLoopRef = React.useRef(null);
             const lastTimeRef = React.useRef(0);
+            const countdownRef = React.useRef(null);
 
             const toggleTopic = (topic) => {
                 setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]);
@@ -2482,16 +2483,25 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setSpeed(1);
                 setPlayerLane(1);
                 setCountdown(3);
+                setObstaclePosition(-20);
+                setIsChecking(false);
+                setLastResult(null);
+                lastTimeRef.current = 0;
+
+                // Clear any existing intervals/loops
+                if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+                if (countdownRef.current) clearInterval(countdownRef.current);
+
                 setGameState('countdown');
                 generateNewRound(shuffled);
 
                 // Start countdown
                 let count = 3;
-                const countdownInterval = setInterval(() => {
+                countdownRef.current = setInterval(() => {
                     count--;
                     setCountdown(count);
                     if (count === 0) {
-                        clearInterval(countdownInterval);
+                        clearInterval(countdownRef.current);
                         setGameState('playing');
                     }
                 }, 1000);
@@ -2595,13 +2605,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const handleTouchEnd = (e) => {
-                if (!touchStartRef.current || gameState !== 'playing') return;
+                if (!touchStartRef.current) return;
+                if (gameState !== 'playing' && gameState !== 'countdown') return;
 
                 const touchEnd = e.changedTouches[0].clientX;
                 const diff = touchEnd - touchStartRef.current;
 
-                // Minimum swipe distance: 50px
-                if (Math.abs(diff) > 50) {
+                // Minimum swipe distance: 30px (reduced for better responsiveness)
+                if (Math.abs(diff) > 30 && gameState === 'playing') {
                     if (diff > 0) {
                         // Swipe right
                         setPlayerLane(prev => Math.min(2, prev + 1));
@@ -2728,7 +2739,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Playing Screen
             return (
-                <div className="max-w-md mx-auto py-4 px-2 select-none">
+                <div className="max-w-md mx-auto py-2 px-2 select-none pb-20">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-4 px-2">
                         <button onClick={() => { setGameState('setup'); cancelAnimationFrame(gameLoopRef.current); }} className="text-slate-400 hover:text-slate-600 text-sm font-bold">
@@ -2743,16 +2754,16 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     </div>
 
                     {/* Word Display */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-2xl text-center mb-4 shadow-lg">
-                        <div className="text-xs opacity-70 mb-1">{currentWord?.topic}</div>
-                        <div className="text-3xl font-black">{currentWord?.word}</div>
-                        <div className="text-sm opacity-70 mt-1">{currentWord?.ipa}</div>
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl text-center mb-3 shadow-lg">
+                        <div className="text-xs opacity-70">{currentWord?.topic}</div>
+                        <div className="text-2xl font-black">{currentWord?.word}</div>
+                        <div className="text-xs opacity-70">{currentWord?.ipa}</div>
                     </div>
 
                     {/* Game Area */}
                     <div
                         className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden"
-                        style={{ height: '400px' }}
+                        style={{ height: 'min(350px, 50vh)' }}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                     >
@@ -3183,7 +3194,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Playing Screen
             return (
-                <div className="max-w-md mx-auto py-4 px-4 select-none">
+                <div className="max-w-md mx-auto py-2 px-3 select-none pb-20">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-4">
                         <button onClick={() => setGameState('setup')} className="text-slate-400 hover:text-slate-600 text-sm font-bold">
@@ -3198,14 +3209,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     </div>
 
                     {/* Vietnamese Meaning */}
-                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6 rounded-2xl text-center mb-6 shadow-lg">
-                        <div className="text-xs opacity-70 mb-2">{currentWord?.topic}</div>
-                        <div className="text-2xl font-black mb-2">{currentWord?.meaning}</div>
-                        <div className="text-sm opacity-70 italic">"{currentWord?.example}"</div>
+                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-3 rounded-xl text-center mb-3 shadow-lg">
+                        <div className="text-xs opacity-70">{currentWord?.topic}</div>
+                        <div className="text-lg font-black">{currentWord?.meaning}</div>
+                        <div className="text-xs opacity-70 italic truncate">"{currentWord?.example}"</div>
                     </div>
 
                     {/* Archery Area */}
-                    <div className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 mb-6" style={{ height: '200px' }}>
+                    <div className="relative bg-slate-100 dark:bg-slate-800 rounded-xl p-4 mb-3" style={{ height: 'min(160px, 25vh)' }}>
                         {/* Target */}
                         <div className={`absolute right-6 top-1/2 -translate-y-1/2 transition-all ${hitTarget ? 'scale-110' : ''}`}>
                             <div className="w-20 h-20 rounded-full bg-white border-8 border-red-500 flex items-center justify-center relative">
