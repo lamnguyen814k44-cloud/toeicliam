@@ -553,7 +553,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -581,7 +581,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1363,13 +1363,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // Đường dẫn đến folder chứa file audio từ vựng
             // Cấu trúc: audio/Topic/Word.wav
             audioBasePath: './audio',  // hoặc 'https://raw.githubusercontent.com/lamnguyen814k44-cloud/toeicliam/main/audio'
-            
+
             // Đường dẫn đến folder sounds effects
             soundsBasePath: './sounds',
-            
+
             // Định dạng file audio: 'mp3' hoặc 'wav'
             audioFormat: 'wav',
-            
+
             // Định dạng file sounds: 'mp3' hoặc 'wav'
             soundsFormat: 'wav',
         };
@@ -1378,7 +1378,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // Cấu trúc folder: sounds/TabName/soundType/sound1.wav, sound2.mp3,...
         // Hoặc: sounds/TabName/soundType.wav (file đơn)
         const soundsBase = AUDIO_CONFIG.soundsBasePath || './sounds';
-        
+
         // Danh sách sounds theo tab
         const SOUND_CONFIG = {
             vocabulary: ['click', 'open', 'close'],
@@ -1387,10 +1387,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             quiz: ['correct', 'wrong', 'complete', 'tick'],
             general: ['click', 'success', 'error', 'levelup', 'coin'],
         };
-        
+
         // Số lượng file tối đa để thử trong mỗi folder (correct1, correct2,... correct10)
         const MAX_SOUND_VARIANTS = 10;
-        
+
         // CDN Fallback URLs
         const FALLBACK_SOUNDS = {
             flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
@@ -1411,37 +1411,37 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             win: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
             tick: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
         };
-        
+
         // Cache sounds đã load thành công - lưu array cho mỗi loại
         const soundCache = {};
-        
+
         // Hàm load tất cả variants của 1 sound
         const loadSoundVariants = async (tab, sound) => {
             const key = `${tab}_${sound}`;
-            
+
             if (soundCache[key] && soundCache[key].length > 0) {
                 return soundCache[key];
             }
-            
+
             soundCache[key] = [];
-            
+
             // Tạo danh sách URLs để thử
             const urlsToTry = [];
-            
+
             // 1. Thử file đơn trong folder: sounds/quiz/correct/correct.wav (KHÔNG CÓ SỐ)
             urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}.wav`, type: 'single-in-folder' });
             urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}.mp3`, type: 'single-in-folder' });
-            
+
             // 2. Thử folder với nhiều files: sounds/quiz/correct/correct1.wav, correct2.mp3,...
             for (let i = 1; i <= MAX_SOUND_VARIANTS; i++) {
                 urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}${i}.wav`, type: 'variant' });
                 urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}${i}.mp3`, type: 'variant' });
             }
-            
+
             // 3. Thử file đơn trực tiếp: sounds/quiz/correct.wav
             urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}.wav`, type: 'single' });
             urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}.mp3`, type: 'single' });
-            
+
             // 4. Thử trong general
             urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}.wav`, type: 'single-in-folder' });
             urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}.mp3`, type: 'single-in-folder' });
@@ -1451,35 +1451,35 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             }
             urlsToTry.push({ url: `${soundsBase}/general/${sound}.wav`, type: 'single' });
             urlsToTry.push({ url: `${soundsBase}/general/${sound}.mp3`, type: 'single' });
-            
+
             // Load tất cả URLs song song
             const loadPromises = urlsToTry.map(({ url }) => {
                 return new Promise((resolve) => {
                     const audio = new Audio();
                     audio.src = url;
-                    
+
                     audio.oncanplaythrough = () => resolve(audio);
                     audio.onerror = () => resolve(null);
-                    
+
                     // Timeout sau 3 giây
                     setTimeout(() => resolve(null), 3000);
-                    
+
                     audio.load();
                 });
             });
-            
+
             const results = await Promise.all(loadPromises);
             soundCache[key] = results.filter(audio => audio !== null);
-            
+
             // Nếu không có file nào, thêm fallback
             if (soundCache[key].length === 0 && FALLBACK_SOUNDS[sound]) {
                 const fallbackAudio = new Audio(FALLBACK_SOUNDS[sound]);
                 soundCache[key] = [fallbackAudio];
             }
-            
+
             return soundCache[key];
         };
-        
+
         // Preload tất cả sounds
         Object.keys(SOUND_CONFIG).forEach(tab => {
             SOUND_CONFIG[tab].forEach(sound => {
@@ -1497,21 +1497,21 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 else if (['next', 'prev'].includes(type)) tab = 'flashcard';
                 else tab = 'general';
             }
-            
+
             console.log(`🔊 Playing sound: ${tab}/${type}`);
-            
+
             try {
                 const variants = await loadSoundVariants(tab, type);
-                
+
                 console.log(`📁 Found ${variants.length} sound variants for ${tab}/${type}`);
-                
+
                 if (variants && variants.length > 0) {
                     // Random chọn 1 sound từ các variants
                     const randomIndex = Math.floor(Math.random() * variants.length);
                     const audio = variants[randomIndex];
-                    
+
                     console.log(`▶️ Playing: ${audio.src}`);
-                    
+
                     const sound = audio.cloneNode();
                     sound.volume = type === 'flip' ? 0.3 : 0.5;
                     sound.play().catch((e) => {
@@ -1527,7 +1527,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 playFallbackSound(type);
             }
         };
-        
+
         // Fallback: Web Audio API (nếu file lỗi)
         const playFallbackSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1563,7 +1563,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         // Cache audio đã tải
         const ttsCache = {};
-        
+
         // Chuyển từ thành tên file - giữ nguyên tên gốc
         const wordToFilename = (word) => {
             // Giữ nguyên tên, chỉ trim
@@ -1579,7 +1579,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         const playTTS = (text, topic = null) => {
             return new Promise((resolve, reject) => {
                 const cacheKey = text;
-                
+
                 // Kiểm tra cache
                 if (ttsCache[cacheKey]) {
                     const audio = ttsCache[cacheKey].cloneNode();
@@ -1587,28 +1587,28 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     audio.play().catch(reject);
                     return;
                 }
-                
+
                 if (!AUDIO_CONFIG.audioBasePath) {
                     reject('No audio configured');
                     return;
                 }
-                
+
                 const filename = wordToFilename(text);
                 const basePath = AUDIO_CONFIG.audioBasePath;
-                
+
                 // Tạo danh sách URLs để thử (theo thứ tự ưu tiên)
                 const urlsToTry = [];
-                
+
                 // 1. Nếu có topic, thử trong subfolder topic trước
                 if (topic) {
                     urlsToTry.push(`${basePath}/${topic}/${filename}.${audioExt}`);
                     urlsToTry.push(`${basePath}/${topic}/${filename}.${audioExt === 'wav' ? 'mp3' : 'wav'}`);
                 }
-                
+
                 // 2. Thử trực tiếp trong folder audio
                 urlsToTry.push(`${basePath}/${filename}.${audioExt}`);
                 urlsToTry.push(`${basePath}/${filename}.${audioExt === 'wav' ? 'mp3' : 'wav'}`);
-                
+
                 // 3. Thử với tên lowercase
                 const lowercaseName = text.toLowerCase().trim();
                 if (lowercaseName !== filename) {
@@ -1617,7 +1617,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     }
                     urlsToTry.push(`${basePath}/${lowercaseName}.${audioExt}`);
                 }
-                
+
                 // Hàm thử load audio từ URL
                 const tryNextUrl = (index) => {
                     if (index >= urlsToTry.length) {
@@ -1625,33 +1625,33 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         reject('Audio not found');
                         return;
                     }
-                    
+
                     const url = urlsToTry[index];
                     const audio = new Audio(url);
-                    
+
                     audio.oncanplaythrough = () => {
                         ttsCache[cacheKey] = audio;
                         audio.onended = resolve;
                         audio.play().catch(() => tryNextUrl(index + 1));
                     };
-                    
+
                     audio.onerror = () => tryNextUrl(index + 1);
-                    
+
                     // Trigger load
                     audio.load();
                 };
-                
+
                 tryNextUrl(0);
             });
         };
-        
+
         const SpeakerButton = ({ text, topic = null, className = "" }) => {
             const [isPlaying, setIsPlaying] = React.useState(false);
-            
+
             const speak = async (e) => {
                 e.stopPropagation();
                 if (isPlaying) return;
-                
+
                 setIsPlaying(true);
                 try {
                     await playTTS(text, topic);
@@ -1663,12 +1663,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             return (
-                <button 
-                    onClick={speak} 
+                <button
+                    onClick={speak}
                     disabled={isPlaying}
-                    className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold transition-all border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 ${className} ${isPlaying ? 'opacity-50 cursor-wait' : ''}`} 
+                    className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold transition-all border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 ${className} ${isPlaying ? 'opacity-50 cursor-wait' : ''}`}
                     title="Nghe phát âm"
-                > 
+                >
                     <i className={`fas ${isPlaying ? 'fa-spinner fa-spin' : 'fa-volume-up'}`}></i> 🔊
                 </button>
             );
@@ -1939,6 +1939,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     setCurrentIndex(0);
                 }
             }, [customReviewList]);
+
+            // AUTO-SPEAK: Tự động đọc từ khi hiển thị thẻ mới
+            React.useEffect(() => {
+                if (!isSetup && sessionData.length > 0 && sessionData[currentIndex]) {
+                    const item = sessionData[currentIndex];
+                    // Chỉ đọc khi thẻ chưa lật (hiển thị mặt trước)
+                    if (!isFlipped) {
+                        playTTS(item.word, item.topic).catch(err => console.log('Auto-speak error:', err));
+                    }
+                }
+            }, [currentIndex, isSetup, sessionData]);
 
             const toggleTopic = (topic) => {
                 setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]);
@@ -2579,7 +2590,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 // Tìm topic của từ trong allData
                 const item = allData.find(i => i.word.toLowerCase() === text.toLowerCase());
                 const topic = item ? item.topic : null;
-                playTTS(text, topic).catch(() => {});
+                playTTS(text, topic).catch(() => { });
             };
 
             const toggleTopic = (topic) => {
@@ -2763,7 +2774,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
                 if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
                 if (isJoining) return; // Prevent double click
-                
+
                 setIsJoining(true);
                 try {
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
@@ -2775,7 +2786,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     if (roomData.hostId === user.uid) { setIsJoining(false); return alert("Bạn không thể tự vào phòng của chính mình!"); }
                     if (roomData.status !== 'waiting') { setIsJoining(false); return alert("Phòng đang chơi hoặc đã đầy!"); }
-                    
+
                     // Load cards TRƯỚC khi update room để giảm delay
                     if (roomData.board) {
                         setCards(roomData.board);
@@ -2784,22 +2795,22 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         setScores(roomData.scores || { host: 0, guest: 0 });
                         setCurrentPlayer(roomData.turn === roomData.hostId ? 1 : 2);
                     }
-                    
+
                     // Set local state ngay lập tức
                     setGameMode('pvp_online');
                     setRoomId(inputRoomId);
                     setIsHost(false);
                     setOnlineStatus('playing');
                     setHasPaid(false);
-                    
+
                     // Update room sau cùng (async, không block UI)
                     roomRef.update({ guestId: user.uid, status: 'playing' });
-                    
+
                     setIsJoining(false);
-                } catch (error) { 
-                    console.error("Lỗi vào phòng:", error); 
+                } catch (error) {
+                    console.error("Lỗi vào phòng:", error);
                     setIsJoining(false);
-                    alert("Lỗi kết nối phòng."); 
+                    alert("Lỗi kết nối phòng.");
                 }
             };
 
@@ -3160,7 +3171,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {cards.map((card, index) => {
                             const isFlipped = flippedIndices.includes(index); const isMatched = matchedIndices.includes(index);
                             if (isMatched) return <div key={card.id} className="aspect-square opacity-0 transition-opacity duration-500"></div>;
-                            
+
                             // Tính toán font size dựa trên độ dài content
                             const len = card.content.length;
                             let fontClass = 'text-sm'; // default
@@ -3168,7 +3179,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             else if (len > 25) fontClass = 'text-[9px]';
                             else if (len > 18) fontClass = 'text-[10px]';
                             else if (len > 12) fontClass = 'text-xs';
-                            
+
                             return (
                                 <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-square cursor-pointer perspective-1000 group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`}>
                                     <div className={`w-full h-full transition-all duration-300 transform-style-3d relative shadow-sm rounded-lg ${isFlipped ? 'rotate-y-180' : ''}`}>
@@ -3188,7 +3199,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         </div>
                                         {/* Mặt sau - đã lật */}
                                         <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-slate-800 border-2 border-indigo-500 dark:border-indigo-400 rounded-lg flex flex-col items-center justify-center p-1 text-center shadow-lg overflow-hidden">
-                                            <p className={`font-bold text-slate-800 dark:text-white leading-tight break-words w-full hyphens-auto ${fontClass}`} style={{display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word'}}>{card.content}</p>
+                                            <p className={`font-bold text-slate-800 dark:text-white leading-tight break-words w-full hyphens-auto ${fontClass}`} style={{ display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word' }}>{card.content}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -3477,7 +3488,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 // Tìm topic của từ trong toeicData
                 const item = toeicData.find(i => i.word.toLowerCase() === text.toLowerCase());
                 const topic = item ? item.topic : null;
-                playTTS(text, topic).catch(() => {});
+                playTTS(text, topic).catch(() => { });
             };
 
             const startReviewSession = (wordsToReview) => {
