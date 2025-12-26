@@ -1386,39 +1386,39 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // 1. Local Assets (Priority 1)
             localAssets: {
                 common: {
-                    click: './sounds/common/click.mp3',
-                    success: './sounds/common/success.mp3',
-                    error: './sounds/common/error.mp3',
-                    levelup: './sounds/common/levelup.mp3',
-                    coin: './sounds/common/coin.mp3',
-                    open: './sounds/common/open.mp3',
-                    close: './sounds/common/close.mp3',
-                    next: './sounds/common/next.mp3',
-                    prev: './sounds/common/prev.mp3',
+                    click: './sounds/general/click/click.mp3',
+                    success: './sounds/quiz/correct/correct.mp3',
+                    error: './sounds/quiz/wrong/wrong.mp3',
+                    levelup: './sounds/quiz/complete/complete.mp3',
+                    coin: './sounds/memory/coin/coin.mp3',
+                    open: './sounds/general/open/open.mp3',
+                    close: './sounds/general/close/close.mp3',
+                    next: './sounds/flashcard/next/next.mp3',
+                    prev: './sounds/flashcard/prev/prev.mp3',
                 },
                 game_runner: {
-                    start: './sounds/game_runner/start.mp3',
-                    move: './sounds/game_runner/move.mp3',
-                    speedup: './sounds/game_runner/speedup.mp3',
-                    gameover: './sounds/game_runner/gameover.mp3',
+                    start: './sounds/quiz/complete/complete.mp3',
+                    move: './sounds/general/click/click.mp3',
+                    speedup: './sounds/quiz/complete/complete.mp3',
+                    gameover: './sounds/quiz/wrong/wrong.mp3',
                 },
                 game_archery: {
-                    draw: './sounds/game_archery/draw.mp3',
-                    release: './sounds/game_archery/release.mp3',
-                    hit: './sounds/game_archery/hit.mp3',
-                    miss: './sounds/game_archery/miss.mp3',
-                    hint: './sounds/game_archery/hint.mp3',
+                    draw: './sounds/general/click/click.mp3',
+                    release: './sounds/quiz/correct/correct.mp3',
+                    hit: './sounds/quiz/correct/correct.mp3',
+                    miss: './sounds/quiz/wrong/wrong.mp3',
+                    hint: './sounds/general/click/click.mp3',
                 },
                 game_memory: {
-                    flip: './sounds/game_memory/flip.mp3',
-                    match: './sounds/game_memory/match.mp3',
-                    miss: './sounds/game_memory/miss.mp3',
-                    win: './sounds/game_memory/win.mp3',
+                    flip: './sounds/memory/flip/flip.mp3',
+                    match: './sounds/memory/match/match.mp3',
+                    miss: './sounds/memory/miss/miss.mp3',
+                    win: './sounds/memory/win/win.mp3',
                 },
                 game_quiz: {
-                    correct: './sounds/game_quiz/correct.mp3',
-                    wrong: './sounds/game_quiz/wrong.mp3',
-                    tick: './sounds/game_quiz/tick.mp3',
+                    correct: './sounds/quiz/correct/correct.mp3',
+                    wrong: './sounds/quiz/wrong/wrong.mp3',
+                    tick: './sounds/quiz/tick/tick.mp3',
                 },
                 music: {
                     general: './sounds/music/general.mp3',
@@ -4673,7 +4673,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {SHOP_ITEMS.map(item => {
                             const isUnlocked = unlockedSkins.includes(item.id);
-                            // const equippedSkin = props.equippedSkin || 'skin_default'; // This line was removed as equippedSkin is already a prop
+                            const isEquipped = equippedSkin === item.id;
                             const isBuying = buyingItem === item.id;
                             // Fix color parsing
                             const iconClass = `text-4xl ${item.color.includes('indigo') ? 'text-indigo-500' : item.color.includes('slate') ? 'text-slate-500' : item.color.includes('zinc') ? 'text-zinc-800' : item.color.includes('orange') ? 'text-orange-500' : 'text-yellow-500'}`;
