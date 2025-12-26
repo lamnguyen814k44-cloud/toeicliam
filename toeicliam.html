@@ -6680,7 +6680,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     </div>
 
                     <LeaderboardModal isOpen={isLeaderboardOpen} onClose={() => setIsLeaderboardOpen(false)} user={user} coins={coins} />
-                    <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} data={toeicData} learnedWords={learnedWords} learnedTimestamps={learnedTimestamps} startReviewSession={startReviewSession} />
+                    <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} data={toeicData} learnedWords={learnedWords} learnedTimestamps={learnedTimestamps} startReviewSession={startReviewSession} onAdminOpen={() => { setIsAdminOpen(true); setIsProfileOpen(false); }} />
 
                     {/* Admin Trigger (Button hidden in Profile, but we can also add a secret trigger or just pass prop to Profile) */}
                     {/* For now let's pass setIsAdminOpen to ProfileModal or add a discrete button in ProfileModal */}
