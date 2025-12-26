@@ -2389,7 +2389,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // RUNNER GAME - Endless Runner Vocabulary Game
         // ============================================
         const RunnerGameView = ({ allData, coins, setCoins, user }) => {
-            const [gameState, setGameState] = React.useState('setup'); // setup, playing, gameover
+            const [gameState, setGameState] = React.useState('setup'); // setup, countdown, playing, gameover
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
 
@@ -2406,6 +2406,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [isChecking, setIsChecking] = React.useState(false);
             const [lastResult, setLastResult] = React.useState(null); // 'correct' | 'wrong' | null
             const [speed, setSpeed] = React.useState(1);
+            const [countdown, setCountdown] = React.useState(3);
 
             const gameLoopRef = React.useRef(null);
             const lastTimeRef = React.useRef(0);
@@ -2468,8 +2469,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setStreak(0);
                 setSpeed(1);
                 setPlayerLane(1);
-                setGameState('playing');
+                setCountdown(3);
+                setGameState('countdown');
                 generateNewRound(shuffled);
+
+                // Start countdown
+                let count = 3;
+                const countdownInterval = setInterval(() => {
+                    count--;
+                    setCountdown(count);
+                    if (count === 0) {
+                        clearInterval(countdownInterval);
+                        setGameState('playing');
+                    }
+                }, 1000);
             };
 
             const checkCollision = () => {
@@ -2698,6 +2711,16 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     {/* Game Area */}
                     <div className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden" style={{ height: '400px' }}>
+
+                        {/* Countdown Overlay */}
+                        {gameState === 'countdown' && (
+                            <div className="absolute inset-0 bg-slate-900/80 z-50 flex items-center justify-center">
+                                <div className="text-center">
+                                    <div className="text-8xl font-black text-white animate-ping">{countdown > 0 ? countdown : 'GO!'}</div>
+                                    <div className="text-white/70 mt-4 text-lg">Chuẩn bị...</div>
+                                </div>
+                            </div>
+                        )}
                         {/* Speed lines background */}
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                             {[...Array(10)].map((_, i) => (
@@ -2799,6 +2822,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [power, setPower] = React.useState(0); // 0-100
             const [gamePool, setGamePool] = React.useState([]);
             const [wrongCount, setWrongCount] = React.useState(0);
+            const [hintCount, setHintCount] = React.useState(0);
             const [isShaking, setIsShaking] = React.useState(false);
             const [arrowFlying, setArrowFlying] = React.useState(false);
             const [hitTarget, setHitTarget] = React.useState(false);
@@ -2826,6 +2850,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setTypedText('');
                 setPower(0);
                 setWrongCount(0);
+                setHintCount(0);
                 setGamePool(pool);
                 setArrowFlying(false);
                 setHitTarget(false);
@@ -2872,18 +2897,38 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         shootArrow();
                     }
                 } else {
-                    // Wrong character
+                    // Wrong character - just shake, don't end game
                     playSound('quiz', 'wrong');
                     setIsShaking(true);
-                    setPower(prev => Math.max(0, prev - 10));
                     setWrongCount(prev => prev + 1);
                     setTimeout(() => setIsShaking(false), 300);
-
-                    // Too many wrong = game over
-                    if (wrongCount >= 4) {
-                        gameOver();
-                    }
                 }
+            };
+
+            const useHint = () => {
+                if (!currentWord || gameState !== 'playing') return;
+                const target = currentWord.word.toLowerCase();
+
+                if (typedText.length >= target.length) return; // Already complete
+
+                // Reveal next character
+                const nextChar = target[typedText.length];
+                const newTyped = typedText + nextChar;
+                setTypedText(newTyped);
+                setHintCount(prev => prev + 1);
+
+                // Update power
+                const newPower = Math.round((newTyped.length / target.length) * 100);
+                setPower(newPower);
+
+                playSound('memory', 'flip');
+
+                // Check if complete
+                if (newTyped === target) {
+                    shootArrow();
+                }
+
+                inputRef.current?.focus();
             };
 
             const shootArrow = () => {
@@ -2895,10 +2940,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     setHitTarget(true);
                     playSound('memory', 'match');
 
-                    // Calculate score
+                    // Calculate score (minus hints)
                     const baseScore = 100;
-                    const accuracy = Math.max(0, 100 - (wrongCount * 20));
-                    const earned = Math.round(baseScore * (accuracy / 100));
+                    const hintPenalty = hintCount * 20;
+                    const earned = Math.max(0, baseScore - hintPenalty);
 
                     setScore(prev => prev + earned);
                     setStreak(prev => prev + 1);
@@ -3076,7 +3121,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <div className={`absolute left-6 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-shake' : ''}`}>
                             <div className="relative">
                                 {/* Bow */}
-                                <div className="w-8 h-24 border-l-4 border-amber-700 rounded-l-full"></div>
+                                <div className="w-8 h-24 border-r-4 border-amber-700 rounded-r-full"></div>
                                 {/* Arrow */}
                                 <div className={`absolute top-1/2 left-4 -translate-y-1/2 transition-all duration-500 ${arrowFlying ? 'translate-x-48 opacity-0' : ''}`}>
                                     <div className="flex items-center">
@@ -3128,20 +3173,24 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             placeholder="Nhập từ tiếng Anh..."
                             autoComplete="off"
                             autoCapitalize="off"
-                            disabled={gameState !== 'playing'}
                         />
+
+                        {/* Hint button */}
+                        <button
+                            onClick={useHint}
+                            disabled={gameState !== 'playing' || typedText.length >= currentWord?.word.length}
+                            className="w-full mt-3 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 py-2 rounded-xl font-bold text-sm hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <i className="fas fa-lightbulb mr-2"></i>
+                            Gợi ý (-20đ)
+                        </button>
                     </div>
 
-                    {/* Wrong count indicator */}
-                    <div className="flex justify-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-3 h-3 rounded-full transition-all ${i < wrongCount ? 'bg-red-500' : 'bg-slate-200 dark:bg-slate-600'}`}
-                            ></div>
-                        ))}
+                    {/* Stats */}
+                    <div className="flex justify-center gap-4 text-xs text-slate-500">
+                        <span><i className="fas fa-lightbulb text-yellow-500 mr-1"></i>Gợi ý: {hintCount}</span>
+                        <span><i className="fas fa-times text-red-500 mr-1"></i>Sai: {wrongCount}</span>
                     </div>
-                    <div className="text-center text-xs text-slate-400 mt-1">Sai {wrongCount}/5 lần</div>
                 </div>
             );
         };
