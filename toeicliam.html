@@ -3065,6 +3065,324 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         // ============================================
+        // FLAPPY VOCAB BIRD GAME VIEW
+        // ============================================
+        const FlappyGameView = ({ allData, coins, setCoins, user }) => {
+            const [gameState, setGameState] = React.useState('start'); // start, playing, gameover
+            const [birdY, setBirdY] = React.useState(300);
+            const [birdVelocity, setBirdVelocity] = React.useState(0);
+            const [birdRotation, setBirdRotation] = React.useState(0);
+            const [pipes, setPipes] = React.useState([]);
+            const [score, setScore] = React.useState(0);
+            const [highScore, setHighScore] = React.useState(() => parseInt(localStorage.getItem('flappy_high_score') || '0'));
+            const [currentWord, setCurrentWord] = React.useState(null);
+
+            const gameRef = React.useRef(null);
+            const requestRef = React.useRef();
+            const lastTimeRef = React.useRef();
+            const birdYRef = React.useRef(300);
+            const birdVelRef = React.useRef(0);
+
+            // Constants
+            const GRAVITY = 0.5;
+            const JUMP_STRENGTH = -8;
+            const PIPE_SPEED = 3;
+            const PIPE_SPAWN_RATE = 2000;
+            const BIRD_X = 80;
+            const GAME_HEIGHT = 600;
+
+            // Spawn Timer
+            const spawnTimerRef = React.useRef(0);
+
+            React.useEffect(() => {
+                if (gameState === 'start' && !currentWord) {
+                    pickNewWord();
+                    resetGame();
+                }
+            }, [gameState]);
+
+            const pickNewWord = () => {
+                const w = allData[Math.floor(Math.random() * allData.length)];
+                setCurrentWord(w);
+                return w;
+            };
+
+            const resetGame = () => {
+                setBirdY(300);
+                setBirdVelocity(0);
+                setBirdRotation(0);
+                setPipes([]);
+                setScore(0);
+                birdYRef.current = 300;
+                birdVelRef.current = 0;
+                spawnTimerRef.current = 0;
+                // pickNewWord(); // Keep current word
+            };
+
+            const jump = () => {
+                if (gameState !== 'playing') {
+                    if (gameState === 'start') setGameState('playing');
+                    return;
+                }
+                birdVelRef.current = JUMP_STRENGTH;
+                playSound('general', 'click');
+            };
+
+            const spawnPipe = (targetWord) => {
+                // Determine Correct Answer Position (Top or Bottom)
+                const isTopCorrect = Math.random() < 0.5;
+
+                // Get Wrong Answer
+                let wrongItem = allData[Math.floor(Math.random() * allData.length)];
+                while (wrongItem.id === targetWord.id) {
+                    wrongItem = allData[Math.floor(Math.random() * allData.length)];
+                }
+
+                const topText = isTopCorrect ? targetWord.meaning : wrongItem.meaning;
+                const bottomText = isTopCorrect ? wrongItem.meaning : targetWord.meaning;
+
+                const newPipe = {
+                    id: Date.now(),
+                    x: window.innerWidth + 100,
+                    isTopCorrect: isTopCorrect,
+                    topText: topText,
+                    bottomText: bottomText,
+                    passed: false
+                };
+
+                setPipes(prev => [...prev, newPipe]);
+            };
+
+            const endGame = () => {
+                setGameState('gameover');
+                playSound('runner', 'gameover');
+                if (score > highScore) {
+                    setHighScore(score);
+                    localStorage.setItem('flappy_high_score', score);
+                }
+            };
+
+            const gameLoop = (time) => {
+                if (gameState !== 'playing') return;
+
+                const deltaTime = time - lastTimeRef.current;
+                lastTimeRef.current = time;
+
+                // Physics
+                birdVelRef.current += GRAVITY;
+                birdYRef.current += birdVelRef.current;
+
+                // Ceiling/Floor Collision
+                if (birdYRef.current < 0) { birdYRef.current = 0; birdVelRef.current = 0; }
+                if (birdYRef.current > GAME_HEIGHT - 30) {
+                    endGame();
+                    return;
+                }
+
+                // Update State for Render
+                setBirdY(birdYRef.current);
+                setBirdVelocity(birdVelRef.current);
+                setBirdRotation(Math.min(Math.max(birdVelRef.current * 3, -25), 90));
+
+                // Pipes Logic
+                spawnTimerRef.current += deltaTime;
+                if (spawnTimerRef.current > PIPE_SPAWN_RATE) {
+                    spawnTimerRef.current = 0;
+                    if (currentWord) spawnPipe(currentWord);
+                }
+
+                setPipes(prevPipes => {
+                    const nextPipes = prevPipes.map(p => ({ ...p, x: p.x - PIPE_SPEED })).filter(p => p.x > -300);
+
+                    // Collision Check
+                    nextPipes.forEach(p => {
+                        // Check Pass
+                        if (!p.passed && p.x + 100 < BIRD_X) {
+                            p.passed = true;
+                            // Just passed safely? No, must collide with option
+                        }
+
+                        // Check Collision Box
+                        // Pipe Width: 200px? Let's say 150.
+                        // Bird is at BIRD_X (80).
+                        if (p.x < BIRD_X + 30 && p.x + 150 > BIRD_X) {
+                            // Inside X Range
+                            const birdCenterY = birdYRef.current + 15;
+                            const midPoint = GAME_HEIGHT / 2;
+
+                            // Top Box: 0 to midPoint - gap/2
+                            // Bottom Box: midPoint + gap/2 to GAME_HEIGHT
+                            // Actually design: Two big boxes with a small gap? 
+                            // Or split screen: Top Half vs Bottom Half.
+
+                            // Implementation: Top Half is Option A. Bottom Half is Option B.
+                            // If Bird Y < MidPoint => Chose Top.
+
+                            if (p.processed) return;
+
+                            if (birdCenterY < midPoint) {
+                                // Chose Top
+                                if (p.isTopCorrect) {
+                                    // Correct!
+                                    setScore(s => s + 1);
+                                    playSound('quiz', 'correct');
+                                    p.processed = true;
+                                    // New Word
+                                    const w = pickNewWord();
+                                    // Clear remaining pipes? Or just keep going? 
+                                    // Flappy is continuous.
+                                    // Update currentWord for NEXT pipe.
+                                } else {
+                                    endGame();
+                                }
+                            } else {
+                                // Chose Bottom
+                                if (!p.isTopCorrect) {
+                                    // Correct!
+                                    setScore(s => s + 1);
+                                    playSound('quiz', 'correct');
+                                    p.processed = true;
+                                    pickNewWord();
+                                } else {
+                                    endGame();
+                                }
+                            }
+                        }
+                    });
+
+                    return nextPipes;
+                });
+
+                requestRef.current = requestAnimationFrame(gameLoop);
+            };
+
+            React.useEffect(() => {
+                if (gameState === 'playing') {
+                    lastTimeRef.current = performance.now();
+                    requestRef.current = requestAnimationFrame(gameLoop);
+                }
+                return () => CancelAnimationFrame(requestRef.current);
+            }, [gameState]);
+
+            // Fallback cancel
+            function CancelAnimationFrame(id) {
+                if (id) window.cancelAnimationFrame(id);
+            }
+
+            return (
+                <div
+                    className="relative w-full max-w-lg mx-auto bg-sky-300 overflow-hidden shadow-2xl rounded-xl border-4 border-slate-800"
+                    style={{ height: GAME_HEIGHT }}
+                    onClick={jump}
+                >
+                    {/* Background Clouds */}
+                    <div className="absolute top-10 left-10 text-white opacity-50 text-6xl"><i className="fas fa-cloud"></i></div>
+                    <div className="absolute top-20 right-20 text-white opacity-40 text-4xl"><i className="fas fa-cloud"></i></div>
+                    <div className="absolute bottom-10 left-1/2 text-white opacity-30 text-8xl"><i className="fas fa-cloud"></i></div>
+
+                    {/* HUD */}
+                    <div className="absolute top-4 left-4 z-20 bg-white/90 px-4 py-2 rounded-xl border-2 border-slate-800 shadow-md">
+                        <div className="text-xs font-bold text-slate-500">SCORE</div>
+                        <div className="text-2xl font-black text-indigo-600">{score}</div>
+                    </div>
+                    <div className="absolute top-4 right-4 z-20 bg-yellow-400 px-3 py-1 rounded-lg border-2 border-black font-black text-xs shadow-sm">
+                        HI: {highScore}
+                    </div>
+
+                    {/* Current Problem */}
+                    {currentWord && (
+                        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-indigo-600 text-white px-6 py-2 rounded-full border-2 border-white shadow-lg animate-bounce">
+                            <div className="text-xs font-bold text-indigo-200 uppercase">Meaning of:</div>
+                            <div className="text-xl font-black">{currentWord.word}</div>
+                        </div>
+                    )}
+
+                    {/* Game Over Screen */}
+                    {gameState === 'gameover' && (
+                        <div className="absolute inset-0 z-30 bg-black/70 flex flex-col items-center justify-center animate-fadeIn">
+                            <h2 className="text-4xl font-black text-white mb-2 text-shadow-lg">GAME OVER</h2>
+                            <div className="bg-white p-6 rounded-2xl text-center mb-6 border-4 border-indigo-600 shadow-2xl">
+                                <div className="text-slate-500 font-bold mb-1">SCORE</div>
+                                <div className="text-5xl font-black text-indigo-900 mb-4">{score}</div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => { resetGame(); setGameState('playing'); }} className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition">
+                                        <i className="fas fa-redo mr-2"></i>RETRY
+                                    </button>
+                                    {/* Menu button handled by parent UI switch usually, but let's add helper */}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Start Screen */}
+                    {gameState === 'start' && (
+                        <div className="absolute inset-0 z-30 bg-black/40 flex flex-col items-center justify-center backdrop-blur-sm">
+                            <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-black shadow-xl mb-6 animate-bounce">
+                                <i className="fas fa-dove text-5xl text-white"></i>
+                            </div>
+                            <h1 className="text-5xl font-black text-white drop-shadow-lg mb-2 stroke-black">VOCAB BIRD</h1>
+                            <p className="text-white font-bold mb-8 text-lg bg-black/20 px-4 py-1 rounded-full">Fly through the correct meaning!</p>
+                            <button onClick={() => setGameState('playing')} className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-full font-black text-2xl shadow-xl border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1 transition animate-pulse">
+                                START
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Bird */}
+                    <div
+                        className="absolute z-10 w-10 h-10 bg-yellow-400 rounded-full border-2 border-black flex items-center justify-center shadow-lg transition-transform"
+                        style={{
+                            top: birdY,
+                            left: BIRD_X,
+                            transform: `rotate(${birdRotation}deg)`
+                        }}
+                    >
+                        <div className="absolute right-2 top-2 w-3 h-3 bg-white rounded-full"><div className="absolute right-0 top-1 w-1 h-1 bg-black rounded-full"></div></div>
+                        <div className="absolute -right-2 top-4 w-4 h-3 bg-orange-500 rounded-r-lg border border-black"></div>
+                        <div className="absolute -left-1 top-4 w-4 h-3 bg-white rounded-full border border-black transform -rotate-12"></div>
+                    </div>
+
+                    {/* Pipes (Gates) */}
+                    {pipes.map(p => (
+                        <React.Fragment key={p.id}>
+                            {/* Top Gate */}
+                            <div
+                                className={`absolute w-40 flex items-center justify-center p-2 text-center border-4 border-slate-800 rounded-xl shadow-lg transition-opacity ${p.processed ? 'opacity-50 scale-95' : ''}`}
+                                style={{
+                                    top: 50,
+                                    height: GAME_HEIGHT / 2 - 60,
+                                    left: p.x,
+                                    backgroundColor: '#f1f5f9'
+                                }}
+                            >
+                                <div className="font-bold text-slate-800 text-sm leading-tight">{p.topText}</div>
+                            </div>
+
+                            {/* Bottom Gate */}
+                            <div
+                                className={`absolute w-40 flex items-center justify-center p-2 text-center border-4 border-slate-800 rounded-xl shadow-lg transition-opacity ${p.processed ? 'opacity-50 scale-95' : ''}`}
+                                style={{
+                                    top: GAME_HEIGHT / 2 + 10,
+                                    height: GAME_HEIGHT / 2 - 60,
+                                    left: p.x,
+                                    backgroundColor: '#f1f5f9'
+                                }}
+                            >
+                                <div className="font-bold text-slate-800 text-sm leading-tight">{p.bottomText}</div>
+                            </div>
+
+                            {/* Divider Line */}
+                            <div className="absolute h-1 bg-slate-800/20 w-full" style={{ top: GAME_HEIGHT / 2 }}></div>
+                        </React.Fragment>
+                    ))}
+
+                    {/* Ground */}
+                    <div className="absolute bottom-0 w-full h-4 bg-green-500 border-t-4 border-slate-800"></div>
+                </div>
+            );
+        };
+
+        // ============================================
         // RUNNER GAME - Endless Runner Vocabulary Game
         // ============================================
         const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default', view }) => {
@@ -3431,7 +3749,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 }
                                 // Float logic
                                 const floatY = Math.sin(timestamp / 500 + d.id) * 0.2;
-                                return { ...d, x: d.x + (d.speed * d.direction * delta * 0.05), y: d.y + floatY };
+                                // Reduced speed from 0.05 to 0.02 for slower gameplay
+                                return { ...d, x: d.x + (d.speed * d.direction * delta * 0.02), y: d.y + floatY };
                             });
 
                             // 2. Remove invalid ducks
@@ -5503,13 +5822,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             const isFlipped = flippedIndices.includes(index) || isPreviewing; const isMatched = matchedIndices.includes(index);
                             if (isMatched) return <div key={card.id} className="aspect-square opacity-0 transition-opacity duration-500 animate-match-celebrate"></div>;
 
-                            // Tính toán font size dựa trên độ dài content - Sửa lại to hơn
+                            // Tính toán font size dựa trên độ dài content - Sửa lại to hơn nữa theo yêu cầu
                             const len = card.content.length;
-                            let fontClass = 'text-base'; // default (16px) - trước là text-sm
-                            if (len > 45) fontClass = 'text-[10px]'; // Cực dài
-                            else if (len > 30) fontClass = 'text-xs'; // ~12px
-                            else if (len > 20) fontClass = 'text-sm'; // ~14px
-                            else if (len > 10) fontClass = 'text-[15px]'; // ~15px
+                            let fontClass = 'text-base'; // default (16px)
+                            if (len > 50) fontClass = 'text-xs leading-tight'; // ~12px
+                            else if (len > 35) fontClass = 'text-sm leading-tight'; // ~14px
+                            else if (len > 20) fontClass = 'text-[15px] leading-tight'; // ~15px
+                            // Ngắn hơn 20 ký tự thì giữ nguyên text-base (16px) cho đồng bộ tiếng Anh
 
                             return (
                                 <div key={card.id} onClick={() => handleCardClick(index)} className={`relative aspect-square cursor-pointer group ${!myTurn && gameMode === 'pvp_online' ? 'cursor-not-allowed opacity-80' : ''}`} style={{ perspective: '1000px' }}>
@@ -6159,7 +6478,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} difficultWords={difficultWords} toggleLearned={toggleLearned} toggleDifficult={toggleDifficult} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} jumpToWord={jumpToWord} />}
                         {view === 'flashcard' && <FlashcardView allData={toeicData} learnedWords={learnedWords} difficultWords={difficultWords} learnedTimestamps={learnedTimestamps} markAsEasy={markAsEasy} markAsHard={markAsHard} customReviewList={customReviewList} jumpToWord={jumpToWord} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
+                        {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
                         {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} view={view} />}
+                        {view === 'flappy' && <FlappyGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'archery' && <ArcheryGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'shop' && <ShopView coins={coins} setCoins={setCoins} unlockedSkins={unlockedSkins} setUnlockedSkins={setUnlockedSkins} equippedSkin={equippedSkin} setEquipSkin={setEquipSkin} buyingItem={buyingItem} setBuyingItem={setBuyingItem} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
@@ -6171,6 +6492,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <button onClick={() => { setView('flashcard'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
                             <button onClick={() => { setView('quiz'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
                             <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-crosshairs text-lg mb-1"></i> <span className="text-[9px] font-bold">Bắn Vịt</span> </button>
+                            <button onClick={() => { setView('flappy'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flappy' ? 'text-sky-500 bg-sky-50 dark:bg-sky-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-dove text-lg mb-1"></i> <span className="text-[9px] font-bold">Bird</span> </button>
                             <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-rocket text-lg mb-1"></i> <span className="text-[9px] font-bold">Space Def</span> </button>
                             <button onClick={() => { setView('memory'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
                             <button onClick={() => { setView('shop'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'shop' ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-store text-lg mb-1"></i> <span className="text-[9px] font-bold">Shop</span> </button>
