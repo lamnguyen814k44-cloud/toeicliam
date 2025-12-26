@@ -2524,7 +2524,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     lastTimeRef.current = timestamp;
 
                     setObstaclePosition(prev => {
-                        const newPos = prev + (delta * 0.05 * speed);
+                        const newPos = prev + (delta * 0.025 * speed);
 
                         // Check collision zone (70-85%)
                         if (newPos >= 70 && newPos <= 85 && !isChecking) {
@@ -2778,6 +2778,370 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <span className="hidden sm:inline"><b>A</b> ← Di chuyển → <b>D</b></span>
                         <span className="sm:hidden">Chạm vào lane để di chuyển</span>
                     </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // ARCHERY GAME - Typing Vocabulary Game
+        // ============================================
+        const ArcheryGameView = ({ allData, coins, setCoins, user }) => {
+            const [gameState, setGameState] = React.useState('setup'); // setup, playing, shooting, gameover
+            const [selectedTopics, setSelectedTopics] = React.useState([]);
+            const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
+
+            // Game state
+            const [score, setScore] = React.useState(0);
+            const [streak, setStreak] = React.useState(0);
+            const [highScore, setHighScore] = React.useState(() => parseInt(localStorage.getItem('archery_high_score') || '0'));
+            const [currentWord, setCurrentWord] = React.useState(null);
+            const [typedText, setTypedText] = React.useState('');
+            const [power, setPower] = React.useState(0); // 0-100
+            const [gamePool, setGamePool] = React.useState([]);
+            const [wrongCount, setWrongCount] = React.useState(0);
+            const [isShaking, setIsShaking] = React.useState(false);
+            const [arrowFlying, setArrowFlying] = React.useState(false);
+            const [hitTarget, setHitTarget] = React.useState(false);
+
+            const inputRef = React.useRef(null);
+
+            const toggleTopic = (topic) => {
+                setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]);
+            };
+
+            const toggleAllTopics = () => {
+                if (selectedTopics.length === uniqueTopics.length) setSelectedTopics([]);
+                else setSelectedTopics(uniqueTopics);
+            };
+
+            const generateNewRound = (pool) => {
+                if (pool.length === 0) {
+                    let newPool = allData;
+                    if (selectedTopics.length > 0) newPool = allData.filter(i => selectedTopics.includes(i.topic));
+                    pool = [...newPool].sort(() => Math.random() - 0.5);
+                }
+
+                const word = pool.pop();
+                setCurrentWord(word);
+                setTypedText('');
+                setPower(0);
+                setWrongCount(0);
+                setGamePool(pool);
+                setArrowFlying(false);
+                setHitTarget(false);
+
+                setTimeout(() => inputRef.current?.focus(), 100);
+            };
+
+            const startGame = () => {
+                let pool = allData;
+                if (selectedTopics.length > 0) pool = allData.filter(i => selectedTopics.includes(i.topic));
+
+                if (pool.length < 1) {
+                    alert("Cần ít nhất 1 từ để chơi!");
+                    return;
+                }
+
+                const shuffled = [...pool].sort(() => Math.random() - 0.5);
+                setGamePool(shuffled);
+                setScore(0);
+                setStreak(0);
+                setGameState('playing');
+                generateNewRound(shuffled);
+            };
+
+            const handleInput = (e) => {
+                if (gameState !== 'playing' || !currentWord) return;
+
+                const input = e.target.value.toLowerCase();
+                const target = currentWord.word.toLowerCase();
+
+                // Check if input matches target so far
+                if (target.startsWith(input)) {
+                    setTypedText(input);
+                    const newPower = Math.round((input.length / target.length) * 100);
+                    setPower(newPower);
+
+                    // Correct character
+                    if (input.length > typedText.length) {
+                        playSound('memory', 'flip');
+                    }
+
+                    // Complete word!
+                    if (input === target) {
+                        shootArrow();
+                    }
+                } else {
+                    // Wrong character
+                    playSound('quiz', 'wrong');
+                    setIsShaking(true);
+                    setPower(prev => Math.max(0, prev - 10));
+                    setWrongCount(prev => prev + 1);
+                    setTimeout(() => setIsShaking(false), 300);
+
+                    // Too many wrong = game over
+                    if (wrongCount >= 4) {
+                        gameOver();
+                    }
+                }
+            };
+
+            const shootArrow = () => {
+                setGameState('shooting');
+                setArrowFlying(true);
+                playSound('quiz', 'correct');
+
+                setTimeout(() => {
+                    setHitTarget(true);
+                    playSound('memory', 'match');
+
+                    // Calculate score
+                    const baseScore = 100;
+                    const accuracy = Math.max(0, 100 - (wrongCount * 20));
+                    const earned = Math.round(baseScore * (accuracy / 100));
+
+                    setScore(prev => prev + earned);
+                    setStreak(prev => prev + 1);
+                    setCoins(prev => prev + earned);
+
+                    // Save to Firebase
+                    if (user && db) {
+                        const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                        const currentCoins = parseInt(localStorage.getItem('toeic_user_coins') || 0) + earned;
+                        userRef.set({ coins: currentCoins }, { merge: true });
+                    }
+
+                    setTimeout(() => {
+                        setGameState('playing');
+                        generateNewRound([...gamePool]);
+                    }, 1000);
+                }, 500);
+            };
+
+            const gameOver = () => {
+                playSound('quiz', 'wrong');
+
+                if (score > highScore) {
+                    setHighScore(score);
+                    localStorage.setItem('archery_high_score', score.toString());
+                }
+
+                setGameState('gameover');
+            };
+
+            // Setup Screen
+            if (gameState === 'setup') {
+                return (
+                    <div className="max-w-xl mx-auto py-6 px-4 animate-fadeIn">
+                        <div className="text-center mb-6">
+                            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                <i className="fas fa-bullseye text-4xl text-white"></i>
+                            </div>
+                            <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Archery Game</h2>
+                            <p className="text-slate-500 dark:text-slate-400">Gõ từ tiếng Anh để bắn cung!</p>
+                            <div className="mt-2 text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full inline-block">
+                                <i className="fas fa-trophy mr-1"></i> Kỷ lục: {highScore} điểm
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 mb-6">
+                            <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-700">
+                                <h3 className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                    <i className="fas fa-tags text-indigo-500"></i> Chủ đề
+                                </h3>
+                                <button onClick={toggleAllTopics} className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition">
+                                    {selectedTopics.length === uniqueTopics.length ? 'Bỏ chọn hết' : 'Chọn tất cả'}
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                {uniqueTopics.map(topic => (
+                                    <button
+                                        key={topic}
+                                        onClick={() => toggleTopic(topic)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-green-300'}`}
+                                    >
+                                        {topic}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl mb-6 text-sm text-slate-600 dark:text-slate-400">
+                            <h4 className="font-bold mb-2 text-slate-700 dark:text-slate-300"><i className="fas fa-gamepad mr-2"></i>Cách chơi:</h4>
+                            <ul className="space-y-1 text-xs">
+                                <li>• Xem nghĩa tiếng Việt</li>
+                                <li>• Gõ từ tiếng Anh tương ứng</li>
+                                <li>• Mỗi ký tự đúng = lực bắn tăng</li>
+                                <li>• Ký tự sai = lực bắn giảm</li>
+                                <li>• Hoàn thành từ = Bắn trúng đích!</li>
+                            </ul>
+                        </div>
+
+                        <button
+                            onClick={startGame}
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+                        >
+                            <i className="fas fa-play"></i> Bắt Đầu Bắn Cung!
+                        </button>
+                    </div>
+                );
+            }
+
+            // Game Over Screen
+            if (gameState === 'gameover') {
+                return (
+                    <div className="max-w-md mx-auto py-10 px-4 animate-fadeIn text-center">
+                        <div className="w-24 h-24 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i className="fas fa-heart-broken text-5xl text-red-500"></i>
+                        </div>
+                        <h2 className="text-3xl font-black text-red-600 dark:text-red-400 mb-2">Hết lượt!</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mb-6">Bạn đã gõ sai quá nhiều lần</p>
+
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 mb-6">
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div className="text-3xl font-black text-green-600">{score}</div>
+                                    <div className="text-xs text-slate-500">Điểm số</div>
+                                </div>
+                                <div>
+                                    <div className="text-3xl font-black text-orange-600">{streak}</div>
+                                    <div className="text-xs text-slate-500">Mục tiêu bắn trúng</div>
+                                </div>
+                            </div>
+                            {score >= highScore && score > 0 && (
+                                <div className="mt-4 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-xl text-yellow-700 dark:text-yellow-400 font-bold text-sm">
+                                    <i className="fas fa-crown mr-2"></i> Kỷ lục mới!
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setGameState('setup')}
+                                className="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition"
+                            >
+                                <i className="fas fa-cog mr-2"></i> Setup
+                            </button>
+                            <button
+                                onClick={startGame}
+                                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
+                            >
+                                <i className="fas fa-redo mr-2"></i> Chơi lại
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Playing Screen
+            return (
+                <div className="max-w-md mx-auto py-4 px-4 select-none">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-4">
+                        <button onClick={() => setGameState('setup')} className="text-slate-400 hover:text-slate-600 text-sm font-bold">
+                            <i className="fas fa-times"></i>
+                        </button>
+                        <div className="flex items-center gap-4">
+                            <div className="text-orange-500 font-bold flex items-center gap-1">
+                                <i className="fas fa-bullseye"></i> {streak}
+                            </div>
+                            <div className="text-green-600 font-black text-xl">{score}</div>
+                        </div>
+                    </div>
+
+                    {/* Vietnamese Meaning */}
+                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6 rounded-2xl text-center mb-6 shadow-lg">
+                        <div className="text-xs opacity-70 mb-2">{currentWord?.topic}</div>
+                        <div className="text-2xl font-black mb-2">{currentWord?.meaning}</div>
+                        <div className="text-sm opacity-70 italic">"{currentWord?.example}"</div>
+                    </div>
+
+                    {/* Archery Area */}
+                    <div className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 mb-6" style={{ height: '200px' }}>
+                        {/* Target */}
+                        <div className={`absolute right-6 top-1/2 -translate-y-1/2 transition-all ${hitTarget ? 'scale-110' : ''}`}>
+                            <div className="w-20 h-20 rounded-full bg-white border-8 border-red-500 flex items-center justify-center relative">
+                                <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
+                                    <div className="w-4 h-4 rounded-full bg-yellow-400"></div>
+                                </div>
+                                {hitTarget && (
+                                    <div className="absolute inset-0 flex items-center justify-center animate-ping">
+                                        <i className="fas fa-check text-green-500 text-3xl"></i>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Bow & Arrow */}
+                        <div className={`absolute left-6 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-shake' : ''}`}>
+                            <div className="relative">
+                                {/* Bow */}
+                                <div className="w-8 h-24 border-l-4 border-amber-700 rounded-l-full"></div>
+                                {/* Arrow */}
+                                <div className={`absolute top-1/2 left-4 -translate-y-1/2 transition-all duration-500 ${arrowFlying ? 'translate-x-48 opacity-0' : ''}`}>
+                                    <div className="flex items-center">
+                                        <div className="w-16 h-1 bg-amber-600"></div>
+                                        <div className="w-0 h-0 border-l-8 border-l-amber-800 border-y-4 border-y-transparent"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Power indicator */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4">
+                            <div className="text-center text-xs font-bold text-slate-500 mb-1">Lực bắn: {power}%</div>
+                            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-150 rounded-full ${power >= 100 ? 'bg-green-500' : power >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                    style={{ width: `${power}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Word Display */}
+                    <div className="bg-white dark:bg-slate-700 p-4 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-600 mb-4">
+                        <div className="text-center mb-3">
+                            <span className="text-slate-400 text-sm">Gõ từ tiếng Anh:</span>
+                        </div>
+                        <div className="flex justify-center gap-1 mb-4 flex-wrap">
+                            {currentWord?.word.split('').map((char, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`w-8 h-10 flex items-center justify-center border-2 rounded font-bold text-lg uppercase transition-all
+                                        ${idx < typedText.length
+                                            ? 'bg-green-100 border-green-500 text-green-700'
+                                            : 'bg-slate-50 dark:bg-slate-600 border-slate-200 dark:border-slate-500 text-slate-300 dark:text-slate-500'
+                                        }
+                                    `}
+                                >
+                                    {idx < typedText.length ? typedText[idx] : char === ' ' ? '·' : '_'}
+                                </div>
+                            ))}
+                        </div>
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={typedText}
+                            onChange={handleInput}
+                            className="w-full p-3 text-center text-lg font-bold border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-green-500 focus:outline-none dark:bg-slate-800 dark:text-white"
+                            placeholder="Nhập từ tiếng Anh..."
+                            autoComplete="off"
+                            autoCapitalize="off"
+                            disabled={gameState !== 'playing'}
+                        />
+                    </div>
+
+                    {/* Wrong count indicator */}
+                    <div className="flex justify-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                            <div
+                                key={i}
+                                className={`w-3 h-3 rounded-full transition-all ${i < wrongCount ? 'bg-red-500' : 'bg-slate-200 dark:bg-slate-600'}`}
+                            ></div>
+                        ))}
+                    </div>
+                    <div className="text-center text-xs text-slate-400 mt-1">Sai {wrongCount}/5 lần</div>
                 </div>
             );
         };
@@ -4045,16 +4409,18 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'flashcard' && <FlashcardView allData={toeicData} learnedWords={learnedWords} difficultWords={difficultWords} learnedTimestamps={learnedTimestamps} markAsEasy={markAsEasy} markAsHard={markAsHard} customReviewList={customReviewList} jumpToWord={jumpToWord} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
                         {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
+                        {view === 'archery' && <ArcheryGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
                     </main>
 
                     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-2 z-40 transition-colors duration-300 pb-safe">
                         <div className="max-w-md mx-auto flex justify-around">
-                            <button onClick={() => { setView('list'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[10px] font-bold">Từ vựng</span> </button>
-                            <button onClick={() => { setView('flashcard'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[10px] font-bold">Thẻ nhớ</span> </button>
-                            <button onClick={() => { setView('quiz'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[10px] font-bold">Quiz</span> </button>
-                            <button onClick={() => { setView('runner'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[10px] font-bold">Runner</span> </button>
-                            <button onClick={() => { setView('memory'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-14 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[10px] font-bold">Game</span> </button>
+                            <button onClick={() => { setView('list'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[9px] font-bold">Từ vựng</span> </button>
+                            <button onClick={() => { setView('flashcard'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
+                            <button onClick={() => { setView('quiz'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
+                            <button onClick={() => { setView('runner'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[9px] font-bold">Runner</span> </button>
+                            <button onClick={() => { setView('archery'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-bullseye text-lg mb-1"></i> <span className="text-[9px] font-bold">Archery</span> </button>
+                            <button onClick={() => { setView('memory'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
                         </div>
                     </div>
 
