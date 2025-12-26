@@ -553,7 +553,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -581,7 +581,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1375,28 +1375,23 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         // Sound Effects URLs - Phân theo từng Tab/View
-        // Cấu trúc folder: sounds/TabName/sound.wav hoặc sound.mp3
+        // Cấu trúc folder: sounds/TabName/soundType/sound1.wav, sound2.mp3,...
+        // Hoặc: sounds/TabName/soundType.wav (file đơn)
         const soundsBase = AUDIO_CONFIG.soundsBasePath || './sounds';
         
         // Danh sách sounds theo tab
         const SOUND_CONFIG = {
-            // === VOCABULARY TAB ===
             vocabulary: ['click', 'open', 'close'],
-            
-            // === FLASHCARD TAB ===
             flashcard: ['flip', 'next', 'prev', 'complete'],
-            
-            // === MEMORY GAME TAB ===
             memory: ['flip', 'match', 'miss', 'win', 'coin'],
-            
-            // === QUIZ TAB ===
             quiz: ['correct', 'wrong', 'complete', 'tick'],
-            
-            // === GENERAL (dùng chung) ===
             general: ['click', 'success', 'error', 'levelup', 'coin'],
         };
         
-        // CDN Fallback URLs (nếu local không có)
+        // Số lượng file tối đa để thử trong mỗi folder (correct1, correct2,... correct10)
+        const MAX_SOUND_VARIANTS = 10;
+        
+        // CDN Fallback URLs
         const FALLBACK_SOUNDS = {
             flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
             match: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
@@ -1417,66 +1412,80 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             tick: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
         };
         
-        // Cache sounds đã load thành công
+        // Cache sounds đã load thành công - lưu array cho mỗi loại
         const soundCache = {};
         
-        // Hàm load sound - thử wav trước, nếu lỗi thử mp3, nếu lỗi dùng fallback
-        const loadSound = (tab, sound) => {
-            return new Promise((resolve) => {
-                const key = `${tab}_${sound}`;
-                
-                // Đã có trong cache
-                if (soundCache[key]) {
-                    resolve(soundCache[key]);
-                    return;
-                }
-                
-                // Danh sách URLs để thử (wav -> mp3 -> fallback)
-                const urlsToTry = [
-                    `${soundsBase}/${tab}/${sound}.wav`,
-                    `${soundsBase}/${tab}/${sound}.mp3`,
-                    `${soundsBase}/general/${sound}.wav`,
-                    `${soundsBase}/general/${sound}.mp3`,
-                    FALLBACK_SOUNDS[sound]
-                ].filter(Boolean);
-                
-                const tryNextUrl = (index) => {
-                    if (index >= urlsToTry.length) {
-                        resolve(null);
-                        return;
-                    }
-                    
+        // Hàm load tất cả variants của 1 sound
+        const loadSoundVariants = async (tab, sound) => {
+            const key = `${tab}_${sound}`;
+            
+            if (soundCache[key] && soundCache[key].length > 0) {
+                return soundCache[key];
+            }
+            
+            soundCache[key] = [];
+            
+            // Tạo danh sách URLs để thử
+            const urlsToTry = [];
+            
+            // 1. Thử folder với nhiều files: sounds/quiz/correct/correct1.wav, correct2.mp3,...
+            for (let i = 1; i <= MAX_SOUND_VARIANTS; i++) {
+                urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}${i}.wav`, type: 'variant' });
+                urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}${i}.mp3`, type: 'variant' });
+            }
+            
+            // 2. Thử file đơn: sounds/quiz/correct.wav
+            urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}.wav`, type: 'single' });
+            urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}.mp3`, type: 'single' });
+            
+            // 3. Thử trong general
+            for (let i = 1; i <= MAX_SOUND_VARIANTS; i++) {
+                urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}${i}.wav`, type: 'variant' });
+                urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}${i}.mp3`, type: 'variant' });
+            }
+            urlsToTry.push({ url: `${soundsBase}/general/${sound}.wav`, type: 'single' });
+            urlsToTry.push({ url: `${soundsBase}/general/${sound}.mp3`, type: 'single' });
+            
+            // Load tất cả URLs song song
+            const loadPromises = urlsToTry.map(({ url }) => {
+                return new Promise((resolve) => {
                     const audio = new Audio();
-                    audio.src = urlsToTry[index];
+                    audio.src = url;
                     
-                    audio.oncanplaythrough = () => {
-                        soundCache[key] = audio;
-                        resolve(audio);
-                    };
+                    audio.oncanplaythrough = () => resolve(audio);
+                    audio.onerror = () => resolve(null);
                     
-                    audio.onerror = () => tryNextUrl(index + 1);
+                    // Timeout sau 3 giây
+                    setTimeout(() => resolve(null), 3000);
                     
                     audio.load();
-                };
-                
-                tryNextUrl(0);
+                });
             });
+            
+            const results = await Promise.all(loadPromises);
+            soundCache[key] = results.filter(audio => audio !== null);
+            
+            // Nếu không có file nào, thêm fallback
+            if (soundCache[key].length === 0 && FALLBACK_SOUNDS[sound]) {
+                const fallbackAudio = new Audio(FALLBACK_SOUNDS[sound]);
+                soundCache[key] = [fallbackAudio];
+            }
+            
+            return soundCache[key];
         };
         
         // Preload tất cả sounds
         Object.keys(SOUND_CONFIG).forEach(tab => {
             SOUND_CONFIG[tab].forEach(sound => {
-                loadSound(tab, sound);
+                loadSoundVariants(tab, sound);
             });
         });
 
-        // Play sound theo tab và loại
-        // Ví dụ: playSound('memory', 'match') hoặc playSound('quiz', 'correct')
+        // Play sound ngẫu nhiên từ các variants
         const playSound = async (tab, type) => {
-            // Hỗ trợ gọi kiểu cũ: playSound('match') -> tự map sang tab phù hợp
+            // Hỗ trợ gọi kiểu cũ: playSound('match') -> tự map sang tab
             if (!type) {
                 type = tab;
-                // Auto-detect tab based on sound type
                 if (['flip', 'match', 'miss', 'win'].includes(type)) tab = 'memory';
                 else if (['correct', 'wrong', 'tick'].includes(type)) tab = 'quiz';
                 else if (['next', 'prev'].includes(type)) tab = 'flashcard';
@@ -1484,8 +1493,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             }
             
             try {
-                const audio = await loadSound(tab, type);
-                if (audio) {
+                const variants = await loadSoundVariants(tab, type);
+                
+                if (variants && variants.length > 0) {
+                    // Random chọn 1 sound từ các variants
+                    const randomIndex = Math.floor(Math.random() * variants.length);
+                    const audio = variants[randomIndex];
+                    
                     const sound = audio.cloneNode();
                     sound.volume = type === 'flip' ? 0.3 : 0.5;
                     sound.play().catch(() => playFallbackSound(type));
