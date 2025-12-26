@@ -6114,73 +6114,76 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn">
-                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-black text-slate-800 dark:text-white"><i className="fas fa-cogs text-indigo-500 mr-2"></i>Admin Dashboard</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn p-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-700 max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700">
+                            <h2 className="text-xl font-black text-slate-800 dark:text-white"><i className="fas fa-cogs text-indigo-500 mr-2"></i>Admin Dashboard</h2>
                             <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition">
                                 <i className="fas fa-times text-slate-500 dark:text-slate-300"></i>
                             </button>
                         </div>
 
-                        {!isAuthenticated ? (
-                            <div className="flex flex-col gap-4">
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Vui lòng nhập mật khẩu quản trị viên.</p>
-                                <input
-                                    type="password"
-                                    placeholder="Mật khẩu..."
-                                    className="p-3 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                />
-                                <button onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg">Đăng Nhập</button>
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                {/* Flappy Bird Config */}
-                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                    <h3 className="font-bold text-lg mb-3 text-sky-500 border-b border-slate-200 dark:border-slate-700 pb-2">Vocab Bird</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500">Pipe Speed</label>
-                                            <input type="number" step="0.1" value={localConfig.flappy.pipeSpeed} onChange={e => handleChange('flappy', 'pipeSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500">Gravity</label>
-                                            <input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500">Jump Strength (Negative)</label>
-                                            <input type="number" step="1" value={localConfig.flappy.jumpStrength} onChange={e => handleChange('flappy', 'jumpStrength', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500">Spawn Rate (ms)</label>
-                                            <input type="number" step="100" value={localConfig.flappy.pipeSpawnRate} onChange={e => handleChange('flappy', 'pipeSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                        <div className="p-5 overflow-y-auto custom-scrollbar">
+                            {!isAuthenticated ? (
+                                <div className="flex flex-col gap-4">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Vui lòng nhập mật khẩu quản trị viên.</p>
+                                    <input
+                                        type="password"
+                                        placeholder="Mật khẩu..."
+                                        className="p-3 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                                    />
+                                    <button onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg">Đăng Nhập</button>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {/* Flappy Bird Config */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-bold text-lg mb-3 text-sky-500 border-b border-slate-200 dark:border-slate-700 pb-2">Vocab Bird</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Pipe Speed</label>
+                                                <input type="number" step="0.1" value={localConfig.flappy.pipeSpeed} onChange={e => handleChange('flappy', 'pipeSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Gravity</label>
+                                                <input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Jump Strength (Negative)</label>
+                                                <input type="number" step="1" value={localConfig.flappy.jumpStrength} onChange={e => handleChange('flappy', 'jumpStrength', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Spawn Rate (ms)</label>
+                                                <input type="number" step="100" value={localConfig.flappy.pipeSpawnRate} onChange={e => handleChange('flappy', 'pipeSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Runner Config */}
-                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                    <h3 className="font-bold text-lg mb-3 text-green-500 border-b border-slate-200 dark:border-slate-700 pb-2">Duck Hunter</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500">Duck Speed</label>
-                                            <input type="number" step="1" value={localConfig.runner.duckSpeed} onChange={e => handleChange('runner', 'duckSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500">Obstacle Rate (ms)</label>
-                                            <input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                    {/* Runner Config */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-bold text-lg mb-3 text-green-500 border-b border-slate-200 dark:border-slate-700 pb-2">Duck Hunter</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Duck Speed</label>
+                                                <input type="number" step="1" value={localConfig.runner.duckSpeed} onChange={e => handleChange('runner', 'duckSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Obstacle Rate (ms)</label>
+                                                <input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="flex gap-3 pt-4 border-t border-slate-700">
-                                    <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
-                                    <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition shadow-lg">Lưu Cấu Hình</button>
+                                    <div className="flex gap-3 pt-4 border-t border-slate-700">
+                                        <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
+                                        <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition shadow-lg">Lưu Cấu Hình</button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             );
