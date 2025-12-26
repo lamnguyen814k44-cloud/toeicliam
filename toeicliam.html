@@ -227,6 +227,7 @@
             0% {
                 background-position: 0 0;
             }
+
             100% {
                 background-position: 0 80px;
             }
@@ -237,55 +238,91 @@
             from {
                 transform: rotateY(0deg);
             }
+
             to {
                 transform: rotateY(360deg);
             }
         }
+
         .animate-spin-slow {
             animation: spinSlow 2s linear infinite;
         }
 
         /* Slow bounce for boss */
         @keyframes bounceSlow {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(-10px);
             }
         }
+
         .animate-bounce-slow {
             animation: bounceSlow 2s ease-in-out infinite;
         }
 
         /* Pulse glow effect */
         @keyframes pulseGlow {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
             }
+
             50% {
                 box-shadow: 0 0 20px rgba(99, 102, 241, 0.8), 0 0 30px rgba(99, 102, 241, 0.4);
             }
         }
+
         .animate-pulse-glow {
             animation: pulseGlow 1.5s ease-in-out infinite;
         }
 
         /* Screen shake effect */
         @keyframes screenShake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-            20%, 40%, 60%, 80% { transform: translateX(4px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-4px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(4px);
+            }
         }
+
         .animate-screen-shake {
             animation: screenShake 0.4s ease-in-out;
         }
 
         /* Hit flash effect */
         @keyframes hitFlash {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 0.3; }
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
+
         .animate-hit-flash {
             animation: hitFlash 0.2s ease-out;
         }
@@ -296,11 +333,13 @@
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
+
             100% {
                 opacity: 0;
                 transform: translateY(-60px) scale(1.2);
             }
         }
+
         .animate-float-up {
             animation: floatUp 1s ease-out forwards;
         }
@@ -311,23 +350,28 @@
                 transform: translateX(0) translateY(-50%) rotate(0deg) scale(1);
                 opacity: 1;
             }
+
             20% {
                 transform: translateX(60px) translateY(-55%) rotate(-2deg) scale(0.95);
                 opacity: 1;
             }
+
             50% {
                 transform: translateX(130px) translateY(-52%) rotate(-1deg) scale(0.85);
                 opacity: 1;
             }
+
             80% {
                 transform: translateX(180px) translateY(-50%) rotate(0deg) scale(0.75);
                 opacity: 0.9;
             }
+
             100% {
                 transform: translateX(200px) translateY(-50%) rotate(0deg) scale(0.6);
                 opacity: 0;
             }
         }
+
         .animate-arrow-fly {
             animation: arrowFly 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
         }
@@ -338,33 +382,55 @@
                 transform: translate(-50%, -50%) rotate(var(--arrow-rotation)) scale(0.3);
                 opacity: 0;
             }
+
             40% {
                 transform: translate(-50%, -50%) rotate(var(--arrow-rotation)) scale(1.15);
                 opacity: 1;
             }
+
             60% {
                 transform: translate(-50%, -50%) rotate(calc(var(--arrow-rotation) + 3deg)) scale(1);
             }
+
             80% {
                 transform: translate(-50%, -50%) rotate(calc(var(--arrow-rotation) - 2deg)) scale(1);
             }
+
             100% {
                 transform: translate(-50%, -50%) rotate(var(--arrow-rotation)) scale(1);
                 opacity: 1;
             }
         }
+
         .animate-arrow-stick {
             animation: arrowStick 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         /* Target shake when hit */
         @keyframes targetShake {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-3px, 0) rotate(-2deg); }
-            40% { transform: translate(3px, 0) rotate(2deg); }
-            60% { transform: translate(-2px, 0) rotate(-1deg); }
-            80% { transform: translate(2px, 0) rotate(1deg); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0) rotate(-2deg);
+            }
+
+            40% {
+                transform: translate(3px, 0) rotate(2deg);
+            }
+
+            60% {
+                transform: translate(-2px, 0) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(2px, 0) rotate(1deg);
+            }
         }
+
         .animate-target-shake {
             animation: targetShake 0.3s ease-out;
         }
@@ -375,14 +441,17 @@
                 transform: translate(-50%, -50%) scale(0);
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.8;
             }
+
             100% {
                 transform: translate(calc(-50% + var(--particle-x)), calc(-50% + var(--particle-y))) scale(1);
                 opacity: 0;
             }
         }
+
         .animate-impact-particle {
             animation: impactParticle 0.4s ease-out forwards;
         }
@@ -392,26 +461,33 @@
             0% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.2);
             }
+
             100% {
                 transform: scale(1);
             }
         }
+
         .animate-target-hit {
             animation: targetHit 0.3s ease-out;
         }
 
         /* Power bar charging */
         @keyframes powerCharge {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
             }
+
             50% {
                 box-shadow: 0 0 15px rgba(34, 197, 94, 0.8), 0 0 25px rgba(34, 197, 94, 0.4);
             }
         }
+
         .animate-power-charge {
             animation: powerCharge 0.5s ease-in-out infinite;
         }
@@ -422,53 +498,68 @@
                 transform: rotateY(90deg) scale(0.9);
                 opacity: 0;
             }
+
             100% {
                 transform: rotateY(0deg) scale(1);
                 opacity: 1;
             }
         }
+
         .animate-card-flip-in {
             animation: cardFlipIn 0.4s ease-out;
         }
 
         /* Memory card match celebration */
         @keyframes matchCelebrate {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1) rotate(0deg);
             }
+
             25% {
                 transform: scale(1.1) rotate(-3deg);
             }
+
             75% {
                 transform: scale(1.1) rotate(3deg);
             }
         }
+
         .animate-match-celebrate {
             animation: matchCelebrate 0.5s ease-in-out;
         }
 
         /* Streak fire effect */
         @keyframes streakFire {
-            0%, 100% {
+
+            0%,
+            100% {
                 text-shadow: 0 0 5px #f97316, 0 0 10px #f97316;
             }
+
             50% {
                 text-shadow: 0 0 10px #f97316, 0 0 20px #f97316, 0 0 30px #ef4444;
             }
         }
+
         .animate-streak-fire {
             animation: streakFire 0.5s ease-in-out infinite;
         }
 
         /* Boss warning pulse */
         @keyframes bossWarning {
-            0%, 100% {
+
+            0%,
+            100% {
                 background-color: rgba(239, 68, 68, 0.1);
             }
+
             50% {
                 background-color: rgba(239, 68, 68, 0.3);
             }
         }
+
         .animate-boss-warning {
             animation: bossWarning 0.5s ease-in-out infinite;
         }
@@ -479,11 +570,13 @@
                 transform: scale(0) rotate(0deg);
                 opacity: 1;
             }
+
             100% {
                 transform: scale(1.5) rotate(180deg);
                 opacity: 0;
             }
         }
+
         .animate-particle-explode {
             animation: particleExplode 0.6s ease-out forwards;
         }
@@ -528,11 +621,13 @@
                 transform: scale(0);
                 opacity: 0.5;
             }
+
             100% {
                 transform: scale(2);
                 opacity: 0;
             }
         }
+
         .animate-ripple {
             animation: ripple 0.6s ease-out;
         }
@@ -543,14 +638,17 @@
                 transform: scale(0.5);
                 opacity: 0;
             }
+
             50% {
                 transform: scale(1.2);
             }
+
             100% {
                 transform: scale(1);
                 opacity: 1;
             }
         }
+
         .animate-countdown-pop {
             animation: countdownPop 0.3s ease-out;
         }
@@ -560,36 +658,73 @@
             0% {
                 transform: scale(1) rotate(0deg);
             }
+
             25% {
                 transform: scale(1.1) rotate(-5deg);
             }
+
             50% {
                 transform: scale(1.2) rotate(5deg);
             }
+
             75% {
                 transform: scale(1.1) rotate(-5deg);
             }
+
             100% {
                 transform: scale(1) rotate(0deg);
             }
         }
+
         .animate-victory {
             animation: victoryCelebrate 0.8s ease-in-out;
         }
 
         /* Defeat shake */
         @keyframes defeatShake {
-            0%, 100% { transform: translateX(0) rotate(0deg); }
-            10% { transform: translateX(-10px) rotate(-5deg); }
-            20% { transform: translateX(10px) rotate(5deg); }
-            30% { transform: translateX(-10px) rotate(-5deg); }
-            40% { transform: translateX(10px) rotate(5deg); }
-            50% { transform: translateX(-5px) rotate(-2deg); }
-            60% { transform: translateX(5px) rotate(2deg); }
-            70% { transform: translateX(-5px) rotate(-2deg); }
-            80% { transform: translateX(5px) rotate(2deg); }
-            90% { transform: translateX(-2px) rotate(-1deg); }
+
+            0%,
+            100% {
+                transform: translateX(0) rotate(0deg);
+            }
+
+            10% {
+                transform: translateX(-10px) rotate(-5deg);
+            }
+
+            20% {
+                transform: translateX(10px) rotate(5deg);
+            }
+
+            30% {
+                transform: translateX(-10px) rotate(-5deg);
+            }
+
+            40% {
+                transform: translateX(10px) rotate(5deg);
+            }
+
+            50% {
+                transform: translateX(-5px) rotate(-2deg);
+            }
+
+            60% {
+                transform: translateX(5px) rotate(2deg);
+            }
+
+            70% {
+                transform: translateX(-5px) rotate(-2deg);
+            }
+
+            80% {
+                transform: translateX(5px) rotate(2deg);
+            }
+
+            90% {
+                transform: translateX(-2px) rotate(-1deg);
+            }
         }
+
         .animate-defeat {
             animation: defeatShake 0.8s ease-out;
         }
@@ -599,10 +734,12 @@
             0% {
                 transform: translateY(-100%);
             }
+
             100% {
                 transform: translateY(100%);
             }
         }
+
         .speed-lines::before {
             content: '';
             position: absolute;
@@ -610,9 +747,10 @@
             left: 10%;
             width: 2px;
             height: 30%;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
             animation: speedLines 0.5s linear infinite;
         }
+
         .speed-lines::after {
             content: '';
             position: absolute;
@@ -620,7 +758,7 @@
             right: 15%;
             width: 2px;
             height: 25%;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.2), transparent);
             animation: speedLines 0.4s linear infinite;
             animation-delay: 0.2s;
         }
@@ -629,6 +767,7 @@
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -979,7 +1118,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -1007,7 +1146,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1914,9 +2053,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     'archery': 'game_archery',
                     'memory': 'game_memory',
                     'quiz': 'game_quiz',
+                    'game_runner': 'game_runner',
+                    'game_archery': 'game_archery',
+                    'game_memory': 'game_memory',
+                    'game_quiz': 'game_quiz',
                     'vocabulary': 'common',
                     'flashcard': 'common',
-                    'general': 'common'
+                    'general': 'common',
+                    'common': 'common'
                 };
 
                 return {
@@ -2927,7 +3071,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [currentWord, setCurrentWord] = React.useState(null);
             const [options, setOptions] = React.useState([null, null, null]);
             const [correctLane, setCorrectLane] = React.useState(1);
-            const [obstaclePosition, setObstaclePosition] = React.useState(-30); // % from top
+            const [obstaclePosition, setObstaclePosition] = React.useState(-25); // % from top
             const [gamePool, setGamePool] = React.useState([]);
             const [isChecking, setIsChecking] = React.useState(false);
             const [lastResult, setLastResult] = React.useState(null); // 'correct' | 'wrong' | null
@@ -2983,7 +3127,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     setOptions(newOptions);
                     setCorrectLane(-1);
-                    setObstaclePosition(-30);
+                    setObstaclePosition(-25);
                     setGamePool(pool);
                     setIsChecking(false); isCheckingRef.current = false;
                     setLastResult(null);
@@ -3008,7 +3152,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     // For coin round, no "correct" lane needed in same sense, 
                     // but we can use correctLane to store something else if needed.
                     setCorrectLane(-1);
-                    setObstaclePosition(-30);
+                    setObstaclePosition(-25);
                     setGamePool(pool);
                     setIsChecking(false); isCheckingRef.current = false;
                     setLastResult(null);
@@ -3043,7 +3187,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setCurrentWord(correctItem);
                 setOptions(newOptions);
                 setCorrectLane(correctLaneIdx);
-                setObstaclePosition(-30);
+                setObstaclePosition(-25);
                 setGamePool(pool);
                 setIsChecking(false); isCheckingRef.current = false;
                 setLastResult(null);
@@ -3065,7 +3209,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setSpeed(1);
                 setPlayerLane(1);
                 setCountdown(3);
-                setObstaclePosition(-30);
+                setObstaclePosition(-25);
                 setIsChecking(false); isCheckingRef.current = false;
                 setLastResult(null);
                 lastTimeRef.current = 0;
@@ -3207,40 +3351,45 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Game loop - Simple and working
             React.useEffect(() => {
-                if (gameState !== 'playing') return;
+                if (gameState !== 'playing') {
+                    lastTimeRef.current = 0;
+                    return;
+                }
 
-                lastTimeRef.current = 0;
-                
                 const gameLoop = (timestamp) => {
                     if (!lastTimeRef.current) lastTimeRef.current = timestamp;
                     const delta = timestamp - lastTimeRef.current;
                     lastTimeRef.current = timestamp;
 
-                    // Update position using setState
+                    // Update position - di chuyển xuống dưới
                     setObstaclePosition(prev => {
-                        const newPos = prev + (delta * 0.04 * speed);
-                        
-                        // Check collision zone (60-78%)
-                        if (newPos >= 60 && newPos <= 78 && !isCheckingRef.current) {
+                        const newPos = prev + (delta * 0.05 * speed);
+
+                        // Check collision zone khi obstacle gần player (65-80%)
+                        if (newPos >= 65 && newPos <= 80 && !isCheckingRef.current) {
                             isCheckingRef.current = true;
-                            setTimeout(() => checkCollision(), 0);
+                            checkCollision();
                         }
-                        
-                        // Reset when passed
-                        if (newPos > 100) {
-                            return -30;
+
+                        // Reset khi đi qua màn hình
+                        if (newPos > 105) {
+                            return -25;
                         }
-                        
+
                         return newPos;
                     });
 
                     gameLoopRef.current = requestAnimationFrame(gameLoop);
                 };
 
+                // Start loop
                 gameLoopRef.current = requestAnimationFrame(gameLoop);
 
                 return () => {
-                    if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+                    if (gameLoopRef.current) {
+                        cancelAnimationFrame(gameLoopRef.current);
+                        gameLoopRef.current = null;
+                    }
                 };
             }, [gameState, speed]);
 
@@ -3428,11 +3577,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     {/* Game Area with 3D Perspective */}
                     <div
-                        className={`relative flex-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black rounded-xl overflow-hidden perspective-1000 group w-full mb-16 border-2 border-slate-700/50 shadow-2xl shadow-indigo-500/10 gpu-accelerate ${gameState === 'playing' && speed > 1.5 ? 'speed-lines' : ''}`}
-                        style={{ 
-                            perspective: '800px',
-                            transform: 'translateZ(0)',
-                            willChange: 'contents'
+                        className={`relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black rounded-xl overflow-hidden perspective-1000 group w-full mb-16 border-2 border-slate-700/50 shadow-2xl shadow-indigo-500/10 ${gameState === 'playing' && speed > 1.5 ? 'speed-lines' : ''}`}
+                        style={{
+                            height: '60vh',
+                            minHeight: '350px',
+                            maxHeight: '500px'
                         }}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
@@ -3498,7 +3647,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {/* Obstacles (Word Gates or Coins) */}
                         <div
                             className="absolute left-0 right-0 flex justify-center transition-none"
-                            style={{ 
+                            style={{
                                 top: `${obstaclePosition}%`,
                                 pointerEvents: 'none'
                             }}
@@ -3837,27 +3986,27 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     setArrowFlying(false);
                     setHitTarget(true);
                     playSound('archery', 'hit');
-                    
+
                     // Tính vị trí ngẫu nhiên trên target
                     const targetCenterX = 50;
                     const targetCenterY = 50;
-                    
+
                     // Random position trong vùng target (15-85%)
                     const arrowX = 20 + Math.random() * 60;
                     const arrowY = 20 + Math.random() * 60;
-                    
+
                     // Tính góc xoay để mũi tên hướng vào tâm target
                     const angleToCenter = Math.atan2(targetCenterY - arrowY, targetCenterX - arrowX) * (180 / Math.PI);
                     // Thêm chút random để trông tự nhiên hơn
                     const finalRotation = angleToCenter + (-5 + Math.random() * 10);
-                    
+
                     // Tính khoảng cách từ tâm để xác định score zone
                     const distFromCenter = Math.sqrt(
-                        Math.pow(arrowX - targetCenterX, 2) + 
+                        Math.pow(arrowX - targetCenterX, 2) +
                         Math.pow(arrowY - targetCenterY, 2)
                     );
                     const isBullseye = distFromCenter < 15;
-                    
+
                     const newArrow = {
                         id: Date.now(),
                         x: arrowX,
@@ -3867,11 +4016,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         isBullseye: isBullseye,
                     };
                     setStuckArrows(prev => [...prev, newArrow]);
-                    
+
                     // Remove "isNew" flag sau animation
                     setTimeout(() => {
-                        setStuckArrows(prev => prev.map(a => 
-                            a.id === newArrow.id ? {...a, isNew: false} : a
+                        setStuckArrows(prev => prev.map(a =>
+                            a.id === newArrow.id ? { ...a, isNew: false } : a
                         ));
                     }, 500);
 
@@ -3879,7 +4028,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const baseScore = isBullseye ? 150 : 100;
                     const hintPenalty = hintCount * 20;
                     const earned = Math.max(0, baseScore - hintPenalty);
-                    
+
                     if (isBullseye) {
                         playSound('archery', 'bullseye');
                     }
@@ -4045,7 +4194,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     <div className="relative bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 mb-3 overflow-hidden" style={{ height: '160px' }}>
                         {/* Background grass/ground effect */}
                         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-green-800/20 to-transparent"></div>
-                        
+
                         {/* Target */}
                         <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'animate-target-shake' : ''}`}>
                             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 border-[6px] sm:border-8 border-red-600 flex items-center justify-center relative gpu-accelerate overflow-visible shadow-lg"
@@ -4056,7 +4205,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400 shadow-md"
                                         style={{ boxShadow: '0 0 10px rgba(250,204,21,0.8)' }}></div>
                                 </div>
-                                
+
                                 {/* Stuck Arrows on target */}
                                 {stuckArrows.map((arrow) => (
                                     <div
@@ -4091,7 +4240,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <path d="M 3 5 L 0 3" stroke="#fef2f2" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
                                             <path d="M 3 5 L 0 7" stroke="#fef2f2" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
                                         </svg>
-                                        
+
                                         {/* Impact mark */}
                                         {arrow.isNew && (
                                             <div className="absolute left-full top-1/2 -translate-y-1/2 -translate-x-1">
@@ -4108,7 +4257,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                 ))}
                                             </div>
                                         )}
-                                        
+
                                         {/* Bullseye indicator */}
                                         {arrow.isBullseye && arrow.isNew && (
                                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-500 text-xs font-black animate-float-up whitespace-nowrap">
@@ -4117,20 +4266,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         )}
                                     </div>
                                 ))}
-                                
+
                                 {/* Hit flash effect */}
                                 {hitTarget && (
                                     <div className="absolute inset-0 rounded-full bg-white/50 animate-ping"></div>
                                 )}
                             </div>
-                            
+
                             {/* Arrow count badge */}
                             {stuckArrows.length > 0 && (
                                 <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg border-2 border-white">
                                     {stuckArrows.length}
                                 </div>
                             )}
-                            
+
                             {/* Target stand */}
                             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-2 h-8 bg-gradient-to-b from-amber-700 to-amber-900 rounded-b"></div>
                         </div>
@@ -4529,7 +4678,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [hasPaid, setHasPaid] = React.useState(false);
             const [betMultiplier, setBetMultiplier] = React.useState(1);
             const [onlinePlayers, setOnlinePlayers] = React.useState([]);
+
             const [showInviteModal, setShowInviteModal] = React.useState(false);
+            const lastMatchTimeRef = React.useRef(0); // Sync for popup
 
             // Functions Definitions (Moved outside effects)
             const speak = (text) => {
@@ -4643,7 +4794,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 playSound('win');
                             }
 
-                            await roomRef.update({ matched: newMatched, flipped: [], scores: newScores, processing: false });
+                            await roomRef.update({
+                                matched: newMatched,
+                                flipped: [],
+                                scores: newScores,
+                                processing: false,
+                                latestMatch: { id: matchedId, time: Date.now() } // Sync match to opponent
+                            });
                         }, 600);
                     } else {
                         setTimeout(async () => {
@@ -4875,6 +5032,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             if (data.status === 'playing') {
                                 setCards(data.board || []); setFlippedIndices(data.flipped || []); setMatchedIndices(data.matched || []); setScores(data.scores || { host: 0, guest: 0 });
                                 setCurrentPlayer(data.turn === data.hostId ? 1 : 2); setProcessing(data.processing || false);
+
+                                // Sync Matched Item Popup
+                                if (data.latestMatch && data.latestMatch.time > lastMatchTimeRef.current) {
+                                    lastMatchTimeRef.current = data.latestMatch.time;
+                                    const item = allData.find(i => i.id === data.latestMatch.id);
+                                    if (item) {
+                                        setMatchedItem(item);
+                                        playSound('match');
+                                        speak(item.word); // Optional: also speak on opponent side
+                                    }
+                                }
 
                                 if ((data.matched || []).length === (data.board || []).length && (data.board || []).length > 0 && !hasPaid) {
                                     playSound('win'); // Sound effect khi thắng PvP Online
