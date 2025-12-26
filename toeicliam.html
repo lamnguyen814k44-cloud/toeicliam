@@ -1390,6 +1390,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             general: ['click', 'success', 'error', 'levelup', 'coin'],
         };
 
+        const SHOP_ITEMS = [
+            { id: 'skin_default', name: 'Runner Cơ Bản', type: 'skin', price: 0, icon: 'fa-running', color: 'indigo-500', desc: 'Trang phục mặc định' },
+            { id: 'skin_robot', name: 'Mecha Bot', type: 'skin', price: 500, icon: 'fa-robot', color: 'slate-500', desc: 'Robot hủy diệt' },
+            { id: 'skin_ninja', name: 'Shadow Ninja', type: 'skin', price: 1000, icon: 'fa-user-ninja', color: 'zinc-800', desc: 'Thân pháp phi phàm' },
+            { id: 'skin_astro', name: 'Phi Hành Gia', type: 'skin', price: 2500, icon: 'fa-user-astronaut', color: 'orange-500', desc: 'Bay vào không gian' },
+            { id: 'skin_king', name: 'Vua Tốc Độ', type: 'skin', price: 5000, icon: 'fa-crown', color: 'yellow-500', desc: 'Quyền uy tối thượng' },
+        ];
+
         // Số lượng file tối đa để thử trong mỗi folder (correct1, correct2,... correct10)
         const MAX_SOUND_VARIANTS = 10;
 
@@ -2466,7 +2474,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         // RUNNER GAME - Endless Runner Vocabulary Game
         // ============================================
-        const RunnerGameView = ({ allData, coins, setCoins, user }) => {
+        const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default' }) => {
             const [gameState, setGameState] = React.useState('setup'); // setup, countdown, playing, gameover
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
@@ -2632,6 +2640,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     if (count === 0) {
                         clearInterval(countdownRef.current);
                         setGameState('playing');
+                        playSound('runner', 'start');
                     }
                 }, 1000);
             };
@@ -2729,6 +2738,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     setTimeout(() => {
                         setGameState('gameover');
+                        playSound('runner', 'gameover');
                         cancelAnimationFrame(gameLoopRef.current);
                     }, 800);
                 }
@@ -2771,10 +2781,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 const handleKeyDown = (e) => {
                     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                         setPlayerLane(prev => Math.max(0, prev - 1));
-                        playSound('memory', 'flip');
+                        playSound('runner', 'move');
                     } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                         setPlayerLane(prev => Math.min(2, prev + 1));
-                        playSound('memory', 'flip');
+                        playSound('runner', 'move');
                     }
                 };
 
@@ -2801,11 +2811,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     if (diff > 0) {
                         // Swipe right
                         setPlayerLane(prev => Math.min(2, prev + 1));
-                        playSound('memory', 'flip');
+                        playSound('runner', 'move');
                     } else {
                         // Swipe left
                         setPlayerLane(prev => Math.max(0, prev - 1));
-                        playSound('memory', 'flip');
+                        playSound('runner', 'move');
                     }
                 }
 
@@ -2815,7 +2825,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const handleLaneClick = (lane) => {
                 if (gameState !== 'playing') return;
                 setPlayerLane(lane);
-                playSound('memory', 'flip');
+                playSound('runner', 'move');
             };
 
             // Setup Screen
@@ -3094,9 +3104,23 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg border-2 z-10 relative
                                             ${lastResult === 'correct' ? 'bg-green-500 border-white text-white rotate-[360deg]' : ''}
                                             ${lastResult === 'wrong' ? 'bg-red-500 border-white text-white animate-shake' : ''}
-                                            ${!lastResult ? 'bg-indigo-600 border-indigo-400 text-white' : ''}
+                                            ${!lastResult ? 'bg-white border-slate-200' : ''}
                                         `}>
-                                            <i className={`fas ${lastResult === 'correct' ? 'fa-check' : lastResult === 'wrong' ? 'fa-bomb' : 'fa-running'}`}></i>
+                                            {lastResult === 'correct' ? (
+                                                <i className="fas fa-check text-white"></i>
+                                            ) : lastResult === 'wrong' ? (
+                                                <i className="fas fa-bomb text-white"></i>
+                                            ) : (
+                                                (() => {
+                                                    const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
+                                                    let textColor = 'text-indigo-600';
+                                                    if (skin.color.includes('slate')) textColor = 'text-slate-600';
+                                                    if (skin.color.includes('zinc')) textColor = 'text-zinc-800';
+                                                    if (skin.color.includes('orange')) textColor = 'text-orange-600';
+                                                    if (skin.color.includes('yellow')) textColor = 'text-yellow-600';
+                                                    return <i className={`fas ${skin.icon} ${textColor} text-3xl`}></i>;
+                                                })()
+                                            )}
                                         </div>
 
                                         {/* Shadow */}
@@ -3241,7 +3265,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     // Correct character
                     if (rawInput.length > typedText.length) {
-                        playSound('memory', 'flip');
+                        playSound('archery', 'draw');
                     }
 
                     // Complete word!
@@ -3250,7 +3274,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     }
                 } else {
                     // Wrong character - just shake, don't end game
-                    playSound('quiz', 'wrong');
+                    playSound('archery', 'miss');
                     setIsShaking(true);
                     setWrongCount(prev => prev + 1);
                     setTimeout(() => setIsShaking(false), 300);
@@ -3274,7 +3298,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     const newPower = Math.round(((currentLength + 1) / target.length) * 100);
                     setPower(newPower);
-                    playSound('memory', 'flip');
+                    playSound('archery', 'draw');
 
                     // Complete word!
                     if (currentLength + 1 === target.length) {
@@ -3282,7 +3306,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     }
                 } else {
                     // Wrong letter
-                    playSound('quiz', 'wrong');
+                    playSound('archery', 'miss');
                     setIsShaking(true);
                     setWrongCount(prev => prev + 1);
                     setTimeout(() => setIsShaking(false), 300);
@@ -3316,7 +3340,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 const newPower = Math.round((newTypedNoSpace.length / targetNoSpace.length) * 100);
                 setPower(newPower);
 
-                playSound('memory', 'flip');
+                playSound('archery', 'hint');
 
                 // Check if complete
                 if (newTypedNoSpace === targetNoSpace) {
@@ -3329,11 +3353,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const shootArrow = () => {
                 setGameState('shooting');
                 setArrowFlying(true);
-                playSound('quiz', 'correct');
+                playSound('archery', 'release');
 
                 setTimeout(() => {
                     setHitTarget(true);
-                    playSound('memory', 'match');
+                    playSound('archery', 'hit');
 
                     // Calculate score (minus hints)
                     const baseScore = 100;
@@ -4500,6 +4524,107 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             );
         };
 
+        // ============================================
+        // SHOP VIEW - Cửa Hàng
+        // ============================================
+        const ShopView = ({ coins, setCoins, unlockedSkins, setUnlockedSkins, equippedSkin, setEquipSkin, buyingItem, setBuyingItem }) => {
+            const handleBuy = (item) => {
+                if (coins < item.price) {
+                    playSound('general', 'error');
+                    alert("Bạn không đủ Coin!");
+                    return;
+                }
+                setBuyingItem(item.id);
+                setTimeout(() => { // Fake processing delay
+                    setCoins(prev => prev - item.price);
+                    setUnlockedSkins(prev => [...prev, item.id]);
+                    setBuyingItem(null);
+                    playSound('general', 'levelup'); // Purchase sound
+                }, 500);
+            };
+
+            const handleEquip = (itemId) => {
+                setEquipSkin(itemId);
+                playSound('general', 'click');
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto pb-24 animate-slideIn">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600">
+                                Cửa Hàng
+                            </h2>
+                            <p className="text-slate-500 dark:text-slate-400">Dùng Coin để mua vật phẩm</p>
+                        </div>
+                        <div className="bg-yellow-100 dark:bg-yellow-900/30 px-4 py-2 rounded-xl border border-yellow-200 dark:border-yellow-700 flex items-center gap-2">
+                            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-yellow-600 shadow-sm">
+                                <span className="font-bold text-yellow-800">$</span>
+                            </div>
+                            <span className="text-xl font-black text-yellow-700 dark:text-yellow-400">{coins}</span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {SHOP_ITEMS.map(item => {
+                            const isUnlocked = unlockedSkins.includes(item.id);
+                            const isEquipped = equippedSkin === item.id;
+                            const isBuying = buyingItem === item.id;
+                            // Fix color parsing
+                            const iconClass = `text-4xl ${item.color.includes('indigo') ? 'text-indigo-500' : item.color.includes('slate') ? 'text-slate-500' : item.color.includes('zinc') ? 'text-zinc-800' : item.color.includes('orange') ? 'text-orange-500' : 'text-yellow-500'}`;
+
+                            return (
+                                <div key={item.id} className={`relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-2 transition-all hover:scale-105 group
+                                    ${isEquipped ? 'border-green-500 ring-2 ring-green-500/30' : 'border-transparent hover:border-slate-300 dark:hover:border-slate-600'}
+                                `}>
+                                    <div className={`w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center shadow-inner bg-slate-100 dark:bg-slate-700`}>
+                                        <i className={`fas ${item.icon} ${iconClass}`}></i>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-white text-center mb-1">{item.name}</h3>
+                                    <p className="text-xs text-slate-500 text-center mb-4 min-h-[1.5em]">{item.desc}</p>
+
+                                    <div className="flex justify-center">
+                                        {isUnlocked ? (
+                                            <button
+                                                onClick={() => handleEquip(item.id)}
+                                                disabled={isEquipped}
+                                                className={`w-full py-2 rounded-xl font-bold transition-all shadow
+                                                    ${isEquipped
+                                                        ? 'bg-green-100 text-green-700 cursor-default'
+                                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg active:scale-95'}
+                                                `}
+                                            >
+                                                {isEquipped ? <><i className="fas fa-check mr-2"></i>Đang Sử Dụng</> : 'Trang Bị'}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleBuy(item)}
+                                                disabled={isBuying}
+                                                className={`w-full py-2 rounded-xl font-bold bg-yellow-400 hover:bg-yellow-300 text-yellow-900 shadow transition-all hover:shadow-lg active:scale-95 flex items-center justify-center gap-2
+                                                    ${isBuying ? 'opacity-70 cursor-wait' : ''}
+                                                `}
+                                            >
+                                                {isBuying ? (
+                                                    <i className="fas fa-spinner fa-spin"></i>
+                                                ) : (
+                                                    <>
+                                                        <span>{item.price}</span> <i className="fas fa-coins text-yellow-700"></i>
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {!isUnlocked && item.price === 0 && (
+                                        <div className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow">FREE</div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             const [view, setView] = React.useState('list');
             const [learnedWords, setLearnedWords] = React.useState(new Set());
@@ -4516,6 +4641,50 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [isAuthChecking, setIsAuthChecking] = React.useState(true);
             const [incomingInvitation, setIncomingInvitation] = React.useState(null);
             const [customReviewList, setCustomReviewList] = React.useState(null);
+
+            // Shop Data
+            const [unlockedSkins, setUnlockedSkins] = React.useState(() => {
+                const saved = localStorage.getItem('toeic_unlocked_skins');
+                return saved ? JSON.parse(saved) : ['skin_default'];
+            });
+            const [equippedSkin, setEquipSkin] = React.useState(() => localStorage.getItem('toeic_equipped_skin') || 'skin_default');
+            const [buyingItem, setBuyingItem] = React.useState(null);
+
+            const handleGoogleLogin = async () => {
+                playSound('general', 'click');
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    await auth.signInWithPopup(provider);
+                    playSound('general', 'success');
+                } catch (error) {
+                    console.error("Login failed:", error);
+                    playSound('general', 'error');
+                    alert("Đăng nhập thất bại: " + error.message);
+                }
+            };
+
+            const getLocalData = () => ({
+                coins: parseInt(localStorage.getItem('toeic_user_coins') || 500),
+                unlockedSkins: JSON.parse(localStorage.getItem('toeic_unlocked_skins') || '["skin_default"]'),
+                equippedSkin: localStorage.getItem('toeic_equipped_skin') || 'skin_default'
+            });
+
+            // Persist Shop Data Locally
+            React.useEffect(() => {
+                localStorage.setItem('toeic_unlocked_skins', JSON.stringify(unlockedSkins));
+                if (user && db) {
+                    const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                    userRef.set({ unlockedSkins }, { merge: true });
+                }
+            }, [unlockedSkins, user]);
+
+            React.useEffect(() => {
+                localStorage.setItem('toeic_equipped_skin', equippedSkin);
+                if (user && db) {
+                    const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(user.uid);
+                    userRef.set({ equippedSkin }, { merge: true });
+                }
+            }, [equippedSkin, user]);
 
             React.useEffect(() => {
                 const isDark = localStorage.getItem('toeic_dark_mode') === 'true';
@@ -4578,11 +4747,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 const data = doc.data();
                                 setCoins(prev => Math.max(prev, data.coins || 0));
                                 localStorage.setItem('toeic_user_coins', data.coins || 0);
+                                if (data.unlockedSkins) setUnlockedSkins(data.unlockedSkins);
+                                if (data.equippedSkin) setEquipSkin(data.equippedSkin);
                             } else {
                                 // New User Welcome Bonus: 500 coins
                                 const initialCoins = parseInt(localStorage.getItem('toeic_user_coins') || 500);
-                                userRef.set({ userId: u.uid, coins: initialCoins, updatedAt: new Date().toISOString() }, { merge: true });
-                                setCoins(initialCoins);
+                                const localData = getLocalData();
+                                userRef.set({
+                                    userId: u.uid,
+                                    coins: localData.coins,
+                                    unlockedSkins: localData.unlockedSkins,
+                                    equippedSkin: localData.equippedSkin,
+                                    updatedAt: new Date().toISOString()
+                                }, { merge: true });
+                                setCoins(localData.coins);
                             }
                         });
                     }
@@ -4830,8 +5008,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} alt="avatar" />
                                         </div>
                                     ) : (
-                                        <button onClick={() => auth.signInAnonymously()} className="text-xs bg-slate-800 text-white px-3 py-1.5 rounded hover:bg-slate-700 font-bold shadow-sm transition transform active:scale-95">
-                                            Đăng nhập
+                                        <button onClick={handleGoogleLogin} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 font-bold shadow-sm transition transform active:scale-95 flex items-center gap-1">
+                                            <i className="fab fa-google"></i> Login
                                         </button>
                                     )}
                                 </div>
@@ -4887,19 +5065,21 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'list' && <WordListView data={filteredData} learnedWords={learnedWords} difficultWords={difficultWords} toggleLearned={toggleLearned} toggleDifficult={toggleDifficult} showDetails={showDetails} toggleDetails={toggleDetails} highlightedId={highlightedId} jumpToWord={jumpToWord} />}
                         {view === 'flashcard' && <FlashcardView allData={toeicData} learnedWords={learnedWords} difficultWords={difficultWords} learnedTimestamps={learnedTimestamps} markAsEasy={markAsEasy} markAsHard={markAsHard} customReviewList={customReviewList} jumpToWord={jumpToWord} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
-                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
+                        {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} />}
                         {view === 'archery' && <ArcheryGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
+                        {view === 'shop' && <ShopView coins={coins} setCoins={setCoins} unlockedSkins={unlockedSkins} setUnlockedSkins={setUnlockedSkins} equippedSkin={equippedSkin} setEquipSkin={setEquipSkin} buyingItem={buyingItem} setBuyingItem={setBuyingItem} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
                     </main>
 
                     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-2 z-40 transition-colors duration-300 pb-safe">
                         <div className="max-w-md mx-auto flex justify-around">
-                            <button onClick={() => { setView('list'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[9px] font-bold">Từ vựng</span> </button>
-                            <button onClick={() => { setView('flashcard'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
-                            <button onClick={() => { setView('quiz'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
-                            <button onClick={() => { setView('runner'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[9px] font-bold">Runner</span> </button>
-                            <button onClick={() => { setView('archery'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-bullseye text-lg mb-1"></i> <span className="text-[9px] font-bold">Archery</span> </button>
-                            <button onClick={() => { setView('memory'); setCustomReviewList(null); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
+                            <button onClick={() => { setView('list'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'list' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-list text-lg mb-1"></i> <span className="text-[9px] font-bold">Từ vựng</span> </button>
+                            <button onClick={() => { setView('flashcard'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
+                            <button onClick={() => { setView('quiz'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
+                            <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[9px] font-bold">Runner</span> </button>
+                            <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-bullseye text-lg mb-1"></i> <span className="text-[9px] font-bold">Archery</span> </button>
+                            <button onClick={() => { setView('memory'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
+                            <button onClick={() => { setView('shop'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'shop' ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-store text-lg mb-1"></i> <span className="text-[9px] font-bold">Shop</span> </button>
                         </div>
                     </div>
 
