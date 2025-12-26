@@ -1359,11 +1359,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
 
         const SHOP_ITEMS = [
-            { id: 'skin_default', name: 'Runner Cơ Bản', type: 'skin', price: 0, icon: 'fa-running', color: 'indigo-500', desc: 'Trang phục mặc định' },
-            { id: 'skin_robot', name: 'Mecha Bot', type: 'skin', price: 500, icon: 'fa-robot', color: 'slate-500', desc: 'Robot hủy diệt' },
-            { id: 'skin_ninja', name: 'Shadow Ninja', type: 'skin', price: 1000, icon: 'fa-user-ninja', color: 'zinc-800', desc: 'Thân pháp phi phàm' },
-            { id: 'skin_astro', name: 'Phi Hành Gia', type: 'skin', price: 2500, icon: 'fa-user-astronaut', color: 'orange-500', desc: 'Bay vào không gian' },
-            { id: 'skin_king', name: 'Vua Tốc Độ', type: 'skin', price: 5000, icon: 'fa-crown', color: 'yellow-500', desc: 'Quyền uy tối thượng' },
+            { id: 'skin_default', name: 'Runner Cơ Bản', type: 'skin', price: 0, icon: 'fa-running', color: 'indigo-500', desc: 'Trang phục mặc định', stats: {} },
+            { id: 'skin_robot', name: 'Mecha Bot', type: 'skin', price: 500, icon: 'fa-robot', color: 'slate-500', desc: 'Bền bỉ: +3s Khiên', stats: { shieldBonus: 3 } },
+            { id: 'skin_ninja', name: 'Shadow Ninja', type: 'skin', price: 1000, icon: 'fa-user-ninja', color: 'zinc-800', desc: 'Khéo léo: +20% Vàng', stats: { coinMult: 1.2 } },
+            { id: 'skin_astro', name: 'Phi Hành Gia', type: 'skin', price: 2500, icon: 'fa-user-astronaut', color: 'orange-500', desc: 'Công nghệ: +3s Nam châm', stats: { magnetBonus: 3 } },
+            { id: 'skin_king', name: 'Vua Tốc Độ', type: 'skin', price: 5000, icon: 'fa-crown', color: 'yellow-500', desc: 'Đại gia: x2 Vàng', stats: { coinMult: 2.0 } },
         ];
 
         const AUDIO_CONFIG = {
@@ -1376,6 +1376,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             musicEnabled: localStorage.getItem('toeic_music_enabled') !== 'false',
             bgMusic: null,
             currentMusicType: null,
+            preloadedSounds: {}, // Cache for preloaded Audio objects
 
             // 1. Local Assets (Priority 1)
             localAssets: {
@@ -1591,6 +1592,24 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     this.bgMusic = null;
                     this.currentMusicType = null;
                 }
+            },
+
+            // Preload common sounds to avoid lag
+            preload: function () {
+                const soundsToPreload = [
+                    ...Object.values(this.localAssets.common),
+                    ...Object.values(this.localAssets.game_runner),
+                    ...Object.values(this.localAssets.game_memory)
+                ];
+
+                console.log('Preloading', soundsToPreload.length, 'sounds...');
+
+                soundsToPreload.forEach(url => {
+                    const audio = new Audio(url);
+                    audio.preload = 'auto'; // Force buffer
+                    // Store reference to prevent garbage collection
+                    this.preloadedSounds[url] = audio;
+                });
             }
         };
 
@@ -1599,6 +1618,40 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         const playMusic = (type) => SoundManager.playMusic(type);
         const toggleMusic = () => SoundManager.toggleMusic();
         const stopMusic = () => SoundManager.stopMusic();
+
+        // ============================================
+        // VISUAL EFFECTS
+        // ============================================
+        const spawnParticles = (x, y, color = '#fbbf24', count = 12) => {
+            const container = document.body;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'fixed pointer-events-none rounded-full z-[100]';
+                const size = Math.random() * 8 + 4;
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.left = `${x}px`;
+                p.style.top = `${y}px`;
+                p.style.backgroundColor = color;
+                p.style.borderRadius = '50%';
+
+                // Physics
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 100 + 50;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+
+                p.animate([
+                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                    { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 600 + Math.random() * 400,
+                    easing: 'cubic-bezier(0, .9, .57, 1)'
+                }).onfinish = () => p.remove();
+
+                container.appendChild(p);
+            }
+        };
 
         // ============================================
         // TTS (Text-to-Speech) - Đọc từ vựng
@@ -1637,6 +1690,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                 const filename = wordToFilename(text);
                 const basePath = AUDIO_CONFIG.audioBasePath;
+
 
                 // Tạo danh sách URLs để thử (theo thứ tự ưu tiên)
                 const urlsToTry = [];
@@ -1804,8 +1858,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         </div>
                     )}
                 </div>
-            </div>
-        );
+            );
+        };
 
         const WordListView = ({ data, learnedWords, difficultWords, toggleLearned, toggleDifficult, showDetails, toggleDetails, highlightedId, jumpToWord }) => (
             <div className="grid grid-cols-1 gap-4 max-w-3xl mx-auto">
@@ -1860,7 +1914,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             });
 
             // 3. Recommendations
-            const recommendations = stats.filter(s => s.percent < 100).sort((a, b) => a.percent - b.percent).slice(0, 3);
+            const recommendations = stats.filter(s => s.percent < 100).sort((a, b) => b.learned - a.learned).slice(0, 3); // Sort by learned count, then percent
 
             return (
                 <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
@@ -2611,9 +2665,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     if (itemInLane && itemInLane.type === 'coin') {
                         // Collected Coin!
                         playSound('general', 'coin');
-                        setScore(prev => prev + 10);
-                        setCoins(prev => prev + 1);
+                        
+                        const stats = getSkinStats();
+                        const mult = stats.coinMult || 1;
+                        const coinsEarned = Math.floor(10 * mult);
+                        
+                        setScore(prev => prev + coinsEarned);
+                        setCoins(prev => prev + 1); // 1 Coin currency, Score is separate
                         setCollectedCoinsEffect({ visible: true, lane: playerLane });
+                        
+                        // Visuals
+                        spawnParticles(window.innerWidth / 2, window.innerHeight * 0.7, '#fbbf24', 15);
 
                         // Hide coin in this lane visually (optional, or just wait for next round)
                         // For simple logic, we just move on
@@ -2644,6 +2706,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const newStreak = streak + 1;
                     setStreak(newStreak);
                     setCoins(prev => prev + earned);
+                    
+                    // Visuals
+                    spawnParticles(window.innerWidth / 2, window.innerHeight * 0.7, '#10b981', 20);
                     setLastResult('correct');
                     setSpeed(prev => Math.min(prev + 0.05, 2.5));
 
@@ -2684,7 +2749,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     setTimeout(() => generateNewRound([...gamePool]), 500);
                 } else {
                     // Wrong - Game Over
-                    playSound('quiz', 'wrong');
+                    playSound('game_runner', 'gameover');
+                    spawnParticles(window.innerWidth / 2, window.innerHeight * 0.7, '#ef4444', 30);
                     setLastResult('wrong');
 
                     if (score > highScore) {
@@ -4331,8 +4397,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 </div>
                             ) : (
                                 <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center">
-                                    <i className="fas fa-user-clock text-2xl text-slate-300 dark:text-slate-600 mb-2"></i>
-                                    <p className="text-[10px] text-slate-400 dark:text-slate-500">Chưa có ai online. Hãy mời bạn bè vào chơi!</p>
+                                    <i className="fas fa-ghost text-3xl mb-2"></i>
+                                    <p className="text-[10px] uppercase font-black">Chưa có ai online</p>
+                                    <p className="text-[9px] mt-1">Hãy chia sẻ mã phòng cho bạn bè!</p>
                                 </div>
                             )}
                         </div>
@@ -4549,6 +4616,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // SHOP VIEW - Cửa Hàng
         // ============================================
         const ShopView = ({ coins, setCoins, unlockedSkins, setUnlockedSkins, equippedSkin, setEquipSkin, buyingItem, setBuyingItem }) => {
+            // Helper for stats
+            const getSkinStats = () => {
+                const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
+                return skin.stats || {};
+            };
+
             const handleBuy = (item) => {
                 if (coins < item.price) {
                     playSound('general', 'error');
@@ -4589,7 +4662,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {SHOP_ITEMS.map(item => {
                             const isUnlocked = unlockedSkins.includes(item.id);
-                            const isEquipped = equippedSkin === item.id;
+                            // const equippedSkin = props.equippedSkin || 'skin_default'; // This line was removed as equippedSkin is already a prop
                             const isBuying = buyingItem === item.id;
                             // Fix color parsing
                             const iconClass = `text-4xl ${item.color.includes('indigo') ? 'text-indigo-500' : item.color.includes('slate') ? 'text-slate-500' : item.color.includes('zinc') ? 'text-zinc-800' : item.color.includes('orange') ? 'text-orange-500' : 'text-yellow-500'}`;
@@ -4659,6 +4732,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [isProfileOpen, setIsProfileOpen] = React.useState(false);
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const [darkMode, setDarkMode] = React.useState(false);
+
+            // Init App
+            React.useEffect(() => {
+                SoundManager.preload();
+            }, []);
             const [isAuthChecking, setIsAuthChecking] = React.useState(true);
             const [incomingInvitation, setIncomingInvitation] = React.useState(null);
             const [customReviewList, setCustomReviewList] = React.useState(null);
