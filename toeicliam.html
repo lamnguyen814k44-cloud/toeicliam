@@ -6211,6 +6211,15 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const [darkMode, setDarkMode] = React.useState(false);
 
+            // Admin State
+            const [gameConfig, setGameConfig] = React.useState(() => safeJSON('admin_game_config', DEFAULT_GAME_CONFIG));
+            const [isAdminOpen, setIsAdminOpen] = React.useState(false);
+
+            // Persist config
+            React.useEffect(() => {
+                localStorage.setItem('admin_game_config', JSON.stringify(gameConfig));
+            }, [gameConfig]);
+
             // Init App
             React.useEffect(() => {
                 try {
