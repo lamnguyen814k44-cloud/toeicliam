@@ -3506,28 +3506,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }
             };
 
-            const checkCollision = () => {
-                isCheckingRef.current = true;
-                const { playerLane, correctLane, coins, score } = latestStateRef.current;
 
-                if (playerLane === correctLane) {
-                    playSound('quiz', 'correct');
-                    setScore(s => s + 10);
-                    setStreak(s => s + 1);
-                    // Visual
-                    const laneLeft = window.innerWidth * (playerLane === 0 ? 0.2 : playerLane === 1 ? 0.5 : 0.8);
-                    spawnParticles(laneLeft, window.innerHeight * 0.8, '#fbbf24', 30);
-
-                    setTimeout(() => {
-                        setObstaclePosition(-25);
-                        isCheckingRef.current = false;
-                        generateNewRound(gamePool);
-                    }, 200);
-                } else {
-                    playSound('runner', 'gameover');
-                    setGameState('gameover');
-                }
-            };
 
             // Keyboard controls
             React.useEffect(() => {
