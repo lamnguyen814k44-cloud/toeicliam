@@ -1357,22 +1357,21 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // --- SOUND HELPER ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         // ============================================
-        // AUDIO CONFIGURATION - Thay đổi đường dẫn tại đây
+        // AUDIO CONFIGURATION - CẤU HÌNH AUDIO
         // ============================================
         const AUDIO_CONFIG = {
-            // Đường dẫn đến folder audio (để trống nếu dùng CDN)
+            // Đường dẫn đến folder chứa file audio từ vựng
             // Ví dụ: './audio' hoặc 'https://your-domain.com/audio'
-            audioBasePath: '',  // Để trống = dùng Google TTS
+            audioBasePath: './audio',  // Folder chứa file audio của bạn
             
-            // Đường dẫn đến folder sounds
-            // Ví dụ: './sounds' hoặc 'https://your-domain.com/sounds'  
-            soundsBasePath: '', // Để trống = dùng CDN Freesound
+            // Đường dẫn đến folder sounds effects
+            soundsBasePath: './sounds',
             
             // Định dạng file audio: 'mp3' hoặc 'wav'
-            audioFormat: 'wav',  // Thay đổi thành 'mp3' nếu dùng file mp3
+            audioFormat: 'wav',
             
             // Định dạng file sounds: 'mp3' hoặc 'wav'
-            soundsFormat: 'wav', // Thay đổi thành 'mp3' nếu dùng file mp3
+            soundsFormat: 'wav',
         };
 
         // Sound Effects URLs - hỗ trợ cả MP3 và WAV
@@ -1459,13 +1458,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         // Định dạng file audio (mp3 hoặc wav)
-        const audioExt = AUDIO_CONFIG.audioFormat || 'mp3';
+        const audioExt = AUDIO_CONFIG.audioFormat || 'wav';
 
         // --- COMPONENTS ---
-        // Global TTS function - ưu tiên local files (WAV/MP3), fallback Google TTS
-        const playTTS = (text, lang = 'US') => {
+        // Global TTS function - đọc từ folder audio local
+        const playTTS = (text) => {
             return new Promise((resolve, reject) => {
-                const cacheKey = `${text}_${lang}`;
+                const cacheKey = text;
                 
                 // Kiểm tra cache
                 if (ttsCache[cacheKey]) {
@@ -1475,83 +1474,41 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     return;
                 }
                 
-                // Ưu tiên 1: Local files (nếu có cấu hình) - hỗ trợ WAV và MP3
+                // Đọc từ folder audio local
                 if (AUDIO_CONFIG.audioBasePath) {
-                    const folder = lang === 'UK' ? 'uk' : 'us';
                     const filename = wordToFilename(text);
-                    const localUrl = `${AUDIO_CONFIG.audioBasePath}/${folder}/${filename}.${audioExt}`;
+                    const localUrl = `${AUDIO_CONFIG.audioBasePath}/${filename}.${audioExt}`;
                     
                     const audio = new Audio(localUrl);
                     audio.onended = resolve;
                     audio.onerror = () => {
-                        // Thử format khác (nếu wav lỗi thì thử mp3 và ngược lại)
+                        // Thử format khác
                         const altExt = audioExt === 'wav' ? 'mp3' : 'wav';
-                        const altUrl = `${AUDIO_CONFIG.audioBasePath}/${folder}/${filename}.${altExt}`;
+                        const altUrl = `${AUDIO_CONFIG.audioBasePath}/${filename}.${altExt}`;
                         
                         const altAudio = new Audio(altUrl);
                         altAudio.onended = resolve;
                         altAudio.onerror = () => {
-                            // Fallback sang Google TTS
-                            playGoogleTTS(text, lang).then(resolve).catch(reject);
+                            console.log('Audio not found:', filename);
+                            reject();
                         };
                         altAudio.oncanplaythrough = () => {
                             ttsCache[cacheKey] = altAudio;
                         };
-                        altAudio.play().catch(() => {
-                            playGoogleTTS(text, lang).then(resolve).catch(reject);
-                        });
+                        altAudio.play().catch(reject);
                     };
                     audio.oncanplaythrough = () => {
                         ttsCache[cacheKey] = audio;
                     };
-                    audio.play().catch(() => {
-                        playGoogleTTS(text, lang).then(resolve).catch(reject);
-                    });
+                    audio.play().catch(reject);
                     return;
                 }
                 
-                // Ưu tiên 2: Google Translate TTS
-                playGoogleTTS(text, lang).then(resolve).catch(reject);
+                reject('No audio configured');
             });
         };
         
-        // Google TTS helper
-        const playGoogleTTS = (text, lang) => {
-            return new Promise((resolve, reject) => {
-                const tl = lang === 'UK' ? 'en-gb' : 'en';
-                const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${tl}&client=tw-ob`;
-                
-                const audio = new Audio(url);
-                audio.onended = resolve;
-                audio.onerror = () => {
-                    // Fallback: SpeechSynthesis
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const msg = new SpeechSynthesisUtterance(text);
-                        msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
-                        msg.rate = 0.9;
-                        msg.onend = resolve;
-                        msg.onerror = reject;
-                        window.speechSynthesis.speak(msg);
-                    } else {
-                        reject();
-                    }
-                };
-                audio.play().catch(() => {
-                    // Fallback nếu play() thất bại
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const msg = new SpeechSynthesisUtterance(text);
-                        msg.lang = lang === 'UK' ? 'en-GB' : 'en-US';
-                        msg.rate = 0.9;
-                        msg.onend = resolve;
-                        window.speechSynthesis.speak(msg);
-                    }
-                });
-            });
-        };
-        
-        const SpeakerButton = ({ text, lang = 'US', className = "" }) => {
+        const SpeakerButton = ({ text, className = "" }) => {
             const [isPlaying, setIsPlaying] = React.useState(false);
             
             const speak = async (e) => {
@@ -1560,9 +1517,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 
                 setIsPlaying(true);
                 try {
-                    await playTTS(text, lang);
+                    await playTTS(text);
                 } catch (err) {
-                    console.log('TTS error:', err);
+                    console.log('Audio error:', err);
                 } finally {
                     setIsPlaying(false);
                 }
@@ -1572,10 +1529,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 <button 
                     onClick={speak} 
                     disabled={isPlaying}
-                    className={`inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all border ${className} ${isPlaying ? 'opacity-50 cursor-wait' : ''} ${lang === 'US' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'}`} 
-                    title={lang === 'US' ? 'Giọng Mỹ (US)' : 'Giọng Anh (UK)'}
+                    className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold transition-all border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 ${className} ${isPlaying ? 'opacity-50 cursor-wait' : ''}`} 
+                    title="Nghe phát âm"
                 > 
-                    <i className={`fas ${isPlaying ? 'fa-spinner fa-spin' : 'fa-volume-up'}`}></i> {lang} 
+                    <i className={`fas ${isPlaying ? 'fa-spinner fa-spin' : 'fa-volume-up'}`}></i> 🔊
                 </button>
             );
         };
@@ -1615,7 +1572,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <div className="flex items-center gap-2 mb-2"> <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded tracking-wide">{item.topic}</span> </div>
                         <div className="flex items-center gap-3 flex-wrap mb-1">
                             <h3 className="text-xl font-black text-slate-800 dark:text-white">{item.word}</h3>
-                            <div className="flex gap-1"> <SpeakerButton text={item.word} lang="US" /> <SpeakerButton text={item.word} lang="UK" /> </div>
+                            <SpeakerButton text={item.word} />
                         </div>
                         <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1">{item.ipa}</p>
                     </div>
@@ -2012,8 +1969,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <span className="text-lg text-slate-500 dark:text-slate-400 font-mono mb-6 bg-slate-50 dark:bg-slate-700 px-3 py-1 rounded">{item.ipa}</span>
                                 <p className="text-xs text-slate-400 animate-pulse mt-8"><i className="fas fa-tap"></i> Chạm để lật</p>
                                 <div className="flex gap-2 mt-6" onClick={(e) => e.stopPropagation()}>
-                                    <SpeakerButton text={item.word} lang="US" className="scale-125" />
-                                    <SpeakerButton text={item.word} lang="UK" className="scale-125" />
+                                    <SpeakerButton text={item.word} className="scale-125" />
                                 </div>
                             </div>
                             <div className="card-face rotate-y-180 bg-slate-800 text-white z-20 overflow-hidden relative">
@@ -2483,7 +2439,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             // Functions Definitions (Moved outside effects)
             const speak = (text) => {
-                playTTS(text, 'US').catch(() => {});
+                playTTS(text).catch(() => {});
             };
 
             const toggleTopic = (topic) => {
@@ -3102,7 +3058,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     {matchedItem && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-                            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-indigo-100 dark:border-slate-700 relative text-center"> <div className="inline-block p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mb-3 text-2xl animate-bounce"><i className="fas fa-check"></i></div> <h3 className="text-2xl font-black text-indigo-900 dark:text-white mb-1">{matchedItem.word}</h3> <div className="flex justify-center gap-2 mb-3"><SpeakerButton text={matchedItem.word} lang="US" /><SpeakerButton text={matchedItem.word} lang="UK" /></div> <p className="text-slate-500 dark:text-slate-400 font-mono text-sm mb-3">{matchedItem.ipa}</p> <p className="text-lg font-bold text-yellow-600 dark:text-yellow-400 mb-4">{matchedItem.meaning}</p> <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 italic mb-5 border border-slate-100 dark:border-slate-600">"{matchedItem.example}"</div> <button onClick={() => setMatchedItem(null)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105">Tiếp tục</button> </div>
+                            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-indigo-100 dark:border-slate-700 relative text-center"> <div className="inline-block p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mb-3 text-2xl animate-bounce"><i className="fas fa-check"></i></div> <h3 className="text-2xl font-black text-indigo-900 dark:text-white mb-1">{matchedItem.word}</h3> <div className="flex justify-center gap-2 mb-3"><SpeakerButton text={matchedItem.word} /></div> <p className="text-slate-500 dark:text-slate-400 font-mono text-sm mb-3">{matchedItem.ipa}</p> <p className="text-lg font-bold text-yellow-600 dark:text-yellow-400 mb-4">{matchedItem.meaning}</p> <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 italic mb-5 border border-slate-100 dark:border-slate-600">"{matchedItem.example}"</div> <button onClick={() => setMatchedItem(null)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105">Tiếp tục</button> </div>
                         </div>
                     )}
 
@@ -3378,7 +3334,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const speakWord = (text) => {
-                playTTS(text, 'US').catch(() => {});
+                playTTS(text).catch(() => {});
             };
 
             const startReviewSession = (wordsToReview) => {
