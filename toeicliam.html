@@ -4036,8 +4036,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     {/* Word Display (Always show for now) */}
                     <div className={`bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl text-center mb-3 shadow-lg transition-all duration-300 transform origin-top ${roundType === 'coin' ? 'opacity-0 scale-y-0 h-0 p-0 mb-0 overflow-hidden' : 'opacity-100 scale-y-100'}`}>
                         <div className="text-xs opacity-70">{currentWord?.topic || '...'}</div>
-                        <div className="text-2xl font-black">{currentWord?.word || '...'}</div>
-                        <div className="text-xs opacity-70">{currentWord?.ipa || '...'}</div>
+                        <div className="text-xl font-black leading-tight">{currentWord?.meaning || '...'}</div>
+                        <div className="text-xs opacity-70 mt-1">{currentWord?.ipa || '...'}</div>
                     </div>
 
                     {view === 'runner' ? (
@@ -4107,7 +4107,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <div className="absolute -bottom-8 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold text-slate-900 border border-slate-200 shadow-sm whitespace-nowrap overflow-hidden max-w-[120px] text-ellipsis"
                                                 style={{ transform: `scaleX(${duck.direction === 1 ? -1 : 1})` }}
                                             >
-                                                {option.meaning}
+                                                {option.word}
                                             </div>
                                         )}
                                         {duck.isDead && (
@@ -6060,21 +6060,30 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             },
             runner: {
                 speed: 5,
-                duckSpeed: 12, // Initial velocity for ducks
+                duckSpeed: 12,
                 obstacleSpawnRate: 2000,
             },
             memory: {
                 flipDuration: 0.6,
+                gridSize: 4, // 4x4 grid = 16 cards
+            },
+            quiz: {
+                timePerQuestion: 15, // seconds
+                coinsPerCorrect: 5,
+            },
+            general: {
+                startingCoins: 500,
             }
         };
 
         // ============================================
         // ADMIN SETTINGS MODAL
         // ============================================
-        const AdminSettingsModal = ({ isOpen, onClose, config, setConfig }) => {
+        const AdminSettingsModal = ({ isOpen, onClose, config, setConfig, coins, setCoins }) => {
             const [localConfig, setLocalConfig] = React.useState(config);
             const [password, setPassword] = React.useState('');
             const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+            const [coinAdjust, setCoinAdjust] = React.useState(100); // Amount to add/subtract
 
             React.useEffect(() => {
                 setLocalConfig(config);
@@ -6177,7 +6186,90 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-3 pt-4 border-t border-slate-700">
+                                    {/* Memory Config */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-bold text-lg mb-3 text-purple-500 border-b border-slate-200 dark:border-slate-700 pb-2">Memory Game</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Flip Duration (s)</label>
+                                                <input type="number" step="0.1" value={localConfig.memory?.flipDuration || 0.6} onChange={e => handleChange('memory', 'flipDuration', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Grid Size</label>
+                                                <input type="number" step="1" min="2" max="6" value={localConfig.memory?.gridSize || 4} onChange={e => handleChange('memory', 'gridSize', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Quiz Config */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-bold text-lg mb-3 text-orange-500 border-b border-slate-200 dark:border-slate-700 pb-2">Quiz</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Time/Question (s)</label>
+                                                <input type="number" step="1" min="5" max="60" value={localConfig.quiz?.timePerQuestion || 15} onChange={e => handleChange('quiz', 'timePerQuestion', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Coins/Correct</label>
+                                                <input type="number" step="1" min="1" max="50" value={localConfig.quiz?.coinsPerCorrect || 5} onChange={e => handleChange('quiz', 'coinsPerCorrect', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* General Config */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-bold text-lg mb-3 text-yellow-500 border-b border-slate-200 dark:border-slate-700 pb-2">General</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500">Starting Coins</label>
+                                                <input type="number" step="100" min="0" value={localConfig.general?.startingCoins || 500} onChange={e => handleChange('general', 'startingCoins', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Coin Management */}
+                                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-4 rounded-xl border-2 border-yellow-300 dark:border-yellow-700">
+                                        <h3 className="font-bold text-lg mb-3 text-yellow-600 dark:text-yellow-400 border-b border-yellow-200 dark:border-yellow-700 pb-2 flex items-center gap-2">
+                                            <i className="fas fa-coins"></i> Quản lý Xu
+                                        </h3>
+                                        <div className="text-center mb-4">
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">Số xu hiện tại</div>
+                                            <div className="text-3xl font-black text-yellow-600 dark:text-yellow-400">{coins?.toLocaleString() || 0}</div>
+                                        </div>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <input
+                                                type="number"
+                                                step="100"
+                                                min="1"
+                                                value={coinAdjust}
+                                                onChange={e => setCoinAdjust(parseInt(e.target.value) || 0)}
+                                                className="flex-1 p-2 rounded-lg border dark:bg-slate-800 font-mono text-center text-lg font-bold"
+                                                placeholder="Số xu..."
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setCoins(prev => prev + coinAdjust);
+                                                    alert(`Đã cộng ${coinAdjust} xu!`);
+                                                }}
+                                                className="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg"
+                                            >
+                                                <i className="fas fa-plus"></i> Cộng Xu
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setCoins(prev => Math.max(0, prev - coinAdjust));
+                                                    alert(`Đã trừ ${coinAdjust} xu!`);
+                                                }}
+                                                className="bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg"
+                                            >
+                                                <i className="fas fa-minus"></i> Trừ Xu
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                                         <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
                                         <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition shadow-lg">Lưu Cấu Hình</button>
                                     </div>
@@ -6687,7 +6779,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                     {/* Admin Trigger (Button hidden in Profile, but we can also add a secret trigger or just pass prop to Profile) */}
                     {/* For now let's pass setIsAdminOpen to ProfileModal or add a discrete button in ProfileModal */}
-                    <AdminSettingsModal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} config={gameConfig} setConfig={setGameConfig} />
+                    <AdminSettingsModal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} config={gameConfig} setConfig={setGameConfig} coins={coins} setCoins={setCoins} />
 
                     {/* Pass config to games */}
                     <div style={{ display: 'none' }}>Debug: Config Loaded</div>
