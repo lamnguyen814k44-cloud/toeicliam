@@ -4089,12 +4089,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 return (
                     <div className="max-w-xl mx-auto py-6 px-4 animate-fadeIn">
                         <div className="text-center mb-6">
-                            <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-                                <i className="fas fa-cat text-4xl text-white"></i>
+                            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                <i className="fas fa-rocket text-4xl text-white"></i>
                             </div>
-                            <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Poke The Cat!</h2>
-                            <p className="text-slate-500 dark:text-slate-400">Gõ từ tiếng Anh để chọc mèo!</p>
-                            <div className="mt-2 text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 rounded-full inline-block">
+                            <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Space Defender</h2>
+                            <p className="text-slate-500 dark:text-slate-400">Gõ từ tiếng Anh để bắn hạ UFO!</p>
+                            <div className="mt-2 text-xs text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1 rounded-full inline-block">
                                 <i className="fas fa-trophy mr-1"></i> Kỷ lục: {highScore} điểm
                             </div>
                         </div>
@@ -4113,7 +4113,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <button
                                         key={topic}
                                         onClick={() => toggleTopic(topic)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-orange-500 text-white border-orange-500 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-orange-300'}`}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-indigo-500 text-white border-indigo-500 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-indigo-300'}`}
                                     >
                                         {topic}
                                     </button>
@@ -4126,17 +4126,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <ul className="space-y-1 text-xs">
                                 <li>• Xem nghĩa tiếng Việt</li>
                                 <li>• Gõ từ tiếng Anh tương ứng</li>
-                                <li>• Mỗi ký tự đúng = lực chọc tăng</li>
-                                <li>• Ký tự sai = lực giảm</li>
-                                <li>• Hoàn thành từ = Chọc trúng mèo!</li>
+                                <li>• Mỗi ký tự đúng = Nạp năng lượng Laser</li>
+                                <li>• Ký tự sai = Mất năng lượng</li>
+                                <li>• Hoàn thành từ = Bắn hạ UFO!</li>
                             </ul>
                         </div>
 
                         <button
                             onClick={startGame}
-                            className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+                            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
                         >
-                            <i className="fas fa-hand-point-right"></i> Bắt Đầu Chọc!
+                            <i className="fas fa-space-shuttle"></i> Xuất Kích!
                         </button>
                     </div>
                 );
@@ -4159,8 +4159,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <div className="text-xs text-slate-500">Điểm số</div>
                                 </div>
                                 <div>
-                                    <div className="text-3xl font-black text-orange-600">{streak}</div>
-                                    <div className="text-xs text-slate-500">Mèo đã chọc</div>
+                                    <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">{streak}</div>
+                                    <div className="text-xs text-slate-500">UFO đã hạ</div>
                                 </div>
                             </div>
                             {score >= highScore && score > 0 && (
@@ -4179,7 +4179,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </button>
                             <button
                                 onClick={startGame}
-                                className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
+                                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
                             >
                                 <i className="fas fa-redo mr-2"></i> Chơi lại
                             </button>
@@ -4211,233 +4211,199 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <div className="text-xs opacity-70 italic truncate">"{currentWord?.example}"</div>
                     </div>
 
-                    {/* Archery Area */}
-                    <div className="relative bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 mb-3 overflow-hidden" style={{ height: '160px' }}>
-                        {/* Background grass/ground effect */}
-                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-green-800/20 to-transparent"></div>
+                    {/* Space Battle Area */}
+                    <div className="relative bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black rounded-xl p-4 mb-3 overflow-hidden" style={{ height: '200px' }}>
 
-                        {/* Target */}
-                        <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'animate-target-shake' : ''}`}>
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 relative gpu-accelerate overflow-visible shadow-lg rounded-full"
-                                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-                                {/* Cat Face SVG */}
-                                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md transition-transform duration-200" style={{ transform: hitTarget ? 'scale(0.95)' : 'scale(1)' }}>
-                                    {/* Definitions for gradients */}
-                                    <defs>
-                                        <linearGradient id="catFaceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" stopColor="#fbbf24" />
-                                            <stop offset="100%" stopColor="#d97706" />
-                                        </linearGradient>
-                                        <radialGradient id="catCheekGradient">
-                                            <stop offset="0%" stopColor="#fecaca" stopOpacity="0.8" />
-                                            <stop offset="100%" stopColor="#fca5a5" stopOpacity="0" />
-                                        </radialGradient>
-                                    </defs>
-
-                                    {/* Ears (Back) */}
-                                    <path d="M10 30 Q5 5 35 15" fill="#d97706" stroke="#92400e" strokeWidth="2" strokeLinejoin="round" />
-                                    <path d="M90 30 Q95 5 65 15" fill="#d97706" stroke="#92400e" strokeWidth="2" strokeLinejoin="round" />
-
-                                    {/* Inner Ears */}
-                                    <path d="M15 28 Q12 15 30 20" fill="#fde68a" />
-                                    <path d="M85 28 Q88 15 70 20" fill="#fde68a" />
-
-                                    {/* Head Shape - Kawaii Squircle */}
-                                    <rect x="10" y="20" width="80" height="70" rx="35" ry="30" fill="url(#catFaceGradient)" stroke="#92400e" strokeWidth="2" />
-
-                                    {/* Stripes (Tabby Markings) */}
-                                    <path d="M50 20 L50 35" stroke="#92400e" strokeWidth="3" strokeLinecap="round" />
-                                    <path d="M40 22 L35 32" stroke="#92400e" strokeWidth="3" strokeLinecap="round" />
-                                    <path d="M60 22 L65 32" stroke="#92400e" strokeWidth="3" strokeLinecap="round" />
-
-                                    {/* Eyes (Change when hit) */}
-                                    {hitTarget ? (
-                                        <g stroke="#451a03" strokeWidth="4" strokeLinecap="round">
-                                            {/* > < Eyes for wincing/hit */}
-                                            <path d="M25 45 L35 50 L25 55" />
-                                            <path d="M75 45 L65 50 L75 55" />
-                                        </g>
-                                    ) : (
-                                        <g>
-                                            {/* Big Cute Eyes */}
-                                            <circle cx="30" cy="50" r="8" fill="#1e1b4b" />
-                                            <circle cx="70" cy="50" r="8" fill="#1e1b4b" />
-                                            {/* Eye Highlights */}
-                                            <circle cx="33" cy="47" r="3" fill="white" />
-                                            <circle cx="73" cy="47" r="3" fill="white" />
-                                            <circle cx="28" cy="53" r="1.5" fill="white" opacity="0.7" />
-                                            <circle cx="68" cy="53" r="1.5" fill="white" opacity="0.7" />
-                                        </g>
-                                    )}
-
-                                    {/* Cheeks (Blush) */}
-                                    <ellipse cx="20" cy="62" rx="6" ry="4" fill="url(#catCheekGradient)" />
-                                    <ellipse cx="80" cy="62" rx="6" ry="4" fill="url(#catCheekGradient)" />
-
-                                    {/* Nose & Mouth */}
-                                    <circle cx="50" cy="58" r="3" fill="#be123c" /> {/* Nose */}
-                                    {hitTarget ? (
-                                        // Ouch Mouth
-                                        <ellipse cx="50" cy="68" rx="4" ry="6" fill="#451a03" />
-                                    ) : (
-                                        // Cute :3 Mouth
-                                        <path d="M50 61 Q42 68 35 62 M50 61 Q58 68 65 62" fill="none" stroke="#451a03" strokeWidth="2.5" strokeLinecap="round" />
-                                    )}
-
-                                    {/* Whiskers */}
-                                    <g stroke="#78350f" strokeWidth="1.5" opacity="0.4" strokeLinecap="round">
-                                        <path d="M15 55 Q5 52 0 45" />
-                                        <path d="M15 60 Q5 60 0 60" />
-                                        <path d="M15 65 Q5 68 0 75" />
-
-                                        <path d="M85 55 Q95 52 100 45" />
-                                        <path d="M85 60 Q95 60 100 60" />
-                                        <path d="M85 65 Q95 68 100 75" />
-                                    </g>
-                                </svg>
-
-                                {/* Stuck Arrows on target */}
-                                {stuckArrows.map((arrow) => (
-                                    <div
-                                        key={arrow.id}
-                                        className={`absolute pointer-events-none ${arrow.isNew ? 'animate-arrow-stick' : ''}`}
-                                        style={{
-                                            left: `${arrow.x}%`,
-                                            top: `${arrow.y}%`,
-                                            '--arrow-rotation': `${arrow.rotation}deg`,
-                                            // Anchor point near the tip (right side of SVG)
-                                            transform: `translate(-90%, -50%) rotate(${arrow.rotation}deg)`,
-                                            zIndex: arrow.isNew ? 30 : 10,
-                                        }}
-                                    >
-                                        {/* Arrow stuck in target - More detailed & Buried effect */}
-                                        <svg width="24" height="24" viewBox="0 0 24 24" className="drop-shadow-sm" style={{ transform: 'rotate(45deg)' }}>
-                                            {/* Bandage Cross */}
-                                            <rect x="2" y="8" width="20" height="8" rx="2" fill="#fcd34d" stroke="#d97706" strokeWidth="1" />
-                                            <rect x="8" y="2" width="8" height="20" rx="2" fill="#fcd34d" stroke="#d97706" strokeWidth="1" />
-                                            {/* Center pad */}
-                                            <rect x="8" y="8" width="8" height="8" fill="#fbbf24" />
-                                            {/* Holes */}
-                                            <circle cx="5" cy="12" r="1" fill="#d97706" opacity="0.5" />
-                                            <circle cx="19" cy="12" r="1" fill="#d97706" opacity="0.5" />
-                                            <circle cx="12" cy="5" r="1" fill="#d97706" opacity="0.5" />
-                                            <circle cx="12" cy="19" r="1" fill="#d97706" opacity="0.5" />
-                                        </svg>
-
-                                        {/* Impact mark */}
-                                        {arrow.isNew && (
-                                            <div className="absolute left-full top-1/2 -translate-y-1/2 -translate-x-1">
-                                                {[...Array(4)].map((_, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="absolute w-1 h-1 bg-amber-200 rounded-full animate-impact-particle"
-                                                        style={{
-                                                            '--particle-x': `${(Math.random() - 0.5) * 20}px`,
-                                                            '--particle-y': `${(Math.random() - 0.5) * 20}px`,
-                                                            animationDelay: `${i * 0.05}s`,
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {/* Bullseye indicator */}
-                                        {arrow.isBullseye && arrow.isNew && (
-                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-orange-600 text-xs font-black animate-float-up whitespace-nowrap">
-                                                👉 CHỌC TRÚNG!
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-
-                                {/* Hit flash effect */}
-                                {hitTarget && (
-                                    <div className="absolute inset-0 rounded-full bg-white/50 animate-ping"></div>
-                                )}
-                            </div>
-
-                            {/* Arrow count badge */}
-                            {stuckArrows.length > 0 && (
-                                <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg border-2 border-white">
-                                    {stuckArrows.length}
-                                </div>
-                            )}
-
-                            {/* Target stand */}
-                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-2 h-8 bg-gradient-to-b from-amber-700 to-amber-900 rounded-b"></div>
+                        {/* Starfield Background Animation */}
+                        <div className="absolute inset-0 opacity-50">
+                            {[...Array(20)].map((_, i) => (
+                                <div key={i} className="absolute bg-white rounded-full animate-pulse"
+                                    style={{
+                                        width: Math.random() * 3 + 'px',
+                                        height: Math.random() * 3 + 'px',
+                                        top: Math.random() * 100 + '%',
+                                        left: Math.random() * 100 + '%',
+                                        animationDelay: Math.random() * 2 + 's',
+                                        opacity: Math.random()
+                                    }}></div>
+                            ))}
                         </div>
 
-                        {/* Poke Hand - Dynamic SVG */}
-                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-screen-shake' : ''} pointer-events-none gpu-accelerate`}>
-                            <div className="relative w-40 h-40 sm:w-48 sm:h-48 -translate-x-4 sm:-translate-x-6">
-                                <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                        {/* Target: UFO/Alien Boss */}
+                        <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'animate-target-shake' : 'animate-float'}`}>
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 relative gpu-accelerate overflow-visible drop-shadow-2xl">
+                                {/* UFO SVG */}
+                                <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible transition-transform duration-200" style={{ transform: hitTarget ? 'scale(0.95) rotate(-5deg)' : 'scale(1)' }}>
                                     <defs>
-                                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                                            <feGaussianBlur stdDeviation="2" result="blur" />
-                                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                        <linearGradient id="domeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#a5f3fc" stopOpacity="0.8" />
+                                            <stop offset="100%" stopColor="#0891b2" stopOpacity="0.4" />
+                                        </linearGradient>
+                                        <linearGradient id="saucerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#94a3b8" />
+                                            <stop offset="50%" stopColor="#475569" />
+                                            <stop offset="100%" stopColor="#1e293b" />
+                                        </linearGradient>
+                                        <filter id="glowAlien">
+                                            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                                            <feMerge>
+                                                <feMergeNode in="coloredBlur" />
+                                                <feMergeNode in="SourceGraphic" />
+                                            </feMerge>
                                         </filter>
                                     </defs>
 
-                                    {(() => {
-                                        // Calculations for Poke Hand
-                                        // Hand starts left and moves RIGHT as you type
-                                        const maxReach = 50;
-                                        const startX = 10;
-                                        const reachAmount = (power / 100) * maxReach;
-                                        const currentHandX = startX + reachAmount;
+                                    {/* Glass Dome (Back) */}
+                                    <path d="M20 50 Q50 10 80 50" fill="url(#domeGrad)" stroke="#22d3ee" strokeWidth="1" />
 
-                                        return (
-                                            <>
-                                                {/* Hand Group */}
-                                                {/* Outer Group: Handles Reach Position (Follows Power) */}
-                                                <g transform={`translate(${currentHandX}, 50)`} className="transition-transform duration-100 ease-out">
+                                    {/* Alien Creature */}
+                                    <g transform={`translate(0, ${hitTarget ? 5 : 0})`}>
+                                        {/* Body */}
+                                        <path d="M35 50 Q50 30 65 50" fill="#a3e635" />
+                                        {/* Head */}
+                                        <ellipse cx="50" cy="38" rx="12" ry="10" fill="#bef264" />
 
-                                                    {/* Inner Group: Handles Poke Animation (Shooting) */}
-                                                    <g
-                                                        className={`transition-transform ease-in ${arrowFlying ? 'duration-200 translate-x-[200px]' : 'duration-0'}`}
-                                                    >
-                                                        {/* Cartoon Glove Pointing */}
-                                                        <g transform="translate(0, -15) scale(0.9)">
-                                                            {/* Arm/Sleeve (Blue Suit) */}
-                                                            <rect x="-300" y="8" width="300" height="14" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" rx="0" />
+                                        {/* Eyes */}
+                                        {hitTarget ? (
+                                            <g stroke="#1a2e05" strokeWidth="2" strokeLinecap="round">
+                                                <path d="M42 36 L46 40 L42 44" /> {/* < Left */}
+                                                <path d="M58 36 L54 40 L58 44" /> {/* > Right */}
+                                            </g>
+                                        ) : (
+                                            <g>
+                                                <circle cx="45" cy="38" r="3" fill="black" />
+                                                <circle cx="55" cy="38" r="3" fill="black" />
+                                                <circle cx="46" cy="37" r="1" fill="white" />
+                                                <circle cx="56" cy="37" r="1" fill="white" />
+                                            </g>
+                                        )}
+                                        {/* Mouth */}
+                                        {hitTarget ? (
+                                            <circle cx="50" cy="45" r="2" fill="#1a2e05" />
+                                        ) : (
+                                            <path d="M48 44 Q50 46 52 44" fill="none" stroke="#1a2e05" strokeWidth="1" />
+                                        )}
+                                    </g>
 
-                                                            {/* Glove Cuff */}
-                                                            <path d="M-5 5 L5 5 L8 25 L-8 25 Z" fill="#ffffff" stroke="#e2e8f0" strokeWidth="2" />
+                                    {/* Glass Dome (Front Reflection) */}
+                                    <path d="M25 45 Q35 25 45 40" fill="none" stroke="white" strokeWidth="2" opacity="0.4" strokeLinecap="round" />
 
-                                                            {/* Hand Shape (White Glove) */}
-                                                            <path d="M5 10 L30 10 A 5 5 0 0 1 30 20 L5 20 Z" fill="#ffffff" stroke="#94a3b8" strokeWidth="1" /> {/* Finger Base */}
+                                    {/* Saucer Body */}
+                                    <ellipse cx="50" cy="55" rx="45" ry="15" fill="url(#saucerGrad)" stroke="#334155" strokeWidth="2" />
+                                    <path d="M5 55 Q50 75 95 55" fill="none" stroke="#334155" strokeWidth="1" opacity="0.5" />
 
-                                                            {/* Main Glove Body */}
-                                                            <path d="M0 10 Q-5 15 0 20 L25 20 Q30 15 25 10 Z" fill="#ffffff" />
+                                    {/* Lights */}
+                                    <circle cx="20" cy="55" r="3" fill="#facc15" className="animate-pulse" />
+                                    <circle cx="50" cy="65" r="3" fill="#ef4444" className="animate-pulse" style={{ animationDelay: '0.2s' }} />
+                                    <circle cx="80" cy="55" r="3" fill="#facc15" className="animate-pulse" style={{ animationDelay: '0.4s' }} />
 
-                                                            {/* Fingers (Curled) */}
-                                                            <circle cx="10" cy="18" r="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
-                                                            <circle cx="18" cy="18" r="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
-                                                            <circle cx="26" cy="18" r="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+                                    {/* Engine Glow */}
+                                    <ellipse cx="50" cy="60" rx="20" ry="5" fill="#3b82f6" opacity="0.5" filter="url(#glowAlien)" />
+                                </svg>
+                            </div>
 
-                                                            {/* Pointing Finger (Index) */}
-                                                            {/* Detailed Finger */}
-                                                            <path d="M10 8 L45 8 Q50 8 50 14 Q50 20 45 20 L10 20" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
-                                                            <path d="M10 9 L44 9 Q48 9 48 14 Q48 19 44 19 L10 19" fill="#ffffff" /> {/* Fill over stroke */}
+                            {/* Damage/Impact Marks on UFO */}
+                            {stuckArrows.map((mark) => (
+                                <div
+                                    key={mark.id}
+                                    className={`absolute pointer-events-none ${mark.isNew ? 'animate-ping-slow' : ''}`}
+                                    style={{
+                                        left: `${mark.x}%`,
+                                        top: `${mark.y}%`,
+                                        transform: 'translate(-50%, -50%)',
+                                        zIndex: 20
+                                    }}
+                                >
+                                    {/* Scorch Mark SVG */}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" style={{ transform: `rotate(${mark.rotation}deg)` }}>
+                                        <circle cx="12" cy="12" r="6" fill="#1e293b" opacity="0.8" />
+                                        <path d="M12 2 L14 8 L20 8 L16 14 L18 20 L12 16 L6 20 L8 14 L4 8 L10 8 Z" fill="#f59e0b" transform="scale(0.5) translate(12,12)" />
+                                    </svg>
 
-                                                            {/* Thumb */}
-                                                            <path d="M5 20 Q5 28 15 25" fill="none" stroke="#cbd5e1" strokeWidth="3" strokeLinecap="round" />
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </>
-                                        );
-                                    })()}
+                                    {mark.isBullseye && mark.isNew && (
+                                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-400 text-xs font-black animate-float-up whitespace-nowrap drop-shadow-md">
+                                            CRITICAL HIT!
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+
+                            {/* Hit Shield Flash */}
+                            {hitTarget && (
+                                <div className="absolute inset-0 rounded-full bg-indigo-500/30 animate-ping" style={{ transform: 'scale(1.5)' }}></div>
+                            )}
+                        </div>
+
+                        {/* Player Ship & Laser */}
+                        <div className={`absolute left-4 top-1/2 -translate-y-1/2 gpu-accelerate`}>
+                            <div className="relative w-32 h-20 -translate-x-2">
+                                {/* Laser Beam Animation - Fires when arrowFlying is true */}
+                                {arrowFlying && (
+                                    <div className="absolute top-1/2 left-[80%] h-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-white rounded-full shadow-[0_0_15px_rgba(34,211,238,0.8)] z-0 origin-left animate-laser-shoot w-[500px]"
+                                        style={{
+                                            filter: 'blur(1px)',
+                                            opacity: 0.8
+                                        }}
+                                    ></div>
+                                )}
+
+                                {/* Spaceship SVG */}
+                                <svg viewBox="0 0 100 60" className="w-full h-full overflow-visible z-10 relative">
+                                    <defs>
+                                        <linearGradient id="shipBody" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#3730a3" />
+                                            <stop offset="100%" stopColor="#6366f1" />
+                                        </linearGradient>
+                                        <filter id="engineGlow">
+                                            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                            <feMerge>
+                                                <feMergeNode in="coloredBlur" />
+                                                <feMergeNode in="SourceGraphic" />
+                                            </feMerge>
+                                        </filter>
+                                    </defs>
+
+                                    {/* Engine Flame */}
+                                    <path d="M10 30 L-10 20 L-5 30 L-10 40 Z" fill="#f97316" className="animate-pulse" filter="url(#engineGlow)" />
+
+                                    {/* Wings */}
+                                    <path d="M20 30 L5 10 L40 30 L5 50 Z" fill="#312e81" />
+
+                                    {/* Main Body */}
+                                    <path d="M10 20 L80 30 L10 40 Z" fill="url(#shipBody)" stroke="#818cf8" strokeWidth="1" />
+
+                                    {/* Cockpit */}
+                                    <ellipse cx="40" cy="28" rx="15" ry="6" fill="#a5f3fc" opacity="0.8" />
+
+                                    {/* Weapon Hardpoint */}
+                                    <rect x="50" y="28" width="20" height="4" fill="#475569" />
+                                    <circle cx="70" cy="30" r="3" fill="#94a3b8" />
+
+                                    {/* Chargin Energy Ball (Based on Power) */}
+                                    <circle
+                                        cx="75" cy="30"
+                                        r={3 + (power / 100) * 8}
+                                        fill="#22d3ee"
+                                        opacity={0.6 + (power / 200)}
+                                        filter="url(#engineGlow)"
+                                        className={power >= 100 && !arrowFlying ? "animate-ping" : ""}
+                                    />
+                                    {/* Core of energy ball */}
+                                    <circle
+                                        cx="75" cy="30"
+                                        r={(power / 100) * 4}
+                                        fill="#ffffff"
+                                    />
                                 </svg>
                             </div>
                         </div>
 
-                        {/* Power indicator */}
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4">
-                            <div className="text-center text-xs font-bold text-slate-500 mb-1">Cự ly chọc: {power}%</div>
-                            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        {/* Power/Charge indicator */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4 max-w-xs">
+                            <div className="text-center text-[10px] font-bold text-cyan-400 mb-1 uppercase tracking-widest shadow-black drop-shadow-md">Laser Charge</div>
+                            <div className="h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
                                 <div
-                                    className={`h-full transition-all duration-150 rounded-full ${power >= 100 ? 'bg-green-500 animate-power-charge' : power >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                    className={`h-full transition-all duration-150 rounded-full shadow-[0_0_10px_currentColor] ${power >= 100 ? 'bg-cyan-400 animate-pulse' : 'bg-blue-600'}`}
                                     style={{ width: `${power}%` }}
                                 ></div>
                             </div>
@@ -6031,7 +5997,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <button onClick={() => { setView('flashcard'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
                             <button onClick={() => { setView('quiz'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
                             <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[9px] font-bold">Runner</span> </button>
-                            <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-cat text-lg mb-1"></i> <span className="text-[9px] font-bold">Poke Cat</span> </button>
+                            <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-rocket text-lg mb-1"></i> <span className="text-[9px] font-bold">Space Def</span> </button>
                             <button onClick={() => { setView('memory'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
                             <button onClick={() => { setView('shop'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'shop' ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-store text-lg mb-1"></i> <span className="text-[9px] font-bold">Shop</span> </button>
                         </div>
