@@ -1424,6 +1424,72 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             hint: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
         };
 
+        // Background Music Configuration
+        const MUSIC_CONFIG = {
+            runner: './sounds/music/runner.mp3',
+            archery: './sounds/music/archery.mp3',
+            memory: './sounds/music/memory.mp3',
+            general: './sounds/music/general.mp3',
+        };
+
+        const FALLBACK_MUSIC = {
+            runner: 'https://cdn.freesound.org/previews/612/612095_5674468-lq.mp3',
+            archery: 'https://cdn.freesound.org/previews/514/514738_11244367-lq.mp3',
+            memory: 'https://cdn.freesound.org/previews/649/649638_14386396-lq.mp3',
+            general: 'https://cdn.freesound.org/previews/612/612095_5674468-lq.mp3',
+        };
+
+        // Music Player
+        let bgMusic = null;
+        let musicEnabled = localStorage.getItem('toeic_music_enabled') !== 'false';
+        let currentMusicType = null;
+
+        const playMusic = async (type) => {
+            if (!musicEnabled) return;
+            if (currentMusicType === type && bgMusic && !bgMusic.paused) return;
+
+            stopMusic();
+
+            try {
+                bgMusic = new Audio();
+                bgMusic.loop = true;
+                bgMusic.volume = 0.3;
+
+                // Try local file first
+                bgMusic.src = MUSIC_CONFIG[type] || MUSIC_CONFIG.general;
+
+                bgMusic.onerror = () => {
+                    // Fallback to CDN
+                    bgMusic.src = FALLBACK_MUSIC[type] || FALLBACK_MUSIC.general;
+                };
+
+                await bgMusic.play();
+                currentMusicType = type;
+            } catch (e) {
+                console.log('Music autoplay blocked');
+            }
+        };
+
+        const stopMusic = () => {
+            if (bgMusic) {
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+                bgMusic = null;
+                currentMusicType = null;
+            }
+        };
+
+        const toggleMusic = () => {
+            musicEnabled = !musicEnabled;
+            localStorage.setItem('toeic_music_enabled', musicEnabled.toString());
+
+            if (!musicEnabled) {
+                stopMusic();
+            }
+
+            return musicEnabled;
+        };
+
         // Cache sounds đã load thành công - lưu array cho mỗi loại
         const soundCache = {};
 
@@ -2424,6 +2490,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const lastTimeRef = React.useRef(0);
             const countdownRef = React.useRef(null);
 
+            // Music control effect
+            React.useEffect(() => {
+                if (gameState === 'setup' || gameState === 'gameover') {
+                    stopMusic();
+                }
+                return () => stopMusic();
+            }, [gameState]);
+
             const toggleTopic = (topic) => {
                 setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]);
             };
@@ -2494,6 +2568,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                 setGameState('countdown');
                 generateNewRound(shuffled);
+
+                // Start background music
+                playMusic('runner');
 
                 // Start countdown
                 let count = 3;
@@ -2760,102 +2837,117 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         <div className="text-xs opacity-70">{currentWord?.ipa}</div>
                     </div>
 
-                    {/* Game Area */}
+                    {/* Game Area with 3D Perspective */}
                     <div
-                        className="relative bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden"
-                        style={{ height: 'min(350px, 50vh)' }}
+                        className="relative bg-slate-900 rounded-2xl overflow-hidden perspective-1000 group"
+                        style={{ height: 'min(400px, 55vh)', perspective: '800px' }}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                     >
+                        {/* The Road - transformed for 3D effect */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-slate-800 to-slate-900 origin-bottom transform-style-3d rotate-x-20 scale-y-125">
+                            {/* Grid lines / Speed lines */}
+                            <div className="absolute inset-0 opacity-20"
+                                style={{
+                                    backgroundImage: 'linear-gradient(0deg, transparent 24%, #ffffff 25%, #ffffff 26%, transparent 27%, transparent 74%, #ffffff 75%, #ffffff 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #ffffff 25%, #ffffff 26%, transparent 27%, transparent 74%, #ffffff 75%, #ffffff 76%, transparent 77%, transparent)',
+                                    backgroundSize: '50px 50px',
+                                    animation: gameState === 'playing' ? 'moveGrid 1s linear infinite' : 'none'
+                                }}
+                            ></div>
+
+                            {/* Lane Markers */}
+                            <div className="absolute inset-0 flex justify-center">
+                                <div className="w-full max-w-sm flex h-full">
+                                    <div className="flex-1 border-r-2 border-dashed border-slate-600/50"></div>
+                                    <div className="flex-1 border-r-2 border-dashed border-slate-600/50"></div>
+                                    <div className="flex-1"></div>
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Countdown Overlay */}
                         {gameState === 'countdown' && (
-                            <div className="absolute inset-0 bg-slate-900/80 z-50 flex items-center justify-center">
-                                <div className="text-center">
-                                    <div className="text-8xl font-black text-white animate-ping">{countdown > 0 ? countdown : 'GO!'}</div>
-                                    <div className="text-white/70 mt-4 text-lg">Chuẩn bị...</div>
+                            <div className="absolute inset-0 bg-slate-900/90 z-50 flex items-center justify-center flex-col">
+                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-red-600 animate-bounce">
+                                    {countdown > 0 ? countdown : 'GO!'}
                                 </div>
+                                <div className="text-white/70 mt-4 text-lg font-bold animate-pulse">Sẵn sàng...</div>
                             </div>
                         )}
-                        {/* Speed lines background */}
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                            {[...Array(10)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="absolute w-0.5 bg-slate-300 dark:bg-slate-600 opacity-30 animate-pulse"
-                                    style={{
-                                        left: `${10 + i * 10}%`,
-                                        height: '100%',
-                                        animationDelay: `${i * 0.1}s`
-                                    }}
-                                />
-                            ))}
-                        </div>
 
-                        {/* Lane dividers */}
-                        <div className="absolute inset-0 flex">
-                            <div className="flex-1 border-r border-slate-200 dark:border-slate-700"></div>
-                            <div className="flex-1 border-r border-slate-200 dark:border-slate-700"></div>
-                            <div className="flex-1"></div>
-                        </div>
-
-                        {/* Obstacles (meanings) */}
+                        {/* Obstacles (Word Gates) - REMOVED transition-all for smooth movement */}
                         <div
-                            className="absolute left-0 right-0 flex gap-2 px-2 transition-all duration-75"
-                            style={{ top: `${obstaclePosition}%` }}
+                            className="absolute left-0 right-0 flex justify-center"
+                            style={{ top: `${obstaclePosition}%`, pointerEvents: 'none' }}
                         >
-                            {options.map((opt, idx) => (
+                            <div className="w-full max-w-sm flex gap-3 px-4">
+                                {options.map((opt, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`flex-1 h-24 rounded-lg shadow-xl flex items-center justify-center text-center p-1 border-b-4 transition-transform
+                                            ${lastResult && idx === correctLane ? 'bg-green-500 border-green-700 scale-110 z-10' : ''}
+                                            ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500 border-red-700 opacity-50' : ''}
+                                            ${!lastResult ? 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-blue-500/50' : ''}
+                                        `}
+                                    >
+                                        <span className={`text-[10px] sm:text-xs font-bold leading-tight line-clamp-3 ${lastResult && (idx === correctLane || (idx === playerLane && lastResult === 'wrong')) ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>
+                                            {opt?.meaning}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Player Character */}
+                        <div className="absolute inset-0 flex justify-center pointer-events-none">
+                            <div className="w-full max-w-sm h-full relative">
                                 <div
-                                    key={idx}
-                                    onClick={() => handleLaneClick(idx)}
-                                    className={`flex-1 p-3 rounded-xl text-center font-bold text-sm cursor-pointer transition-all
-                                        ${lastResult && idx === correctLane ? 'bg-green-500 text-white scale-105' : ''}
-                                        ${lastResult === 'wrong' && idx === playerLane && idx !== correctLane ? 'bg-red-500 text-white animate-shake' : ''}
-                                        ${!lastResult ? 'bg-white dark:bg-slate-700 shadow-lg border-2 border-slate-200 dark:border-slate-600' : ''}
+                                    className={`absolute bottom-[10%] transition-transform duration-200 ease-out will-change-transform flex flex-col items-center
+                                        ${playerLane === 0 ? 'left-[16.66%] -translate-x-1/2' : ''}
+                                        ${playerLane === 1 ? 'left-[50%] -translate-x-1/2' : ''}
+                                        ${playerLane === 2 ? 'left-[83.33%] -translate-x-1/2' : ''}
                                     `}
                                 >
-                                    {opt?.meaning || '...'}
+                                    <div className={`relative transition-all duration-300 ${lastResult === 'correct' ? 'scale-125 mb-4' : ''}`}>
+                                        {/* Aura Effect */}
+                                        <div className="absolute inset-0 bg-indigo-500 rounded-full blur-md opacity-50 animate-pulse"></div>
+
+                                        {/* Character Body */}
+                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg border-2 z-10 relative
+                                            ${lastResult === 'correct' ? 'bg-green-500 border-white text-white rotate-[360deg]' : ''}
+                                            ${lastResult === 'wrong' ? 'bg-red-500 border-white text-white animate-shake' : ''}
+                                            ${!lastResult ? 'bg-indigo-600 border-indigo-400 text-white' : ''}
+                                        `}>
+                                            <i className={`fas ${lastResult === 'correct' ? 'fa-check' : lastResult === 'wrong' ? 'fa-bomb' : 'fa-running'}`}></i>
+                                        </div>
+
+                                        {/* Shadow */}
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-2 bg-black/40 rounded-full blur-sm"></div>
+                                    </div>
+
+                                    {/* Name Tag */}
+                                    {!lastResult && <div className="mt-1 px-2 py-0.5 bg-black/50 rounded text-[10px] text-white font-bold backdrop-blur-sm">Bạn</div>}
                                 </div>
-                            ))}
-                        </div>
-
-                        {/* Player zone indicator */}
-                        <div className="absolute bottom-20 left-0 right-0 h-16 bg-gradient-to-t from-indigo-500/20 to-transparent border-t-2 border-indigo-400 border-dashed"></div>
-
-                        {/* Player */}
-                        <div
-                            className={`absolute bottom-8 transition-all duration-150 flex flex-col items-center
-                                ${playerLane === 0 ? 'left-[16.67%] -translate-x-1/2' : ''}
-                                ${playerLane === 1 ? 'left-1/2 -translate-x-1/2' : ''}
-                                ${playerLane === 2 ? 'left-[83.33%] -translate-x-1/2' : ''}
-                            `}
-                        >
-                            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-xl transition-all
-                                ${lastResult === 'correct' ? 'bg-green-500 text-white scale-110' : ''}
-                                ${lastResult === 'wrong' ? 'bg-red-500 text-white' : ''}
-                                ${!lastResult ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' : ''}
-                            `}>
-                                <i className={`fas ${lastResult === 'correct' ? 'fa-check' : lastResult === 'wrong' ? 'fa-times' : 'fa-running'}`}></i>
                             </div>
-                            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">Bạn</div>
                         </div>
 
-                        {/* Lane tap zones (mobile) */}
-                        <div className="absolute inset-0 flex">
-                            {[0, 1, 2].map(lane => (
-                                <div
-                                    key={lane}
-                                    onClick={() => handleLaneClick(lane)}
-                                    className="flex-1 cursor-pointer"
-                                />
-                            ))}
+                        {/* Lane Tap Zones (Invisible) */}
+                        <div className="absolute inset-0 flex justify-center z-20">
+                            <div className="w-full max-w-sm flex h-full">
+                                {[0, 1, 2].map(lane => (
+                                    <div
+                                        key={lane}
+                                        onClick={() => handleLaneClick(lane)}
+                                        className="flex-1 cursor-pointer hover:bg-white/5 transition-colors active:bg-white/10"
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Controls hint */}
-                    <div className="text-center text-xs text-slate-400 mt-3">
-                        <span className="hidden sm:inline"><b>A</b> ← Di chuyển → <b>D</b></span>
-                        <span className="sm:hidden">Chạm vào lane để di chuyển</span>
+                    {/* Controls Hint */}
+                    <div className="text-center text-xs text-slate-400 mt-2 font-medium">
+                        <i className="fas fa-hand-pointer mr-1"></i> Vuốt hoặc chạm để di chuyển
                     </div>
                 </div>
             );
@@ -2886,6 +2978,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [usedIndices, setUsedIndices] = React.useState([]);
 
             const inputRef = React.useRef(null);
+
+            // Music control effect
+            React.useEffect(() => {
+                if (gameState === 'setup' || gameState === 'gameover') {
+                    stopMusic();
+                }
+                return () => stopMusic();
+            }, [gameState]);
 
             const toggleTopic = (topic) => {
                 setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]);
@@ -2940,6 +3040,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 setStreak(0);
                 setGameState('playing');
                 generateNewRound(shuffled);
+
+                // Start background music
+                playMusic('archery');
             };
 
             const handleInput = (e) => {
@@ -4507,6 +4610,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <div className="flex items-center gap-3">
                                     <button onClick={toggleDarkMode} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                                         <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`}></i>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const enabled = toggleMusic();
+                                            // Force re-render/update UI state if needed (often handled by state, but here simple toggle)
+                                            document.getElementById('music-icon').className = `fas ${enabled ? 'fa-music' : 'fa-slash'}`;
+                                            document.getElementById('music-btn').classList.toggle('text-indigo-500', enabled);
+                                            document.getElementById('music-btn').classList.toggle('text-slate-400', !enabled);
+                                        }}
+                                        id="music-btn"
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition ${musicEnabled ? 'text-indigo-500' : 'text-slate-400'}`}
+                                        title="Bật/Tắt nhạc nền"
+                                    >
+                                        <i id="music-icon" className={`fas ${musicEnabled ? 'fa-music' : 'fa-slash'}`}></i>
                                     </button>
                                     <button
                                         onClick={() => setIsLeaderboardOpen(true)}
