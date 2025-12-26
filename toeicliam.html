@@ -553,7 +553,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -1356,13 +1356,41 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
         // --- SOUND HELPER ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        // Sound Effects URLs (Free CDN sounds)
-        const SOUND_URLS = {
-            flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',      // Card flip
-            match: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',     // Success chime
-            miss: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',      // Error buzz
-            coin: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',      // Coin = match sound
-            levelup: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',   // Level up fanfare
+        // ============================================
+        // AUDIO CONFIGURATION - Thay đổi đường dẫn tại đây
+        // ============================================
+        const AUDIO_CONFIG = {
+            // Đường dẫn đến folder audio (để trống nếu dùng CDN)
+            // Ví dụ: './audio' hoặc 'https://your-domain.com/audio'
+            audioBasePath: '',  // Để trống = dùng Google TTS
+            
+            // Đường dẫn đến folder sounds
+            // Ví dụ: './sounds' hoặc 'https://your-domain.com/sounds'  
+            soundsBasePath: '', // Để trống = dùng CDN Freesound
+            
+            // Định dạng file audio: 'mp3' hoặc 'wav'
+            audioFormat: 'wav',  // Thay đổi thành 'mp3' nếu dùng file mp3
+            
+            // Định dạng file sounds: 'mp3' hoặc 'wav'
+            soundsFormat: 'wav', // Thay đổi thành 'mp3' nếu dùng file mp3
+        };
+
+        // Sound Effects URLs - hỗ trợ cả MP3 và WAV
+        const soundExt = AUDIO_CONFIG.soundsFormat || 'mp3';
+        const SOUND_URLS = AUDIO_CONFIG.soundsBasePath ? {
+            // Local files (MP3 hoặc WAV)
+            flip: `${AUDIO_CONFIG.soundsBasePath}/flip.${soundExt}`,
+            match: `${AUDIO_CONFIG.soundsBasePath}/match.${soundExt}`,
+            miss: `${AUDIO_CONFIG.soundsBasePath}/miss.${soundExt}`,
+            coin: `${AUDIO_CONFIG.soundsBasePath}/coin.${soundExt}`,
+            levelup: `${AUDIO_CONFIG.soundsBasePath}/levelup.${soundExt}`,
+        } : {
+            // CDN Fallback (Freesound) - chỉ có MP3
+            flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
+            match: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            miss: 'https://cdn.freesound.org/previews/362/362205_6754798-lq.mp3',
+            coin: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+            levelup: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
         };
         
         // Preload và cache sounds
@@ -1377,7 +1405,6 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
         const playSound = (type) => {
             try {
-                // Thử dùng cached sound trước
                 if (soundCache[type]) {
                     const sound = soundCache[type].cloneNode();
                     sound.volume = type === 'flip' ? 0.3 : 0.5;
@@ -1390,7 +1417,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             }
         };
         
-        // Fallback: Web Audio API (nếu CDN lỗi)
+        // Fallback: Web Audio API (nếu file lỗi)
         const playFallbackSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
@@ -1420,11 +1447,77 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             }
         };
 
+        // ============================================
+        // TTS (Text-to-Speech) - Đọc từ vựng
+        // ============================================
+        // Cache audio đã tải
+        const ttsCache = {};
+        
+        // Chuyển từ thành tên file (lowercase, bỏ ký tự đặc biệt)
+        const wordToFilename = (word) => {
+            return word.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+        };
+
+        // Định dạng file audio (mp3 hoặc wav)
+        const audioExt = AUDIO_CONFIG.audioFormat || 'mp3';
+
         // --- COMPONENTS ---
-        // Global TTS function - sử dụng nhiều nguồn để đảm bảo giọng chuẩn
+        // Global TTS function - ưu tiên local files (WAV/MP3), fallback Google TTS
         const playTTS = (text, lang = 'US') => {
             return new Promise((resolve, reject) => {
-                // Ưu tiên 1: Google Translate TTS (miễn phí, giọng chuẩn)
+                const cacheKey = `${text}_${lang}`;
+                
+                // Kiểm tra cache
+                if (ttsCache[cacheKey]) {
+                    const audio = ttsCache[cacheKey].cloneNode();
+                    audio.onended = resolve;
+                    audio.play().catch(reject);
+                    return;
+                }
+                
+                // Ưu tiên 1: Local files (nếu có cấu hình) - hỗ trợ WAV và MP3
+                if (AUDIO_CONFIG.audioBasePath) {
+                    const folder = lang === 'UK' ? 'uk' : 'us';
+                    const filename = wordToFilename(text);
+                    const localUrl = `${AUDIO_CONFIG.audioBasePath}/${folder}/${filename}.${audioExt}`;
+                    
+                    const audio = new Audio(localUrl);
+                    audio.onended = resolve;
+                    audio.onerror = () => {
+                        // Thử format khác (nếu wav lỗi thì thử mp3 và ngược lại)
+                        const altExt = audioExt === 'wav' ? 'mp3' : 'wav';
+                        const altUrl = `${AUDIO_CONFIG.audioBasePath}/${folder}/${filename}.${altExt}`;
+                        
+                        const altAudio = new Audio(altUrl);
+                        altAudio.onended = resolve;
+                        altAudio.onerror = () => {
+                            // Fallback sang Google TTS
+                            playGoogleTTS(text, lang).then(resolve).catch(reject);
+                        };
+                        altAudio.oncanplaythrough = () => {
+                            ttsCache[cacheKey] = altAudio;
+                        };
+                        altAudio.play().catch(() => {
+                            playGoogleTTS(text, lang).then(resolve).catch(reject);
+                        });
+                    };
+                    audio.oncanplaythrough = () => {
+                        ttsCache[cacheKey] = audio;
+                    };
+                    audio.play().catch(() => {
+                        playGoogleTTS(text, lang).then(resolve).catch(reject);
+                    });
+                    return;
+                }
+                
+                // Ưu tiên 2: Google Translate TTS
+                playGoogleTTS(text, lang).then(resolve).catch(reject);
+            });
+        };
+        
+        // Google TTS helper
+        const playGoogleTTS = (text, lang) => {
+            return new Promise((resolve, reject) => {
                 const tl = lang === 'UK' ? 'en-gb' : 'en';
                 const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${tl}&client=tw-ob`;
                 
@@ -3440,4 +3533,3 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 </body>
 
 </html>
-
