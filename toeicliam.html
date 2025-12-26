@@ -1669,14 +1669,25 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold transition-all border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 ${className} ${isPlaying ? 'opacity-50 cursor-wait' : ''}`}
                     title="Nghe phát âm"
                 >
-                    <i className={`fas ${isPlaying ? 'fa-spinner fa-spin' : 'fa-volume-up'}`}></i> 🔊
+                    <i className={`fas ${isPlaying ? 'fa-spinner fa-spin' : 'fa-volume-up'}`}></i>
                 </button>
             );
         };
 
-        const LinkedWordList = ({ text, jumpToWord, colorClass = "text-gray-600", hoverClass = "hover:bg-yellow-100" }) => {
+        const LinkedWordList = ({ text, jumpToWord, colorClass = "text-gray-600", hoverClass = "hover:bg-yellow-100", linkColorClass = "" }) => {
             if (!text || text === "N/A") return <span className="text-gray-400 italic text-xs">Không có</span>;
             const words = text.split(',').map(w => w.trim());
+
+            // Determine link colors based on colorClass context
+            const getLinkColors = () => {
+                if (colorClass.includes('blue')) return 'text-blue-300 bg-blue-500/20 border-blue-400/30 hover:bg-blue-500/30 hover:text-blue-200';
+                if (colorClass.includes('red')) return 'text-red-300 bg-red-500/20 border-red-400/30 hover:bg-red-500/30 hover:text-red-200';
+                if (colorClass.includes('purple')) return 'text-purple-300 bg-purple-500/20 border-purple-400/30 hover:bg-purple-500/30 hover:text-purple-200';
+                return 'text-indigo-300 bg-indigo-500/20 border-indigo-400/30 hover:bg-indigo-500/30 hover:text-indigo-200';
+            };
+
+            const linkColors = linkColorClass || getLinkColors();
+
             return (
                 <span>
                     {words.map((w, i) => {
@@ -1687,10 +1698,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 {exists && jumpToWord ? (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); jumpToWord(w); }}
-                                        className={`text-indigo-600 font-bold cursor-pointer hover:underline hover:text-indigo-800 bg-indigo-50 px-1.5 py-0.5 rounded transition-all border border-indigo-100`}
+                                        className={`font-bold cursor-pointer hover:underline px-1.5 py-0.5 rounded transition-all border ${linkColors}`}
                                         title={`Xem chi tiết từ "${w}"`}
                                     >
-                                        <i className="fas fa-link text-[10px] mr-1 opacity-50"></i>{w}
+                                        <i className="fas fa-link text-[10px] mr-1 opacity-70"></i>{w}
                                     </button>
                                 ) : (
                                     <span className={colorClass}>{w}</span>
@@ -1999,7 +2010,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 const currentItem = sessionData[currentIndex];
 
                 setSlideAnimation(direction === 'left' ? 'slide-left' : 'slide-right');
-                playSound('flashcard', 'next'); // Sound effect khi chuyển thẻ
+
+                // Play appropriate sound based on direction
+                if (direction === 'left') {
+                    playSound('quiz', 'correct'); // Đã thuộc - sound correct
+                } else {
+                    playSound('quiz', 'wrong'); // Cần ôn - sound wrong
+                }
 
                 setTimeout(() => {
                     if (direction === 'left') {
