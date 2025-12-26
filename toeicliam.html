@@ -1428,17 +1428,23 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // Tạo danh sách URLs để thử
             const urlsToTry = [];
             
-            // 1. Thử folder với nhiều files: sounds/quiz/correct/correct1.wav, correct2.mp3,...
+            // 1. Thử file đơn trong folder: sounds/quiz/correct/correct.wav (KHÔNG CÓ SỐ)
+            urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}.wav`, type: 'single-in-folder' });
+            urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}.mp3`, type: 'single-in-folder' });
+            
+            // 2. Thử folder với nhiều files: sounds/quiz/correct/correct1.wav, correct2.mp3,...
             for (let i = 1; i <= MAX_SOUND_VARIANTS; i++) {
                 urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}${i}.wav`, type: 'variant' });
                 urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}/${sound}${i}.mp3`, type: 'variant' });
             }
             
-            // 2. Thử file đơn: sounds/quiz/correct.wav
+            // 3. Thử file đơn trực tiếp: sounds/quiz/correct.wav
             urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}.wav`, type: 'single' });
             urlsToTry.push({ url: `${soundsBase}/${tab}/${sound}.mp3`, type: 'single' });
             
-            // 3. Thử trong general
+            // 4. Thử trong general
+            urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}.wav`, type: 'single-in-folder' });
+            urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}.mp3`, type: 'single-in-folder' });
             for (let i = 1; i <= MAX_SOUND_VARIANTS; i++) {
                 urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}${i}.wav`, type: 'variant' });
                 urlsToTry.push({ url: `${soundsBase}/general/${sound}/${sound}${i}.mp3`, type: 'variant' });
@@ -1492,21 +1498,32 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 else tab = 'general';
             }
             
+            console.log(`🔊 Playing sound: ${tab}/${type}`);
+            
             try {
                 const variants = await loadSoundVariants(tab, type);
+                
+                console.log(`📁 Found ${variants.length} sound variants for ${tab}/${type}`);
                 
                 if (variants && variants.length > 0) {
                     // Random chọn 1 sound từ các variants
                     const randomIndex = Math.floor(Math.random() * variants.length);
                     const audio = variants[randomIndex];
                     
+                    console.log(`▶️ Playing: ${audio.src}`);
+                    
                     const sound = audio.cloneNode();
                     sound.volume = type === 'flip' ? 0.3 : 0.5;
-                    sound.play().catch(() => playFallbackSound(type));
+                    sound.play().catch((e) => {
+                        console.log(`❌ Play error: ${e.message}, using fallback`);
+                        playFallbackSound(type);
+                    });
                 } else {
+                    console.log(`⚠️ No variants found, using fallback`);
                     playFallbackSound(type);
                 }
             } catch (e) {
+                console.log(`❌ Error: ${e.message}`);
                 playFallbackSound(type);
             }
         };
