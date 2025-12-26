@@ -1118,7 +1118,7 @@ Warranties|Forfeit|/ˈfɔːfɪt/|Mất quyền, từ bỏ quyền lợi bảo h�
 Warranties|Frequently|/ˈfriːkwəntli/|Thường xuyên, xảy ra nhiều lần|Warranty claims are frequently filed within year one.|Often, Regularly|Rarely, Seldom|Frequent (adj), Frequency (n), Frequent (v)
 Warranties|Function|/ˈfʌŋkʃn/|Hoạt động đúng chức năng, làm việc bình thường|The device should function properly under warranty.|Work, Operate|Break, Malfunction|Function (n), Functional (adj), Functionally (adv)
 Warranties|Guarantee|/ˌɡærənˈtiː/|Đảm bảo, cam kết chất lượng sản phẩm|We guarantee satisfaction or full refund.|Assurance, Promise|N/A|Guarantee (v), Guaranteed (adj)
-Warranties|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
+WARRANTIES|Harm|/hɑːm/|Gây hại, làm hỏng sản phẩm|Physical harm voids manufacturer warranty.|Damage, Injure|Repair, Protect|Harm (v), Harmful (adj), Harmfully (adv)
 Warranties|Heed|/hiːd/|Chú ý, lắng nghe lời khuyên về bảo hành|Heed warranty instructions for proper coverage.|Consider, Mind|Disregard, Ignore|Heed (n), Heedful (adj), Heedless (adj)
 Warranties|Honor|/ˈɒnə/|Tôn trọng, thực hiện đúng cam kết bảo hành|The company will honor all valid warranties.|Uphold, Respect|Breach, Violate|Honor (n), Honorable (adj), Honored (adj)
 Warranties|Ignore|/ɪɡˈnɔː/|Bỏ qua, không quan tâm đến điều khoản|Don't ignore warranty registration requirements.|Disregard, Overlook|Consider, Heed|Ignorance (n), Ignorant (adj), Ignored (adj)
@@ -1146,7 +1146,7 @@ Warranties|Protection|/prəˈtekʃn/|Sự bảo vệ, che chở quyền lợi|Ex
 Warranties|Provide|/prəˈvaɪd/|Cung cấp, đưa ra bảo hành|All products provide a standard warranty.|Give, Supply|N/A|Provider (n), Provision (n), Provided (conj)
 Warranties|Quality|/ˈkwɒləti/|Chất lượng, mức độ tốt của sản phẩm|Warranties guarantee product quality standards.|Standard, Grade|N/A|Qualify (v), Qualified (adj), Qualification (n)
 Warranties|Rarely|/ˈreəli/|Hiếm khi, không thường xuyên xảy ra|Warranty claims are rarely denied unfairly.|Seldom, Infrequently|Frequently, Often|Rare (adj), Rarity (n)
-Warranties|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
+WARRANTIES|Receipt|/rɪˈsiːt/|Biên lai, giấy chứng nhận mua hàng|Keep your receipt for warranty purposes.|Proof of purchase, Invoice|N/A|Receive (v), Received (adj)
 Warranties|Refund|/ˈriːfʌnd/|Hoàn tiền, trả lại số tiền đã mua|Request a full refund for defective products.|Reimbursement, Repayment|N/A|Refund (v), Refundable (adj)
 Warranties|Register|/ˈredʒɪstə/|Đăng ký sản phẩm để kích hoạt bảo hành|Register your product online within thirty days.|Record, Enroll|N/A|Registration (n), Registered (adj), Registrar (n)
 Warranties|Regularly|/ˈreɡjələli/|Thường xuyên, đều đặn theo chu kỳ|Service products regularly to maintain warranty.|Frequently, Often|Rarely, Seldom|Regular (adj), Regularity (n), Regulate (v)
@@ -1957,20 +1957,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     prev: './sounds/flashcard/prev/prev.mp3',
                 },
                 game_runner: {
-                    start: './sounds/game_runner/start/start.mp3',
-                    move: './sounds/game_runner/move/move.mp3',
-                    speedup: './sounds/game_runner/speedup/speedup.mp3',
-                    gameover: './sounds/game_runner/gameover/gameover.mp3',
-                    jump: './sounds/game_runner/jump/jump.mp3',
-                    coin: './sounds/game_runner/coin/coin.mp3',
+                    start: './sounds/general/open/open.mp3',
+                    move: './sounds/general/click/click.mp3',
+                    speedup: './sounds/quiz/correct/correct.mp3',
+                    gameover: './sounds/quiz/wrong/wrong.mp3',
+                    jump: './sounds/memory/flip/flip.mp3',
+                    coin: './sounds/memory/coin/coin.mp3',
                 },
                 game_archery: {
-                    draw: './sounds/game_archery/draw/draw.mp3',
-                    release: './sounds/game_archery/release/release.mp3',
-                    hit: './sounds/game_archery/hit/hit.mp3',
-                    miss: './sounds/game_archery/miss/miss.mp3',
-                    hint: './sounds/game_archery/hint/hint.mp3',
-                    bullseye: './sounds/game_archery/bullseye/bullseye.mp3',
+                    draw: './sounds/memory/flip/flip.mp3',
+                    release: './sounds/general/click/click.mp3',
+                    hit: './sounds/quiz/correct/correct.mp3',
+                    miss: './sounds/memory/miss/miss.mp3',
+                    hint: './sounds/general/open/open.mp3',
+                    bullseye: './sounds/quiz/complete/complete.mp3',
                 },
                 game_memory: {
                     flip: './sounds/memory/flip/flip.mp3',
@@ -1982,12 +1982,19 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     correct: './sounds/quiz/correct/correct.mp3',
                     wrong: './sounds/quiz/wrong/wrong.mp3',
                     tick: './sounds/quiz/tick/tick.mp3',
+                    complete: './sounds/quiz/complete/complete.mp3',
                 },
                 music: {
-                    general: './sounds/music/general.mp3',
-                    archery: './sounds/music/archery.mp3',
-                    memory: './sounds/music/memory.mp3',
-                    runner: './sounds/music/runner.mp3',
+                    general: '', // No local music
+                    archery: '',
+                    memory: '',
+                    runner: '',
+                },
+                flashcard: {
+                    complete: './sounds/flashcard/complete/complete.mp3',
+                    flip: './sounds/flashcard/flip/flip.mp3',
+                    next: './sounds/flashcard/next/next.mp3',
+                    prev: './sounds/flashcard/prev/prev.mp3',
                 }
             },
 
@@ -4082,12 +4089,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 return (
                     <div className="max-w-xl mx-auto py-6 px-4 animate-fadeIn">
                         <div className="text-center mb-6">
-                            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-                                <i className="fas fa-bullseye text-4xl text-white"></i>
+                            <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                <i className="fas fa-cat text-4xl text-white"></i>
                             </div>
-                            <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Archery Game</h2>
-                            <p className="text-slate-500 dark:text-slate-400">Gõ từ tiếng Anh để bắn cung!</p>
-                            <div className="mt-2 text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full inline-block">
+                            <h2 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">Poke The Cat!</h2>
+                            <p className="text-slate-500 dark:text-slate-400">Gõ từ tiếng Anh để chọc mèo!</p>
+                            <div className="mt-2 text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 rounded-full inline-block">
                                 <i className="fas fa-trophy mr-1"></i> Kỷ lục: {highScore} điểm
                             </div>
                         </div>
@@ -4106,7 +4113,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <button
                                         key={topic}
                                         onClick={() => toggleTopic(topic)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-green-300'}`}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${selectedTopics.includes(topic) ? 'bg-orange-500 text-white border-orange-500 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-orange-300'}`}
                                     >
                                         {topic}
                                     </button>
@@ -4119,17 +4126,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <ul className="space-y-1 text-xs">
                                 <li>• Xem nghĩa tiếng Việt</li>
                                 <li>• Gõ từ tiếng Anh tương ứng</li>
-                                <li>• Mỗi ký tự đúng = lực bắn tăng</li>
-                                <li>• Ký tự sai = lực bắn giảm</li>
-                                <li>• Hoàn thành từ = Bắn trúng đích!</li>
+                                <li>• Mỗi ký tự đúng = lực chọc tăng</li>
+                                <li>• Ký tự sai = lực giảm</li>
+                                <li>• Hoàn thành từ = Chọc trúng mèo!</li>
                             </ul>
                         </div>
 
                         <button
                             onClick={startGame}
-                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+                            className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
                         >
-                            <i className="fas fa-play"></i> Bắt Đầu Bắn Cung!
+                            <i className="fas fa-hand-point-right"></i> Bắt Đầu Chọc!
                         </button>
                     </div>
                 );
@@ -4153,7 +4160,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 </div>
                                 <div>
                                     <div className="text-3xl font-black text-orange-600">{streak}</div>
-                                    <div className="text-xs text-slate-500">Mục tiêu bắn trúng</div>
+                                    <div className="text-xs text-slate-500">Mèo đã chọc</div>
                                 </div>
                             </div>
                             {score >= highScore && score > 0 && (
@@ -4172,7 +4179,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </button>
                             <button
                                 onClick={startGame}
-                                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
+                                className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
                             >
                                 <i className="fas fa-redo mr-2"></i> Chơi lại
                             </button>
@@ -4211,14 +4218,46 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                         {/* Target */}
                         <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all z-10 ${hitTarget ? 'animate-target-shake' : ''}`}>
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 border-[6px] sm:border-8 border-red-600 flex items-center justify-center relative gpu-accelerate overflow-visible shadow-lg"
-                                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.3), inset 0 2px 10px rgba(255,255,255,0.5)' }}>
-                                {/* Target rings */}
-                                <div className="absolute inset-2 rounded-full border-4 border-red-500 opacity-80"></div>
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600 flex items-center justify-center shadow-inner">
-                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400 shadow-md"
-                                        style={{ boxShadow: '0 0 10px rgba(250,204,21,0.8)' }}></div>
-                                </div>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 relative gpu-accelerate overflow-visible shadow-lg rounded-full"
+                                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+                                {/* Cat Face SVG */}
+                                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md transition-transform duration-200" style={{ transform: hitTarget ? 'scale(0.95)' : 'scale(1)' }}>
+                                    {/* Ears */}
+                                    <path d="M5 25 Q0 5 25 10" fill="#fb923c" stroke="#c2410c" strokeWidth="2" />
+                                    <path d="M95 25 Q100 5 75 10" fill="#fb923c" stroke="#c2410c" strokeWidth="2" />
+
+                                    {/* Face */}
+                                    <circle cx="50" cy="50" r="45" fill="#fdba74" stroke="#c2410c" strokeWidth="3" />
+
+                                    {/* Eyes (Change when hit) */}
+                                    {hitTarget ? (
+                                        <>
+                                            {/* X Eyes for hit */}
+                                            <path d="M25 35 L45 55 M45 35 L25 55" stroke="#4a044e" strokeWidth="4" strokeLinecap="round" />
+                                            <path d="M55 35 L75 55 M75 35 L55 55" stroke="#4a044e" strokeWidth="4" strokeLinecap="round" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Normal Eyes */}
+                                            <ellipse cx="35" cy="45" rx="6" ry="8" fill="#1e1b4b" />
+                                            <ellipse cx="65" cy="45" rx="6" ry="8" fill="#1e1b4b" />
+                                            <circle cx="37" cy="42" r="2" fill="white" />
+                                            <circle cx="67" cy="42" r="2" fill="white" />
+                                        </>
+                                    )}
+
+                                    {/* Nose & Mouth */}
+                                    <path d="M45 60 L55 60 L50 66 Z" fill="#be185d" />
+                                    <path d="M50 66 Q40 75 30 68 M50 66 Q60 75 70 68" fill="none" stroke="#be185d" strokeWidth="2" strokeLinecap="round" />
+
+                                    {/* Whiskers */}
+                                    <g stroke="#7c2d12" strokeWidth="1.5" opacity="0.6">
+                                        <line x1="15" y1="55" x2="35" y2="58" />
+                                        <line x1="12" y1="65" x2="35" y2="65" />
+                                        <line x1="85" y1="55" x2="65" y2="58" />
+                                        <line x1="88" y1="65" x2="65" y2="65" />
+                                    </g>
+                                </svg>
 
                                 {/* Stuck Arrows on target */}
                                 {stuckArrows.map((arrow) => (
@@ -4235,31 +4274,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         }}
                                     >
                                         {/* Arrow stuck in target - More detailed & Buried effect */}
-                                        <svg width="40" height="12" viewBox="0 0 40 12" className="drop-shadow-sm" style={{ filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }}>
-                                            <defs>
-                                                <linearGradient id={`shaft-${arrow.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stopColor="#78350f" />
-                                                    <stop offset="100%" stopColor="#b45309" />
-                                                </linearGradient>
-                                            </defs>
-
-                                            {/* Shaft (Tail sticking out) */}
-                                            {/* Only show back part, head is buried */}
-                                            <line x1="0" y1="6" x2="35" y2="6" stroke={`url(#shaft-${arrow.id})`} strokeWidth="3" strokeLinecap="square" />
-
-                                            {/* Buried point shadow/hole */}
-                                            <ellipse cx="35" cy="6" rx="2" ry="3" fill="#000" opacity="0.3" />
-
-                                            {/* Fletching (feathers) - Larger and more visible */}
-                                            <path d="M 5 6 L 0 1 M 12 6 L 7 1" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
-                                            <path d="M 5 6 L 0 11 M 12 6 L 7 11" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
-
-                                            {/* Feather details */}
-                                            <path d="M 6 6 L 2 3" stroke="#fecaca" strokeWidth="1" opacity="0.8" />
-                                            <path d="M 6 6 L 2 9" stroke="#fecaca" strokeWidth="1" opacity="0.8" />
-
-                                            {/* Nock */}
-                                            <rect x="0" y="4" width="2" height="4" fill="#a16207" />
+                                        <svg width="24" height="24" viewBox="0 0 24 24" className="drop-shadow-sm" style={{ transform: 'rotate(45deg)' }}>
+                                            {/* Bandage Cross */}
+                                            <rect x="2" y="8" width="20" height="8" rx="2" fill="#fcd34d" stroke="#d97706" strokeWidth="1" />
+                                            <rect x="8" y="2" width="8" height="20" rx="2" fill="#fcd34d" stroke="#d97706" strokeWidth="1" />
+                                            {/* Center pad */}
+                                            <rect x="8" y="8" width="8" height="8" fill="#fbbf24" />
+                                            {/* Holes */}
+                                            <circle cx="5" cy="12" r="1" fill="#d97706" opacity="0.5" />
+                                            <circle cx="19" cy="12" r="1" fill="#d97706" opacity="0.5" />
+                                            <circle cx="12" cy="5" r="1" fill="#d97706" opacity="0.5" />
+                                            <circle cx="12" cy="19" r="1" fill="#d97706" opacity="0.5" />
                                         </svg>
 
                                         {/* Impact mark */}
@@ -4281,8 +4306,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                                         {/* Bullseye indicator */}
                                         {arrow.isBullseye && arrow.isNew && (
-                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-500 text-xs font-black animate-float-up whitespace-nowrap">
-                                                🎯 BULLSEYE!
+                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-orange-600 text-xs font-black animate-float-up whitespace-nowrap">
+                                                👉 CHỌC TRÚNG!
                                             </div>
                                         )}
                                     </div>
@@ -4305,38 +4330,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-2 h-8 bg-gradient-to-b from-amber-700 to-amber-900 rounded-b"></div>
                         </div>
 
-                        {/* Flying Arrow Animation */}
-                        {arrowFlying && (
-                            <div className="absolute left-1/4 top-1/2 z-20 pointer-events-none animate-arrow-fly">
-                                <svg width="50" height="14" viewBox="0 0 50 14" style={{ filter: 'drop-shadow(2px 2px 3px rgba(0,0,0,0.3))' }}>
-                                    {/* Motion blur effect */}
-                                    <defs>
-                                        <linearGradient id="motionBlur" x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" stopColor="#92400e" stopOpacity="0.2" />
-                                            <stop offset="100%" stopColor="#92400e" stopOpacity="1" />
-                                        </linearGradient>
-                                    </defs>
-                                    {/* Shaft with motion blur */}
-                                    <line x1="-10" y1="7" x2="35" y2="7" stroke="url(#motionBlur)" strokeWidth="3" />
-                                    <line x1="10" y1="7" x2="35" y2="7" stroke="#a16207" strokeWidth="3" />
-                                    {/* Arrow head */}
-                                    <polygon points="35,7 50,2 50,12" fill="#78716c" />
-                                    <polygon points="35,7 48,3 48,11" fill="#a8a29e" />
-                                    {/* Fletching */}
-                                    <path d="M 5 7 L 0 2 M 10 7 L 5 2" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
-                                    <path d="M 5 7 L 0 12 M 10 7 L 5 12" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
-                                </svg>
-                            </div>
-                        )}
-
-                        {/* Bow & Arrow - Dynamic SVG */}
+                        {/* Poke Hand - Dynamic SVG */}
                         <div className={`absolute left-0 top-1/2 -translate-y-1/2 transition-all ${isShaking ? 'animate-screen-shake' : ''} pointer-events-none gpu-accelerate`}>
                             <div className="relative w-40 h-40 sm:w-48 sm:h-48 -translate-x-4 sm:-translate-x-6">
                                 <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
                                     <defs>
-                                        <marker id="archery-arrowhead" markerWidth="6" markerHeight="4" refX="0" refY="2" orient="auto">
-                                            <polygon points="0 0, 6 2, 0 4" fill="#d97706" />
-                                        </marker>
                                         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                                             <feGaussianBlur stdDeviation="2" result="blur" />
                                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -4344,49 +4342,42 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     </defs>
 
                                     {(() => {
-                                        // Calculations
-                                        const maxDraw = 40; // Max pixels to pull back
-                                        const neutralX = 60; // Neutral position of string/nock
-                                        const drawAmount = (power / 100) * maxDraw;
-                                        const currentNockX = neutralX - drawAmount; // Moves left as power increases
-
-                                        // String Logic: Snaps back when flying
-                                        const stringX = arrowFlying ? neutralX : currentNockX;
-
-                                        // Arrow Logic: Stays drawn until flying start, then animates away
-                                        // We use an outer group for Draw Position, and inner for Flight Animation
+                                        // Calculations for Poke Hand
+                                        // Hand starts left and moves RIGHT as you type
+                                        const maxReach = 50;
+                                        const startX = 10;
+                                        const reachAmount = (power / 100) * maxReach;
+                                        const currentHandX = startX + reachAmount;
 
                                         return (
                                             <>
-                                                {/* Bow Riser (The handle) */}
-                                                <path d="M 60 20 Q 80 50 60 80" stroke="#92400e" strokeWidth="4" fill="none" strokeLinecap="round" />
-                                                <path d="M 60 20 Q 80 50 60 80" stroke="#f59e0b" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.5" />
+                                                {/* Hand Group */}
+                                                {/* Outer Group: Handles Reach Position (Follows Power) */}
+                                                <g transform={`translate(${currentHandX}, 50)`} className="transition-transform duration-100 ease-out">
 
-                                                {/* Bow String */}
-                                                <path
-                                                    d={`M 60 20 L ${stringX} 50 L 60 80`}
-                                                    stroke="#e2e8f0"
-                                                    strokeWidth="1.5"
-                                                    fill="none"
-                                                    className="transition-all duration-75"
-                                                />
-
-                                                {/* Arrow Group */}
-                                                {/* Outer Group: Handles Draw Position (Follows Power) */}
-                                                <g transform={`translate(${currentNockX}, 50)`} className="transition-transform duration-100 ease-out">
-
-                                                    {/* Inner Group: Handles Flight Animation */}
+                                                    {/* Inner Group: Handles Poke Animation (Shooting) */}
                                                     <g
-                                                        className={`transition-transform ease-in ${arrowFlying ? 'duration-300 translate-x-[300px] opacity-0' : 'duration-0'}`}
+                                                        className={`transition-transform ease-in ${arrowFlying ? 'duration-200 translate-x-[200px]' : 'duration-0'}`}
                                                     >
-                                                        {/* Arrow Shaft & Head */}
-                                                        {/* Arrow length 50px. Head is handled by marker or manual polygon if marker fails in some browsers, but marker is standard. Let's use manual polygon for robust styling */}
-                                                        <line x1="0" y1="0" x2="50" y2="0" stroke="#d97706" strokeWidth="2.5" />
-                                                        <polygon points="50,0 60,3 50,6" fill="#d97706" transform="translate(0, -3)" />
+                                                        {/* Arm/Sleeve extending from left */}
+                                                        {/* We fake the arm length by drawing a long rect behind the hand */}
+                                                        <rect x="-300" y="-8" width="300" height="16" fill="#3b82f6" rx="4" />
 
-                                                        {/* Fletching (Feathers) */}
-                                                        <path d="M 0 0 L -8 -4 M 2 0 L -6 -4" stroke="#dc2626" strokeWidth="2" />
-                                                        <path d="M 0 0 L -8 4 M 2 0 L -6 4" stroke="#dc2626" strokeWidth="2" />
+                                                        {/* Pointing Hand SVG (Scaled to fit context) */}
+                                                        <g transform="translate(0, -12) scale(0.8)">
+                                                            {/* Cuff detail */}
+                                                            <rect x="-4" y="5" width="4" height="14" fill="#2563eb" rx="1" />
+
+                                                            {/* Hand/Fist */}
+                                                            <circle cx="8" cy="12" r="7" fill="#fca5a5" />
+
+                                                            {/* Pointing Finger */}
+                                                            <path d="M8 8 L30 8 A 4 4 0 0 1 30 16 L8 16 Z" fill="#fca5a5" />
+
+                                                            {/* Knuckles */}
+                                                            <circle cx="8" cy="9" r="2" fill="#f87171" opacity="0.5" />
+                                                            <circle cx="8" cy="15" r="2" fill="#f87171" opacity="0.5" />
+                                                        </g>
                                                     </g>
                                                 </g>
                                             </>
@@ -4398,7 +4389,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                         {/* Power indicator */}
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4">
-                            <div className="text-center text-xs font-bold text-slate-500 mb-1">Lực bắn: {power}%</div>
+                            <div className="text-center text-xs font-bold text-slate-500 mb-1">Cự ly chọc: {power}%</div>
                             <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full transition-all duration-150 rounded-full ${power >= 100 ? 'bg-green-500 animate-power-charge' : power >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
@@ -5995,7 +5986,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <button onClick={() => { setView('flashcard'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
                             <button onClick={() => { setView('quiz'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
                             <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-running text-lg mb-1"></i> <span className="text-[9px] font-bold">Runner</span> </button>
-                            <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-bullseye text-lg mb-1"></i> <span className="text-[9px] font-bold">Archery</span> </button>
+                            <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-cat text-lg mb-1"></i> <span className="text-[9px] font-bold">Poke Cat</span> </button>
                             <button onClick={() => { setView('memory'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
                             <button onClick={() => { setView('shop'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'shop' ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-store text-lg mb-1"></i> <span className="text-[9px] font-bold">Shop</span> </button>
                         </div>
