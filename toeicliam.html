@@ -221,6 +221,102 @@
         }
 
         /* ============================================
+           ADMIN DASHBOARD ANIMATIONS
+           ============================================ */
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes coinPop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes successFlash {
+            0% {
+                background-color: rgba(34, 197, 94, 0);
+            }
+
+            50% {
+                background-color: rgba(34, 197, 94, 0.3);
+            }
+
+            100% {
+                background-color: rgba(34, 197, 94, 0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .animate-slideInUp {
+            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-coinPop {
+            animation: coinPop 0.3s ease-out;
+        }
+
+        .animate-successFlash {
+            animation: successFlash 0.5s ease-out;
+        }
+
+        .admin-card {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-btn {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .admin-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .admin-btn:active {
+            transform: scale(0.95);
+        }
+
+        .user-row {
+            transition: all 0.2s ease;
+        }
+
+        .user-row:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+
+        /* ============================================
            GAME ANIMATIONS - Runner, Archery, Memory
            ============================================ */
 
@@ -6172,12 +6268,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-700 max-h-[90vh] flex flex-col overflow-hidden">
-                        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700">
-                            <h2 className="text-xl font-black text-slate-800 dark:text-white"><i className="fas fa-cogs text-indigo-500 mr-2"></i>Admin Dashboard</h2>
-                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition">
-                                <i className="fas fa-times text-slate-500 dark:text-slate-300"></i>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" style={{ animation: 'fadeIn 0.2s ease-out' }}>
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-700 max-h-[90vh] flex flex-col overflow-hidden animate-slideInUp">
+                        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-indigo-500 to-purple-600">
+                            <h2 className="text-xl font-black text-white flex items-center gap-2"><i className="fas fa-cogs"></i>Admin Dashboard</h2>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition admin-btn">
+                                <i className="fas fa-times text-white"></i>
                             </button>
                         </div>
 
@@ -6199,22 +6295,22 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 <div className="space-y-6">
                                     {/* Flappy Bird Config */}
                                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-sky-500 border-b border-slate-200 dark:border-slate-700 pb-2">Vocab Bird</h3>
+                                        <h3 className="font-bold text-lg mb-3 text-sky-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-dove mr-2"></i>Chim Từ Vựng</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Pipe Speed</label>
+                                                <label className="text-xs font-bold text-slate-500">Tốc độ ống</label>
                                                 <input type="number" step="0.1" value={localConfig.flappy.pipeSpeed} onChange={e => handleChange('flappy', 'pipeSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Gravity</label>
+                                                <label className="text-xs font-bold text-slate-500">Trọng lực</label>
                                                 <input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Jump Strength (Negative)</label>
+                                                <label className="text-xs font-bold text-slate-500">Lực nhảy (số âm)</label>
                                                 <input type="number" step="1" value={localConfig.flappy.jumpStrength} onChange={e => handleChange('flappy', 'jumpStrength', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Spawn Rate (ms)</label>
+                                                <label className="text-xs font-bold text-slate-500">Tần suất ống (ms)</label>
                                                 <input type="number" step="100" value={localConfig.flappy.pipeSpawnRate} onChange={e => handleChange('flappy', 'pipeSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                         </div>
@@ -6222,14 +6318,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                                     {/* Runner Config */}
                                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-green-500 border-b border-slate-200 dark:border-slate-700 pb-2">Duck Hunter</h3>
+                                        <h3 className="font-bold text-lg mb-3 text-green-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-crosshairs mr-2"></i>Bắn Vịt</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Duck Speed</label>
+                                                <label className="text-xs font-bold text-slate-500">Tốc độ vịt</label>
                                                 <input type="number" step="1" value={localConfig.runner.duckSpeed} onChange={e => handleChange('runner', 'duckSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Obstacle Rate (ms)</label>
+                                                <label className="text-xs font-bold text-slate-500">Tần suất vịt (ms)</label>
                                                 <input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                         </div>
@@ -6237,14 +6333,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                                     {/* Memory Config */}
                                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-purple-500 border-b border-slate-200 dark:border-slate-700 pb-2">Memory Game</h3>
+                                        <h3 className="font-bold text-lg mb-3 text-purple-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-brain mr-2"></i>Ghép Thẻ</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Flip Duration (s)</label>
+                                                <label className="text-xs font-bold text-slate-500">Thời gian lật (s)</label>
                                                 <input type="number" step="0.1" value={localConfig.memory?.flipDuration || 0.6} onChange={e => handleChange('memory', 'flipDuration', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Grid Size</label>
+                                                <label className="text-xs font-bold text-slate-500">Kích thước lưới</label>
                                                 <input type="number" step="1" min="2" max="6" value={localConfig.memory?.gridSize || 4} onChange={e => handleChange('memory', 'gridSize', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                         </div>
@@ -6252,14 +6348,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                                     {/* Quiz Config */}
                                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-orange-500 border-b border-slate-200 dark:border-slate-700 pb-2">Quiz</h3>
+                                        <h3 className="font-bold text-lg mb-3 text-orange-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-question-circle mr-2"></i>Trắc Nghiệm</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Time/Question (s)</label>
+                                                <label className="text-xs font-bold text-slate-500">Thời gian/câu (s)</label>
                                                 <input type="number" step="1" min="5" max="60" value={localConfig.quiz?.timePerQuestion || 15} onChange={e => handleChange('quiz', 'timePerQuestion', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Coins/Correct</label>
+                                                <label className="text-xs font-bold text-slate-500">Xu/câu đúng</label>
                                                 <input type="number" step="1" min="1" max="50" value={localConfig.quiz?.coinsPerCorrect || 5} onChange={e => handleChange('quiz', 'coinsPerCorrect', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                         </div>
@@ -6267,10 +6363,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                                     {/* General Config */}
                                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-yellow-500 border-b border-slate-200 dark:border-slate-700 pb-2">General</h3>
+                                        <h3 className="font-bold text-lg mb-3 text-yellow-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-cog mr-2"></i>Cài Đặt Chung</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Starting Coins</label>
+                                                <label className="text-xs font-bold text-slate-500">Xu khởi đầu</label>
                                                 <input type="number" step="100" min="0" value={localConfig.general?.startingCoins || 500} onChange={e => handleChange('general', 'startingCoins', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
                                             </div>
                                         </div>
@@ -6330,8 +6426,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <div className="text-center py-4 text-slate-400 text-sm">Không có người dùng hoặc chưa kết nối Firebase</div>
                                         ) : (
                                             <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
-                                                {allUsers.map(user => (
-                                                    <div key={user.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                {allUsers.map((user, idx) => (
+                                                    <div key={user.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 user-row" style={{ animationDelay: `${idx * 50}ms` }}>
                                                         <div className="flex items-center gap-2">
                                                             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="" className="w-8 h-8 rounded-full" />
                                                             <div>
@@ -6363,8 +6459,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     </div>
 
                                     <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                        <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
-                                        <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition shadow-lg">Lưu Cấu Hình</button>
+                                        <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition admin-btn">Reset Default</button>
+                                        <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 rounded-xl font-bold transition shadow-lg admin-btn">Lưu Cấu Hình</button>
                                     </div>
                                 </div>
                             )}
