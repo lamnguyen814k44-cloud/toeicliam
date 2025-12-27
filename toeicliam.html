@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -7240,82 +7240,6 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 });
                 return () => unsubscribe();
             }, [user]);
-
-            // Fetch Notifications & Assignments for User
-            // Track previous unread count for sound trigger
-            const prevUnreadRef = React.useRef(0);
-            
-            React.useEffect(() => {
-                if (!user || !db) return;
-                
-                // Listen to admin notifications
-                const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
-                const unsubNotif = notifRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
-                    const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // Filter: show all if target is 'all', or specific to this user
-                    const relevantNotifs = notifs.filter(n => n.target === 'all' || n.target === user.uid);
-                    setUserNotifications(relevantNotifs);
-                    
-                    // Calculate unread
-                    const readIds = JSON.parse(localStorage.getItem('toeic_read_notifications') || '[]');
-                    const newUnread = relevantNotifs.filter(n => !readIds.includes(n.id)).length;
-                    
-                    // 🔔 Play notification sound if new notifications arrived
-                    if (newUnread > prevUnreadRef.current && prevUnreadRef.current >= 0) {
-                        const latestNotif = relevantNotifs.find(n => !readIds.includes(n.id));
-                        if (latestNotif) {
-                            // Play different sound based on notification type
-                            const soundType = latestNotif.type || 'system';
-                            playSound('notification', soundType);
-                        }
-                    }
-                    prevUnreadRef.current = newUnread;
-                    setUnreadCount(newUnread);
-                });
-                
-                // Listen to assignments
-                const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
-                const unsubAssign = assignRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
-                    const assigns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // Filter: show all if target is 'all', or specific to this user
-                    const relevantAssigns = assigns.filter(a => a.target === 'all' || a.target === user.uid);
-                    
-                    // 🔔 Play assignment sound if new assignments
-                    const readAssignIds = JSON.parse(localStorage.getItem('toeic_read_assignments') || '[]');
-                    const newAssigns = relevantAssigns.filter(a => !readAssignIds.includes(a.id));
-                    if (newAssigns.length > 0 && userAssignments.length > 0 && newAssigns.length > relevantAssigns.length - userAssignments.length) {
-                        playSound('notification', 'assignment');
-                    }
-                    
-                    setUserAssignments(relevantAssigns);
-                });
-                
-                // Update user progress periodically
-                const updateProgress = () => {
-                    const progressRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_progress').doc(user.uid);
-                    progressRef.set({
-                        learnedWords: [...learnedWords],
-                        difficultWords: [...difficultWords],
-                        lastActive: Date.now(),
-                        streak: parseInt(localStorage.getItem('toeic_streak') || '0'),
-                    }, { merge: true }).catch(() => {});
-                };
-                updateProgress();
-                const progressInterval = setInterval(updateProgress, 60000);
-                
-                return () => {
-                    unsubNotif();
-                    unsubAssign();
-                    clearInterval(progressInterval);
-                };
-            }, [user, learnedWords, difficultWords]);
-
-            // Mark notifications as read
-            const markNotificationsAsRead = () => {
-                const readIds = userNotifications.map(n => n.id);
-                localStorage.setItem('toeic_read_notifications', JSON.stringify(readIds));
-                setUnreadCount(0);
-            };
 
             const acceptInvitation = async () => {
                 if (!incomingInvitation || !db) return;
