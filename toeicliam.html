@@ -2776,66 +2776,93 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         </div>
                     </div>
 
-                    {/* EXPANDED MODAL (Portal-like or inline absolute) */}
-                    {isDetailOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn" style={{ cursor: 'default' }}>
-                            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] p-8 w-full max-w-2xl shadow-[0_0_100px_rgba(99,102,241,0.2)] border border-white/20 relative animate-slideUp overflow-hidden" onClick={e => e.stopPropagation()}>
+                    {/* EXPANDED MODAL - Full screen overlay */}
+                    {isDetailOpen && ReactDOM.createPortal(
+                        <div 
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" 
+                            onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }}
+                        >
+                            <div 
+                                className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-2xl border border-slate-200 dark:border-slate-700 relative animate-slideInUp max-h-[90vh] overflow-y-auto" 
+                                onClick={e => e.stopPropagation()}
+                            >
                                 {/* Close Button */}
-                                <button onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }} className="absolute top-6 right-6 w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }} 
+                                    className="absolute top-4 right-4 w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900 transition z-10"
+                                >
                                     <i className="fas fa-times"></i>
                                 </button>
 
-                                <div className="flex flex-col md:flex-row gap-8">
+                                {/* Topic Badge */}
+                                <div className="mb-4">
+                                    <span className="text-xs font-black uppercase tracking-widest text-white px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md">
+                                        {item.topic}
+                                    </span>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-6 md:gap-8">
                                     {/* Left Column: Word Info */}
-                                    <div className="md:w-1/3 flex flex-col items-center text-center border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 pb-6 md:pb-0 md:pr-8">
-                                        <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center text-4xl text-white font-black shadow-lg mb-4 transform -rotate-6">
+                                    <div className="md:w-1/3 flex flex-col items-center text-center border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 pb-6 md:pb-0 md:pr-6">
+                                        <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl md:text-4xl text-white font-black shadow-xl mb-4 transform -rotate-3">
                                             {item.word.charAt(0).toUpperCase()}
                                         </div>
-                                        <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2">{item.word}</h2>
-                                        <span className="font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg mb-4">{item.ipa}</span>
+                                        <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-2">{item.word}</h2>
+                                        <span className="font-mono text-sm text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg mb-4">{item.ipa}</span>
 
-                                        <div className="flex gap-2 w-full justify-center">
-                                            <SpeakerButton text={item.word} topic={item.topic} className="w-full py-3 text-base" />
-                                        </div>
+                                        <SpeakerButton text={item.word} topic={item.topic} className="w-full py-3 text-base mb-4" />
 
-                                        <div className="mt-6 flex gap-2 w-full">
-                                            <button onClick={() => toggleDifficult(item.id)} className={`flex-1 py-2 rounded-xl font-bold text-xs transition ${isDifficult ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>
+                                        <div className="flex gap-2 w-full">
+                                            <button onClick={() => toggleDifficult(item.id)} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition ${isDifficult ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40'}`}>
                                                 <i className="fas fa-exclamation mr-1"></i> Khó
                                             </button>
-                                            <button onClick={() => toggleLearned(item.id)} className={`flex-1 py-2 rounded-xl font-bold text-xs transition ${isLearned ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-500 hover:bg-emerald-100'}`}>
+                                            <button onClick={() => toggleLearned(item.id)} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition ${isLearned ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'}`}>
                                                 <i className="fas fa-check mr-1"></i> Thuộc
                                             </button>
                                         </div>
                                     </div>
 
                                     {/* Right Column: Details */}
-                                    <div className="md:w-2/3 space-y-6">
+                                    <div className="md:w-2/3 space-y-5">
+                                        {/* Meaning */}
                                         <div>
-                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{item.meaning}</h3>
-                                            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/50">
-                                                <span className="text-xs font-black text-indigo-400 uppercase tracking-wider block mb-1">Ví dụ minh họa:</span>
-                                                <p className="italic text-indigo-900 dark:text-indigo-100 font-serif text-lg">"{item.example}"</p>
-                                            </div>
+                                            <h3 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-3">{item.meaning}</h3>
+                                        </div>
+                                        
+                                        {/* Example */}
+                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl border border-indigo-100 dark:border-indigo-800/50">
+                                            <span className="text-xs font-black text-indigo-500 uppercase tracking-wider block mb-2">
+                                                <i className="fas fa-quote-left mr-1"></i> Ví dụ minh họa
+                                            </span>
+                                            <p className="italic text-indigo-900 dark:text-indigo-100 text-base md:text-lg leading-relaxed">"{item.example}"</p>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                            <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-                                                <span className="block text-[10px] font-black text-blue-500 uppercase tracking-wider mb-1">Đồng nghĩa</span>
-                                                <LinkedWordList text={item.synonym} jumpToWord={jumpToWord} colorClass="text-blue-700 dark:text-blue-300 font-medium" />
+                                        {/* Word Relations */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                                                <span className="block text-[10px] font-black text-blue-500 uppercase tracking-wider mb-2">
+                                                    <i className="fas fa-link mr-1"></i> Đồng nghĩa
+                                                </span>
+                                                <LinkedWordList text={item.synonym} jumpToWord={jumpToWord} colorClass="text-blue-700 dark:text-blue-300 font-medium text-sm" />
                                             </div>
-                                            <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-                                                <span className="block text-[10px] font-black text-rose-500 uppercase tracking-wider mb-1">Trái nghĩa</span>
-                                                <LinkedWordList text={item.antonym} jumpToWord={jumpToWord} colorClass="text-rose-700 dark:text-rose-300 font-medium" />
+                                            <div className="bg-rose-50 dark:bg-rose-900/20 p-3 rounded-xl border border-rose-100 dark:border-rose-800/50">
+                                                <span className="block text-[10px] font-black text-rose-500 uppercase tracking-wider mb-2">
+                                                    <i className="fas fa-exchange-alt mr-1"></i> Trái nghĩa
+                                                </span>
+                                                <LinkedWordList text={item.antonym} jumpToWord={jumpToWord} colorClass="text-rose-700 dark:text-rose-300 font-medium text-sm" />
                                             </div>
-                                            <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-                                                <span className="block text-[10px] font-black text-purple-500 uppercase tracking-wider mb-1">Gia đình từ</span>
-                                                <LinkedWordList text={item.family} jumpToWord={jumpToWord} colorClass="text-purple-700 dark:text-purple-300 font-medium" />
+                                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-xl border border-purple-100 dark:border-purple-800/50">
+                                                <span className="block text-[10px] font-black text-purple-500 uppercase tracking-wider mb-2">
+                                                    <i className="fas fa-sitemap mr-1"></i> Gia đình từ
+                                                </span>
+                                                <LinkedWordList text={item.family} jumpToWord={jumpToWord} colorClass="text-purple-700 dark:text-purple-300 font-medium text-sm" />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>,
+                        document.body
                     )}
                 </div>
             );
@@ -5338,7 +5365,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             return (
                 <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6">
-                    <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl w-full max-w-sm border border-slate-100 dark:border-slate-700 animate-slideUp">
+                    <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl w-full max-w-sm border border-slate-100 dark:border-slate-700 animate-slideInUp">
                         <div className="text-center mb-8">
                             <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-user-tag text-2xl text-indigo-600 dark:text-indigo-400"></i>
@@ -6064,7 +6091,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         )}
                         {/* Invitation Modal (Full list) - chỉ hiện người khác để mời */}
                         {onlineStatus === 'waiting' && isHost && (
-                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border-2 border-indigo-500 dark:border-indigo-400 w-full max-w-sm mt-4 animate-slideUp">
+                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border-2 border-indigo-500 dark:border-indigo-400 w-full max-w-sm mt-4 animate-slideInUp">
                                 <h4 className="font-black text-indigo-900 dark:text-white mb-4 flex items-center justify-between uppercase tracking-tighter">
                                     <span>Mời cao thủ ({otherOnlinePlayers.length})</span>
                                     <div className="flex items-center gap-1">
