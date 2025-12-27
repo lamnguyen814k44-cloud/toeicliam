@@ -2758,13 +2758,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {/* Content */}
                         <div className="relative z-10 flex flex-col h-full cursor-pointer" onClick={() => toggleDetails(item.id)}>
                             <div className="flex items-center gap-2 mb-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-2 font-sans">
+                                <span className="text-xs font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-2 font-sans">
                                     {item.topic}
                                 </span>
                             </div>
 
-                            <div className="flex items-end justify-between gap-2 mb-3">
-                                <h3 className="text-2xl font-serif font-bold text-stone-800 dark:text-stone-100 leading-tight">
+                            <div className="flex items-end justify-between gap-2 mb-2 md:mb-3">
+                                <h3 className="text-3xl md:text-4xl font-serif font-bold text-stone-800 dark:text-stone-100 leading-tight tracking-tight">
                                     {item.word}
                                 </h3>
                                 <SpeakerButton text={item.word} topic={item.topic} className="scale-90 text-stone-400 hover:text-orange-600 transition-colors" />
@@ -2896,7 +2896,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         const WordListView = ({ data, learnedWords, difficultWords, toggleLearned, toggleDifficult, showDetails, toggleDetails, highlightedId, jumpToWord }) => (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-2 pb-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto px-4 md:px-6 pb-24">
                 {data.map(item => (
                     <WordItem
                         key={item.id}
@@ -3814,7 +3814,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // Gradients, Glassmorphism, Animations
 
             return (
-                <div className="relative w-full h-[85vh] overflow-hidden rounded-2xl shadow-2xl border-4 border-slate-800 select-none group font-sans">
+                <div className="relative w-full h-[75vh] md:h-[85vh] overflow-hidden rounded-2xl shadow-xl border-2 md:border-4 border-slate-800 select-none group font-sans touch-none">
 
                     {/* Animated Sky Background */}
                     {/* Animated Sky Background & Parallax */}
