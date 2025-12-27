@@ -38,9 +38,9 @@
 
     <!-- 🔒 ANTI-DEVTOOLS PROTECTION -->
     <script>
-        (function() {
+        (function () {
             // === 1. Chặn phím tắt ===
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 // F12
                 if (e.keyCode === 123) {
                     e.preventDefault();
@@ -74,7 +74,7 @@
             });
 
             // === 2. Chặn chuột phải ===
-            document.addEventListener('contextmenu', function(e) {
+            document.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
                 return false;
             });
@@ -82,8 +82,8 @@
             // === 3. Detect DevTools mở ===
             var devtools = { open: false, orientation: null };
             var threshold = 160;
-            
-            var emitEvent = function(isOpen) {
+
+            var emitEvent = function (isOpen) {
                 if (isOpen && !devtools.open) {
                     // DevTools vừa mở - có thể thêm action ở đây
                     console.clear();
@@ -94,10 +94,10 @@
                 devtools.open = isOpen;
             };
 
-            setInterval(function() {
+            setInterval(function () {
                 var widthThreshold = window.outerWidth - window.innerWidth > threshold;
                 var heightThreshold = window.outerHeight - window.innerHeight > threshold;
-                
+
                 if (widthThreshold || heightThreshold) {
                     emitEvent(true);
                 } else {
@@ -115,7 +115,7 @@
             */
 
             // === 5. Chặn kéo thả ảnh ===
-            document.addEventListener('dragstart', function(e) {
+            document.addEventListener('dragstart', function (e) {
                 e.preventDefault();
                 return false;
             });
@@ -378,12 +378,13 @@
                 opacity: 0;
                 transform: translateX(100px) scale(0.9);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0) scale(1);
             }
         }
-        
+
         .animate-slideInRight {
             animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -1015,10 +1016,10 @@
         // TOAST NOTIFICATION SYSTEM
         // ============================================
         const ToastContext = React.createContext();
-        
+
         const ToastProvider = ({ children }) => {
             const [toasts, setToasts] = React.useState([]);
-            
+
             const showToast = React.useCallback((message, type = 'info', duration = 3000) => {
                 const id = Date.now() + Math.random();
                 setToasts(prev => [...prev, { id, message, type }]);
@@ -1026,21 +1027,21 @@
                     setToasts(prev => prev.filter(t => t.id !== id));
                 }, duration);
             }, []);
-            
+
             const toast = React.useMemo(() => ({
                 success: (msg, duration) => showToast(msg, 'success', duration),
                 error: (msg, duration) => showToast(msg, 'error', duration),
                 info: (msg, duration) => showToast(msg, 'info', duration),
                 warning: (msg, duration) => showToast(msg, 'warning', duration),
             }), [showToast]);
-            
+
             return (
                 <ToastContext.Provider value={toast}>
                     {children}
                     <div className="fixed top-4 right-4 z-[9999] space-y-3 pointer-events-none">
                         {toasts.map(t => (
-                            <div 
-                                key={t.id} 
+                            <div
+                                key={t.id}
                                 className={`
                                     pointer-events-auto px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-xl 
                                     flex items-center gap-3 min-w-[280px] max-w-[400px]
@@ -1064,7 +1065,7 @@
                 </ToastContext.Provider>
             );
         };
-        
+
         const useToast = () => React.useContext(ToastContext);
 
         // --- DATA (Added cross-reference words for testing) ---
@@ -2217,7 +2218,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // ├── archery/   (draw, release, hit, miss, hint, bullseye)
             // ├── notification/ (system, reminder, assignment, achievement, warning, invite)
             // └── music/     (general, archery, memory, runner)
-            
+
             localAssets: {
                 common: {
                     click: './sounds/general/click.mp3',
@@ -2734,129 +2735,142 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     className={`relative group transition-all duration-300 rounded-[2rem] p-[2px] ${isHighlighted ? 'z-20 scale-105' : 'z-0 hover:z-10'}`}
                 >
                     {/* Glowing Border Gradient */}
-                    <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${isHighlighted ? 'from-yellow-400 to-orange-500 opacity-100' : isLearned ? 'from-emerald-400 to-teal-500 opacity-40 group-hover:opacity-100' : isDifficult ? 'from-red-400 to-rose-500 opacity-40 group-hover:opacity-100' : 'from-white/40 to-white/10 opacity-30 group-hover:opacity-80'} blur-sm transition-opacity duration-300`}></div>
+                    <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${isHighlighted ? 'from-amber-400 to-orange-500 opacity-100' : isLearned ? 'from-emerald-400 to-teal-500 opacity-40 group-hover:opacity-100' : isDifficult ? 'from-rose-400 to-pink-500 opacity-40 group-hover:opacity-100' : 'from-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100'} blur-md transition-all duration-500`}></div>
 
-                    <div className={`relative h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 lg:p-7 overflow-hidden transition-all duration-300 ${isHighlighted ? 'shadow-[0_20px_50px_rgba(251,191,36,0.3)]' : 'shadow-lg hover:shadow-2xl'}`}>
+                    <div className={`relative h-full bg-white dark:bg-slate-900 rounded-[2rem] p-6 lg:p-7 overflow-hidden transition-all duration-300 border border-slate-100 dark:border-slate-800 ${isHighlighted ? 'shadow-[0_20px_50px_rgba(251,191,36,0.3)]' : 'shadow-sm hover:shadow-xl'}`}>
                         {/* Status Indicators (Top Corners) */}
-                        <div className="absolute top-0 right-0 p-4 flex gap-2 z-10">
-                            {isDifficult && <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse"></div>}
+                        <div className="absolute top-0 right-0 p-5 flex gap-2 z-10">
+                            {isDifficult && <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_10px_#f43f5e] animate-pulse"></div>}
                             {isLearned && <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>}
                         </div>
 
                         {/* Content */}
                         <div className="relative z-10 flex flex-col h-full cursor-pointer" onClick={() => toggleDetails(item.id)}>
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-white px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md transform -rotate-2">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-full border border-indigo-100 dark:border-indigo-800">
                                     {item.topic}
                                 </span>
                             </div>
 
                             <div className="flex items-end justify-between gap-2 mb-2">
-                                <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-none tracking-tighter drop-shadow-sm">
+                                <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 leading-none tracking-tight">
                                     {item.word}
                                 </h3>
-                                <SpeakerButton text={item.word} topic={item.topic} className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-md rounded-full shadow-sm" />
+                                <SpeakerButton text={item.word} topic={item.topic} className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50 dark:bg-slate-800 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400" />
                             </div>
 
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mb-4 px-2 py-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-lg inline-block w-max">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mb-6">
                                 {item.ipa}
                             </p>
 
-                            <div className="mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                                <p className="font-bold text-lg text-slate-700 dark:text-slate-200 line-clamp-2 leading-snug">
+                            <div className="mt-auto pt-5 border-t border-slate-100 dark:border-slate-800">
+                                <p className="font-semibold text-lg text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed">
                                     {item.meaning}
                                 </p>
                             </div>
                         </div>
 
                         {/* Hover Overlay Actions */}
-                        <div className="absolute bottom-4 right-4 flex gap-2 translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                            <button onClick={(e) => { e.stopPropagation(); toggleDifficult(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition ${isDifficult ? 'bg-red-500 text-white' : 'bg-white text-slate-400 hover:text-red-500'}`}><i className="fas fa-exclamation"></i></button>
-                            <button onClick={(e) => { e.stopPropagation(); toggleLearned(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition ${isLearned ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 hover:text-emerald-500'}`}><i className="fas fa-check"></i></button>
+                        <div className="absolute bottom-5 right-5 flex gap-2 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                            <button onClick={(e) => { e.stopPropagation(); toggleDifficult(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition border ${isDifficult ? 'bg-rose-500 text-white border-rose-500' : 'bg-white dark:bg-slate-800 text-slate-400 hover:text-rose-500 border-slate-100 dark:border-slate-700'}`}><i className="fas fa-exclamation"></i></button>
+                            <button onClick={(e) => { e.stopPropagation(); toggleLearned(item.id); }} className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition border ${isLearned ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white dark:bg-slate-800 text-slate-400 hover:text-emerald-500 border-slate-100 dark:border-slate-700'}`}><i className="fas fa-check"></i></button>
                         </div>
                     </div>
 
                     {/* EXPANDED MODAL - Full screen overlay */}
                     {isDetailOpen && ReactDOM.createPortal(
-                        <div 
-                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" 
+                        <div
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fadeIn"
                             onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }}
                         >
-                            <div 
-                                className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-2xl border border-slate-200 dark:border-slate-700 relative animate-slideInUp max-h-[90vh] overflow-y-auto" 
+                            <div
+                                className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 w-full max-w-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 relative animate-slideInUp max-h-[90vh] overflow-y-auto"
                                 onClick={e => e.stopPropagation()}
                             >
                                 {/* Close Button */}
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }} 
-                                    className="absolute top-4 right-4 w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900 transition z-10"
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }}
+                                    className="absolute top-6 right-6 w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition z-10"
                                 >
                                     <i className="fas fa-times"></i>
                                 </button>
 
-                                {/* Topic Badge */}
-                                <div className="mb-4">
-                                    <span className="text-xs font-black uppercase tracking-widest text-white px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md">
-                                        {item.topic}
-                                    </span>
-                                </div>
-
-                                <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                                <div className="flex flex-col md:flex-row gap-8 md:gap-12">
                                     {/* Left Column: Word Info */}
-                                    <div className="md:w-1/3 flex flex-col items-center text-center border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 pb-6 md:pb-0 md:pr-6">
-                                        <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl md:text-4xl text-white font-black shadow-xl mb-4 transform -rotate-3">
-                                            {item.word.charAt(0).toUpperCase()}
+                                    <div className="md:w-5/12 flex flex-col">
+
+                                        <div className="mb-6">
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-2 block">Topic</span>
+                                            <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold border border-indigo-100 dark:border-indigo-800">
+                                                {item.topic}
+                                            </span>
                                         </div>
-                                        <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-2">{item.word}</h2>
-                                        <span className="font-mono text-sm text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg mb-4">{item.ipa}</span>
 
-                                        <SpeakerButton text={item.word} topic={item.topic} className="w-full py-3 text-base mb-4" />
+                                        <div className="mb-8">
+                                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{item.word}</h2>
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-mono text-lg text-slate-500 dark:text-slate-400">{item.ipa}</span>
+                                                <SpeakerButton text={item.word} topic={item.topic} className="w-8 h-8 rounded-full !bg-indigo-600 !text-white hover:!bg-indigo-700 border-none shadow-lg shadow-indigo-500/30" />
+                                            </div>
+                                        </div>
 
-                                        <div className="flex gap-2 w-full">
-                                            <button onClick={() => toggleDifficult(item.id)} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition ${isDifficult ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40'}`}>
-                                                <i className="fas fa-exclamation mr-1"></i> Khó
+                                        <div className="mt-auto space-y-3">
+                                            <button onClick={() => toggleDifficult(item.id)} className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition flex items-center justify-between group ${isDifficult ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-600'}`}>
+                                                <span>Mark as Difficult</span>
+                                                <i className={`fas fa-exclamation-circle text-lg ${isDifficult ? 'text-white' : 'text-slate-400 group-hover:text-rose-500'}`}></i>
                                             </button>
-                                            <button onClick={() => toggleLearned(item.id)} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition ${isLearned ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'}`}>
-                                                <i className="fas fa-check mr-1"></i> Thuộc
+                                            <button onClick={() => toggleLearned(item.id)} className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition flex items-center justify-between group ${isLearned ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600'}`}>
+                                                <span>Mark as Learned</span>
+                                                <i className={`fas fa-check-circle text-lg ${isLearned ? 'text-white' : 'text-slate-400 group-hover:text-emerald-500'}`}></i>
                                             </button>
                                         </div>
                                     </div>
 
                                     {/* Right Column: Details */}
-                                    <div className="md:w-2/3 space-y-5">
+                                    <div className="md:w-7/12 space-y-8">
                                         {/* Meaning */}
                                         <div>
-                                            <h3 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-3">{item.meaning}</h3>
-                                        </div>
-                                        
-                                        {/* Example */}
-                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl border border-indigo-100 dark:border-indigo-800/50">
-                                            <span className="text-xs font-black text-indigo-500 uppercase tracking-wider block mb-2">
-                                                <i className="fas fa-quote-left mr-1"></i> Ví dụ minh họa
-                                            </span>
-                                            <p className="italic text-indigo-900 dark:text-indigo-100 text-base md:text-lg leading-relaxed">"{item.example}"</p>
+                                            <h3 className="text-2xl font-bold text-slate-800 dark:text-white leading-tight mb-4">{item.meaning}</h3>
+
+                                            {/* Example */}
+                                            <div className="p-5 bg-gradient-to-br from-slate-50 to-indigo-50/50 dark:from-slate-800 dark:to-slate-800/50 rounded-2xl border-l-4 border-indigo-500">
+                                                <p className="italic text-slate-700 dark:text-slate-300 text-lg font-serif">"{item.example}"</p>
+                                            </div>
                                         </div>
 
-                                        {/* Word Relations */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800/50">
-                                                <span className="block text-[10px] font-black text-blue-500 uppercase tracking-wider mb-2">
-                                                    <i className="fas fa-link mr-1"></i> Đồng nghĩa
-                                                </span>
-                                                <LinkedWordList text={item.synonym} jumpToWord={jumpToWord} colorClass="text-blue-700 dark:text-blue-300 font-medium text-sm" />
+                                        {/* Word Relations - Vertical List */}
+                                        <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+
+                                            <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                                                    <i className="fas fa-link"></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Synonyms</span>
+                                                    <LinkedWordList text={item.synonym} jumpToWord={jumpToWord} colorClass="text-slate-700 dark:text-slate-200 font-medium text-base" />
+                                                </div>
                                             </div>
-                                            <div className="bg-rose-50 dark:bg-rose-900/20 p-3 rounded-xl border border-rose-100 dark:border-rose-800/50">
-                                                <span className="block text-[10px] font-black text-rose-500 uppercase tracking-wider mb-2">
-                                                    <i className="fas fa-exchange-alt mr-1"></i> Trái nghĩa
-                                                </span>
-                                                <LinkedWordList text={item.antonym} jumpToWord={jumpToWord} colorClass="text-rose-700 dark:text-rose-300 font-medium text-sm" />
+
+                                            <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                                                    <i className="fas fa-exchange-alt"></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Antonyms</span>
+                                                    <LinkedWordList text={item.antonym} jumpToWord={jumpToWord} colorClass="text-slate-700 dark:text-slate-200 font-medium text-base" />
+                                                </div>
                                             </div>
-                                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-xl border border-purple-100 dark:border-purple-800/50">
-                                                <span className="block text-[10px] font-black text-purple-500 uppercase tracking-wider mb-2">
-                                                    <i className="fas fa-sitemap mr-1"></i> Gia đình từ
-                                                </span>
-                                                <LinkedWordList text={item.family} jumpToWord={jumpToWord} colorClass="text-purple-700 dark:text-purple-300 font-medium text-sm" />
+
+                                            <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                                                    <i className="fas fa-sitemap"></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Word Family</span>
+                                                    <LinkedWordList text={item.family} jumpToWord={jumpToWord} colorClass="text-slate-700 dark:text-slate-200 font-medium text-base" />
+                                                </div>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -6419,13 +6433,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [allUsers, setAllUsers] = React.useState([]);
             const [selectedUserId, setSelectedUserId] = React.useState(null);
             const [loadingUsers, setLoadingUsers] = React.useState(false);
-            
+
             // Notifications
             const [notificationText, setNotificationText] = React.useState('');
             const [notificationType, setNotificationType] = React.useState('reminder'); // reminder, achievement, warning
             const [notificationTarget, setNotificationTarget] = React.useState('all'); // all, specific user id
             const [sentNotifications, setSentNotifications] = React.useState([]);
-            
+
             // Assignments
             const [assignmentTitle, setAssignmentTitle] = React.useState('');
             const [assignmentTopics, setAssignmentTopics] = React.useState([]);
@@ -6433,7 +6447,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [assignmentDeadline, setAssignmentDeadline] = React.useState('');
             const [assignmentTarget, setAssignmentTarget] = React.useState('all');
             const [assignments, setAssignments] = React.useState([]);
-            
+
             // Analytics
             const [userProgress, setUserProgress] = React.useState({});
             const [selectedUserForDetails, setSelectedUserForDetails] = React.useState(null);
@@ -6456,7 +6470,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
             const fetchAllData = async () => {
                 if (!db) return;
-                
+
                 setLoadingUsers(true);
                 try {
                     // Fetch users
@@ -6464,19 +6478,19 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const usersSnapshot = await leaderboardRef.orderBy('coins', 'desc').limit(100).get();
                     const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setAllUsers(users);
-                    
+
                     // Fetch notifications
                     const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
                     const notifSnapshot = await notifRef.orderBy('createdAt', 'desc').limit(20).get();
                     const notifs = notifSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setSentNotifications(notifs);
-                    
+
                     // Fetch assignments
                     const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
                     const assignSnapshot = await assignRef.orderBy('createdAt', 'desc').limit(20).get();
                     const assigns = assignSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setAssignments(assigns);
-                    
+
                     // Fetch user progress
                     const progressRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_progress');
                     const progressSnapshot = await progressRef.get();
@@ -6485,7 +6499,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         progress[doc.id] = doc.data();
                     });
                     setUserProgress(progress);
-                    
+
                 } catch (err) {
                     console.error('Failed to fetch data:', err);
                     toast.error('Lỗi tải dữ liệu!');
@@ -6546,7 +6560,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // Send notification
             const sendNotification = async () => {
                 if (!db || !notificationText.trim()) { toast.warning('Vui lòng nhập nội dung thông báo!'); return; }
-                
+
                 try {
                     const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
                     const newNotif = {
@@ -6557,7 +6571,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         read: []
                     };
                     await notifRef.add(newNotif);
-                    
+
                     // Also add to user's personal notifications if specific user
                     if (notificationTarget !== 'all') {
                         const userNotifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_notifications').doc(notificationTarget);
@@ -6568,7 +6582,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             })
                         }, { merge: true });
                     }
-                    
+
                     setSentNotifications(prev => [{ ...newNotif, id: Date.now() }, ...prev]);
                     setNotificationText('');
                     toast.success('Đã gửi thông báo!');
@@ -6581,15 +6595,15 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const createAssignment = async () => {
                 if (!db || !assignmentTitle.trim()) { toast.warning('Vui lòng nhập tiêu đề bài tập!'); return; }
                 if (assignmentTopics.length === 0) { toast.warning('Vui lòng chọn ít nhất 1 chủ đề!'); return; }
-                
+
                 try {
                     const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
-                    
+
                     // Get random words from selected topics
                     const wordsFromTopics = toeicData.filter(w => assignmentTopics.includes(w.topic));
                     const shuffled = [...wordsFromTopics].sort(() => Math.random() - 0.5);
                     const selectedWords = shuffled.slice(0, assignmentWordCount).map(w => w.id);
-                    
+
                     const newAssignment = {
                         title: assignmentTitle,
                         topics: assignmentTopics,
@@ -6600,7 +6614,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         createdAt: Date.now(),
                         completedBy: []
                     };
-                    
+
                     await assignRef.add(newAssignment);
                     setAssignments(prev => [{ ...newAssignment, id: Date.now() }, ...prev]);
                     setAssignmentTitle('');
@@ -6685,17 +6699,16 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                                                activeTab === tab.id 
-                                                    ? 'bg-indigo-600 text-white shadow-lg' 
-                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
-                                            }`}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === tab.id
+                                                ? 'bg-indigo-600 text-white shadow-lg'
+                                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
+                                                }`}
                                         >
                                             <i className={`fas ${tab.icon}`}></i>
                                             <span>{tab.label}</span>
                                         </button>
                                     ))}
-                                    
+
                                     <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
                                         <button onClick={fetchAllData} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs text-slate-500 hover:text-indigo-600 transition">
                                             <i className="fas fa-sync-alt"></i> Làm mới
@@ -6722,7 +6735,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                     />
                                                 </div>
                                             </div>
-                                            
+
                                             {loadingUsers ? (
                                                 <div className="text-center py-8"><i className="fas fa-spinner animate-spin text-2xl text-indigo-500"></i></div>
                                             ) : (
@@ -6773,14 +6786,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
                                                 <i className="fas fa-bell text-purple-500"></i> Gửi Thông báo
                                             </h3>
-                                            
+
                                             <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-5 rounded-2xl border border-purple-200 dark:border-purple-800">
                                                 <div className="grid gap-4">
                                                     {/* Target */}
                                                     <div>
                                                         <label className="text-xs font-bold text-slate-500 mb-2 block">Gửi đến</label>
-                                                        <select 
-                                                            value={notificationTarget} 
+                                                        <select
+                                                            value={notificationTarget}
                                                             onChange={e => setNotificationTarget(e.target.value)}
                                                             className="w-full p-3 rounded-xl border dark:bg-slate-800 font-bold"
                                                         >
@@ -6790,7 +6803,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    
+
                                                     {/* Type */}
                                                     <div>
                                                         <label className="text-xs font-bold text-slate-500 mb-2 block">Loại thông báo</label>
@@ -6804,18 +6817,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                                 <button
                                                                     key={type.id}
                                                                     onClick={() => setNotificationType(type.id)}
-                                                                    className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
-                                                                        notificationType === type.id 
-                                                                            ? `bg-${type.color}-500 text-white` 
-                                                                            : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border'
-                                                                    }`}
+                                                                    className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${notificationType === type.id
+                                                                        ? `bg-${type.color}-500 text-white`
+                                                                        : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border'
+                                                                        }`}
                                                                 >
                                                                     <i className={`fas ${type.icon}`}></i> {type.label}
                                                                 </button>
                                                             ))}
                                                         </div>
                                                     </div>
-                                                    
+
                                                     {/* Content */}
                                                     <div>
                                                         <label className="text-xs font-bold text-slate-500 mb-2 block">Nội dung</label>
@@ -6826,13 +6838,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                             placeholder="Nhập nội dung thông báo..."
                                                         />
                                                     </div>
-                                                    
+
                                                     <button onClick={sendNotification} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                                                         <i className="fas fa-paper-plane"></i> Gửi Thông báo
                                                     </button>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Sent notifications history */}
                                             <div>
                                                 <h4 className="font-bold text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2">
@@ -6841,11 +6853,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                 <div className="space-y-2 max-h-60 overflow-y-auto">
                                                     {sentNotifications.map(notif => (
                                                         <div key={notif.id} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex items-start gap-3">
-                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                                notif.type === 'reminder' ? 'bg-blue-100 text-blue-600' :
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${notif.type === 'reminder' ? 'bg-blue-100 text-blue-600' :
                                                                 notif.type === 'achievement' ? 'bg-yellow-100 text-yellow-600' :
-                                                                notif.type === 'warning' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
-                                                            }`}>
+                                                                    notif.type === 'warning' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                                                                }`}>
                                                                 <i className={`fas ${notif.type === 'reminder' ? 'fa-clock' : notif.type === 'achievement' ? 'fa-trophy' : notif.type === 'warning' ? 'fa-exclamation-triangle' : 'fa-tasks'} text-sm`}></i>
                                                             </div>
                                                             <div className="flex-1 min-w-0">
@@ -6872,7 +6883,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
                                                 <i className="fas fa-tasks text-green-500"></i> Giao Bài tập
                                             </h3>
-                                            
+
                                             <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-5 rounded-2xl border border-green-200 dark:border-green-800">
                                                 <div className="grid gap-4">
                                                     {/* Title */}
@@ -6886,7 +6897,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                             placeholder="VD: Ôn tập từ vựng Marketing..."
                                                         />
                                                     </div>
-                                                    
+
                                                     {/* Topics */}
                                                     <div>
                                                         <label className="text-xs font-bold text-slate-500 mb-2 block">Chọn chủ đề ({assignmentTopics.length} đã chọn)</label>
@@ -6894,21 +6905,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                             {uniqueTopics.map(topic => (
                                                                 <button
                                                                     key={topic}
-                                                                    onClick={() => setAssignmentTopics(prev => 
+                                                                    onClick={() => setAssignmentTopics(prev =>
                                                                         prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
                                                                     )}
-                                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition ${
-                                                                        assignmentTopics.includes(topic)
-                                                                            ? 'bg-green-500 text-white'
-                                                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                                                                    }`}
+                                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition ${assignmentTopics.includes(topic)
+                                                                        ? 'bg-green-500 text-white'
+                                                                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                                                                        }`}
                                                                 >
                                                                     {topic}
                                                                 </button>
                                                             ))}
                                                         </div>
                                                     </div>
-                                                    
+
                                                     {/* Word count & Deadline */}
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
@@ -6932,12 +6942,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                             />
                                                         </div>
                                                     </div>
-                                                    
+
                                                     {/* Target */}
                                                     <div>
                                                         <label className="text-xs font-bold text-slate-500 mb-2 block">Giao cho</label>
-                                                        <select 
-                                                            value={assignmentTarget} 
+                                                        <select
+                                                            value={assignmentTarget}
                                                             onChange={e => setAssignmentTarget(e.target.value)}
                                                             className="w-full p-3 rounded-xl border dark:bg-slate-800"
                                                         >
@@ -6947,13 +6957,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    
+
                                                     <button onClick={createAssignment} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                                                         <i className="fas fa-plus"></i> Tạo Bài tập
                                                     </button>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Existing assignments */}
                                             <div>
                                                 <h4 className="font-bold text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2">
@@ -6996,7 +7006,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
                                                 <i className="fas fa-chart-bar text-orange-500"></i> Thống kê Học tập
                                             </h3>
-                                            
+
                                             {/* Overview Cards */}
                                             <div className="grid grid-cols-4 gap-4">
                                                 {[
@@ -7014,7 +7024,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                     </div>
                                                 ))}
                                             </div>
-                                            
+
                                             {/* User Progress Table */}
                                             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                                                 <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
@@ -7077,7 +7087,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2 mb-4">
                                                 <i className="fas fa-cogs text-slate-500"></i> Cấu hình Game
                                             </h3>
-                                            
+
                                             {/* Existing config sections - compressed */}
                                             <div className="grid grid-cols-2 gap-4">
                                                 {/* Flappy */}
@@ -7088,7 +7098,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                         <div><label className="text-xs text-slate-500">Trọng lực</label><input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* Runner */}
                                                 <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
                                                     <h4 className="font-bold text-green-500 mb-3"><i className="fas fa-crosshairs mr-2"></i>Bắn Vịt</h4>
@@ -7097,7 +7107,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                         <div><label className="text-xs text-slate-500">Tần suất</label><input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* Quiz */}
                                                 <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
                                                     <h4 className="font-bold text-orange-500 mb-3"><i className="fas fa-question-circle mr-2"></i>Trắc Nghiệm</h4>
@@ -7106,14 +7116,14 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                         <div><label className="text-xs text-slate-500">Xu/đúng</label><input type="number" step="1" value={localConfig.quiz?.coinsPerCorrect || 5} onChange={e => handleChange('quiz', 'coinsPerCorrect', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* General */}
                                                 <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
                                                     <h4 className="font-bold text-yellow-500 mb-3"><i className="fas fa-cog mr-2"></i>Chung</h4>
                                                     <div><label className="text-xs text-slate-500">Xu khởi đầu</label><input type="number" step="100" value={localConfig.general?.startingCoins || 500} onChange={e => handleChange('general', 'startingCoins', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Local Coin Management */}
                                             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-4 rounded-xl border-2 border-yellow-300">
                                                 <h4 className="font-bold text-yellow-600 mb-3"><i className="fas fa-coins mr-2"></i>Xu của bạn: {coins?.toLocaleString() || 0}</h4>
@@ -7123,7 +7133,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                     <button onClick={() => { setCoins(prev => Math.max(0, prev - coinAdjust)); toast.success(`-${coinAdjust} xu!`); }} className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold"><i className="fas fa-minus"></i></button>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex gap-3 pt-4 border-t">
                                                 <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
                                                 <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-bold shadow-lg">Lưu Cấu Hình</button>
@@ -7188,7 +7198,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [unlockedSkins, setUnlockedSkins] = React.useState(() => safeJSON('toeic_unlocked_skins', ['skin_default']));
             const [equippedSkin, setEquipSkin] = React.useState(() => localStorage.getItem('toeic_equipped_skin') || 'skin_default');
             const [buyingItem, setBuyingItem] = React.useState(null);
-            
+
             // Notifications & Assignments for User
             const [userNotifications, setUserNotifications] = React.useState([]);
             const [userAssignments, setUserAssignments] = React.useState([]);
@@ -7384,7 +7394,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (!('Notification' in window)) return;
                 if (Notification.permission !== 'granted') return;
                 if (document.hasFocus()) return; // Không gửi nếu đang focus vào app
-                
+
                 try {
                     const notification = new Notification(title, {
                         body: options.body || '',
@@ -7394,13 +7404,13 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         requireInteraction: options.requireInteraction || false,
                         silent: false,
                     });
-                    
+
                     // Click vào notification -> focus vào app
-                    notification.onclick = function() {
+                    notification.onclick = function () {
                         window.focus();
                         notification.close();
                     };
-                    
+
                     // Tự đóng sau 10 giây
                     setTimeout(() => notification.close(), 10000);
                 } catch (e) {
@@ -7411,10 +7421,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             // Fetch Notifications & Assignments for User
             // Track previous unread count for sound trigger
             const prevUnreadRef = React.useRef(0);
-            
+
             React.useEffect(() => {
                 if (!user || !db) return;
-                
+
                 // Listen to admin notifications
                 const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
                 const unsubNotif = notifRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
@@ -7422,11 +7432,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     // Filter: show all if target is 'all', or specific to this user
                     const relevantNotifs = notifs.filter(n => n.target === 'all' || n.target === user.uid);
                     setUserNotifications(relevantNotifs);
-                    
+
                     // Calculate unread
                     const readIds = JSON.parse(localStorage.getItem('toeic_read_notifications') || '[]');
                     const newUnread = relevantNotifs.filter(n => !readIds.includes(n.id)).length;
-                    
+
                     // 🔔 Gửi Browser Notification + Sound nếu có thông báo mới
                     if (newUnread > prevUnreadRef.current && prevUnreadRef.current >= 0) {
                         const latestNotif = relevantNotifs.find(n => !readIds.includes(n.id));
@@ -7434,7 +7444,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             // Play sound
                             const soundType = latestNotif.type || 'system';
                             playSound('notification', soundType);
-                            
+
                             // 🔔 GỬI BROWSER NOTIFICATION
                             const notifIcons = {
                                 reminder: '⏰',
@@ -7450,7 +7460,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                 warning: '⚠️ Thông báo quan trọng!',
                                 system: '📢 TOEIC LIAM'
                             };
-                            
+
                             sendBrowserNotification(notifTitles[latestNotif.type] || notifTitles.system, {
                                 body: latestNotif.text,
                                 icon: notifIcons[latestNotif.type] || '📢',
@@ -7462,20 +7472,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     prevUnreadRef.current = newUnread;
                     setUnreadCount(newUnread);
                 });
-                
+
                 // Listen to assignments
                 const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
                 const unsubAssign = assignRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
                     const assigns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     // Filter: show all if target is 'all', or specific to this user
                     const relevantAssigns = assigns.filter(a => a.target === 'all' || a.target === user.uid);
-                    
+
                     // 🔔 Browser Notification + Sound cho bài tập mới
                     const readAssignIds = JSON.parse(localStorage.getItem('toeic_read_assignments') || '[]');
                     const newAssigns = relevantAssigns.filter(a => !readAssignIds.includes(a.id));
                     if (newAssigns.length > 0 && userAssignments.length > 0 && newAssigns.length > relevantAssigns.length - userAssignments.length) {
                         playSound('notification', 'assignment');
-                        
+
                         // 🔔 GỬI BROWSER NOTIFICATION cho bài tập
                         const latestAssign = newAssigns[0];
                         sendBrowserNotification('📚 Bài tập mới từ Admin!', {
@@ -7485,10 +7495,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             requireInteraction: true
                         });
                     }
-                    
+
                     setUserAssignments(relevantAssigns);
                 });
-                
+
                 // Update user progress periodically
                 const updateProgress = () => {
                     const progressRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_progress').doc(user.uid);
@@ -7497,11 +7507,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         difficultWords: [...difficultWords],
                         lastActive: Date.now(),
                         streak: parseInt(localStorage.getItem('toeic_streak') || '0'),
-                    }, { merge: true }).catch(() => {});
+                    }, { merge: true }).catch(() => { });
                 };
                 updateProgress();
                 const progressInterval = setInterval(updateProgress, 60000);
-                
+
                 return () => {
                     unsubNotif();
                     unsubAssign();
@@ -7662,8 +7672,8 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             return (
                 <div className="min-h-screen relative overflow-x-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
                     {/* Animated Gradient Background */}
-                    <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-950 animate-gradient-xy"></div>
-                    <div className="fixed inset-0 z-[-1] opacity-30 dark:opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-repeat pointer-events-none"></div>
+                    <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 animate-gradient-xy"></div>
+                    <div className="fixed inset-0 z-[-1] bg-[radial-gradient(circle_at_50%_0%,_rgba(99,102,241,0.15),_transparent_50%)] pointer-events-none"></div>
 
                     {/* Navbar */}
                     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border-b border-indigo-100/50 dark:border-slate-800/50 h-16 transition-all">
@@ -7702,7 +7712,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                             </span>
                                         )}
                                     </button>
-                                    
+
                                     {/* Notification Panel Dropdown */}
                                     {showNotificationPanel && (
                                         <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[60] animate-fadeIn">
@@ -7739,22 +7749,20 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                                                 </div>
                                                             </div>
                                                         ))}
-                                                        
+
                                                         {/* Notifications */}
                                                         {userNotifications.map(notif => (
                                                             <div key={notif.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
                                                                 <div className="flex items-start gap-3">
-                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                                                                        notif.type === 'reminder' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' :
+                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${notif.type === 'reminder' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' :
                                                                         notif.type === 'achievement' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' :
-                                                                        notif.type === 'warning' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' :
-                                                                        'bg-purple-100 dark:bg-purple-900/30 text-purple-600'
-                                                                    }`}>
-                                                                        <i className={`fas ${
-                                                                            notif.type === 'reminder' ? 'fa-clock' :
+                                                                            notif.type === 'warning' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' :
+                                                                                'bg-purple-100 dark:bg-purple-900/30 text-purple-600'
+                                                                        }`}>
+                                                                        <i className={`fas ${notif.type === 'reminder' ? 'fa-clock' :
                                                                             notif.type === 'achievement' ? 'fa-trophy' :
-                                                                            notif.type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info'
-                                                                        }`}></i>
+                                                                                notif.type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info'
+                                                                            }`}></i>
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
                                                                         <p className="text-sm text-slate-700 dark:text-slate-200">{notif.text}</p>
