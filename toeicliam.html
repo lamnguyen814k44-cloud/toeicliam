@@ -3169,337 +3169,274 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ============================================
         // FLAPPY VOCAB BIRD GAME VIEW
         // ============================================
-        const FlappyGameView = ({ allData, coins, setCoins, user, config }) => {
-            const [gameState, setGameState] = React.useState('start'); // start, playing, gameover
-            const [birdY, setBirdY] = React.useState(300);
-            const [birdVelocity, setBirdVelocity] = React.useState(0);
-            const [birdRotation, setBirdRotation] = React.useState(0);
-            const [pipes, setPipes] = React.useState([]);
+        const AirplaneGameView = ({ allData, coins, setCoins, user, config }) => {
+            const [gameState, setGameState] = React.useState('menu'); // menu, playing, gameover
             const [score, setScore] = React.useState(0);
-            const [highScore, setHighScore] = React.useState(() => parseInt(localStorage.getItem('flappy_high_score') || '0'));
-            const [currentWord, setCurrentWord] = React.useState(null);
+            const [lives, setLives] = React.useState(3);
+            const [question, setQuestion] = React.useState(null);
+            const [planeY, setPlaneY] = React.useState(50); // percentage 0-100
+            const [clouds, setClouds] = React.useState([]);
+            const [targetWord, setTargetWord] = React.useState(null);
+            
+            const gameLoopRef = React.useRef(null);
+            const keysPressed = React.useRef({});
 
-            const gameRef = React.useRef(null);
-            const requestRef = React.useRef();
-            const lastTimeRef = React.useRef();
-            const birdYRef = React.useRef(300);
-            const birdVelRef = React.useRef(0);
-
-            // Constants
-            const GRAVITY = config?.gravity || 0.5;
-            const JUMP_STRENGTH = config?.jumpStrength || -8;
-            const PIPE_SPEED = config?.pipeSpeed || 1.5;
-            const PIPE_SPAWN_RATE = config?.pipeSpawnRate || 2500;
-            const BIRD_X = 80;
-            const GAME_HEIGHT = 600;
-
-            // Spawn Timer
-            const spawnTimerRef = React.useRef(0);
-
-            React.useEffect(() => {
-                if (gameState === 'start' && !currentWord) {
-                    pickNewWord();
-                    resetGame();
+            // Audio effects
+            const playSfx = (type) => {
+                if (typeof playSound === 'function') {
+                    playSound('coin'); 
                 }
+            };
+            const playHitSfx = () => {
+                 if (typeof playSound === 'function') {
+                    playSound('general', 'click'); // Fallback or distinct
+                }
+            }
+
+            // Start Game
+            const startGame = () => {
+                setScore(0);
+                setLives(3);
+                setClouds([]);
+                setGameState('playing');
+                setPlaneY(50);
+                nextQuestion();
+            };
+
+            const nextQuestion = () => {
+                const randomItem = allData[Math.floor(Math.random() * allData.length)];
+                setQuestion(randomItem.word);
+                setTargetWord(randomItem);
+            };
+
+            // Input Handling
+            React.useEffect(() => {
+                const handleKeyDown = (e) => (keysPressed.current[e.key] = true);
+                const handleKeyUp = (e) => (keysPressed.current[e.key] = false);
+                window.addEventListener('keydown', handleKeyDown);
+                window.addEventListener('keyup', handleKeyUp);
+                
+                // Touch/Mouse control
+                const handleTouch = (e) => {
+                    if(gameState !== 'playing') return;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                     const percent = (clientY / window.innerHeight) * 100;
+                     setPlaneY(Math.max(5, Math.min(95, percent)));
+                };
+                 window.addEventListener('touchmove', handleTouch);
+                
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                    window.removeEventListener('keyup', handleKeyUp);
+                    window.removeEventListener('touchmove', handleTouch);
+                };
             }, [gameState]);
 
-            const pickNewWord = () => {
-                const w = allData[Math.floor(Math.random() * allData.length)];
-                setCurrentWord(w);
-                return w;
-            };
-
-            const resetGame = () => {
-                setBirdY(300);
-                setBirdVelocity(0);
-                setBirdRotation(0);
-                setPipes([]);
-                setScore(0);
-                birdYRef.current = 300;
-                birdVelRef.current = 0;
-                spawnTimerRef.current = 0;
-                // pickNewWord(); // Keep current word
-            };
-
-            const jump = () => {
-                if (gameState === 'ready') {
-                    setGameState('playing');
-                    birdVelRef.current = JUMP_STRENGTH;
-                    playSound('general', 'click');
-                    return;
-                }
+            // Game Loop
+            React.useEffect(() => {
                 if (gameState !== 'playing') return;
 
-                birdVelRef.current = JUMP_STRENGTH;
-                playSound('general', 'click');
-            };
+                let lastSpawn = 0;
+                
+                const loop = (timestamp) => {
+                    // Update Plane
+                    if (keysPressed.current['ArrowUp']) setPlaneY(y => Math.max(5, y - 1.5));
+                    if (keysPressed.current['ArrowDown']) setPlaneY(y => Math.min(95, y + 1.5));
 
-            const spawnPipe = (targetWord) => {
-                // Determine Correct Answer Position (Top or Bottom)
-                const isTopCorrect = Math.random() < 0.5;
+                    // Update Clouds
+                    setClouds(prev => {
+                        return prev
+                            .map(c => ({ ...c, x: c.x - 0.5 })) // Move left
+                            .filter(c => c.x > -20); // Remove off-screen
+                    });
 
-                // Get Wrong Answer
-                let wrongItem = allData[Math.floor(Math.random() * allData.length)];
-                while (wrongItem.id === targetWord.id) {
-                    wrongItem = allData[Math.floor(Math.random() * allData.length)];
-                }
+                    // Spawn Clouds
+                    if (timestamp - lastSpawn > 2000) { // 2s spawn rate
+                        spawnClouds();
+                        lastSpawn = timestamp;
+                    }
 
-                const topText = isTopCorrect ? targetWord.meaning : wrongItem.meaning;
-                const bottomText = isTopCorrect ? wrongItem.meaning : targetWord.meaning;
+                    // Collision Detection
+                    checkCollisions();
 
-                const newPipe = {
-                    id: Date.now(),
-                    x: window.innerWidth + 100,
-                    isTopCorrect: isTopCorrect,
-                    topText: topText,
-                    bottomText: bottomText,
-                    passed: false
+                    gameLoopRef.current = requestAnimationFrame(loop);
                 };
 
-                setPipes(prev => [...prev, newPipe]);
+                gameLoopRef.current = requestAnimationFrame(loop);
+                return () => cancelAnimationFrame(gameLoopRef.current);
+            }, [gameState, targetWord]); 
+
+            const spawnClouds = () => {
+                if (!targetWord) return;
+                
+                const isCorrect = Math.random() < 0.4; 
+                let content;
+                
+                if (isCorrect) {
+                     content = targetWord.meaning;
+                } else {
+                    const wrong = allData.filter(i => i.word !== targetWord.word);
+                    content = wrong[Math.floor(Math.random() * wrong.length)].meaning;
+                }
+
+                const newCloud = {
+                    id: Date.now() + Math.random(),
+                    x: 100, // Start just off-screen
+                    y: Math.random() * 80 + 10,
+                    content: content,
+                    isCorrect: content === targetWord.meaning
+                };
+                
+                setClouds(prev => [...prev, newCloud]);
+            };
+
+            const checkCollisions = () => {
+                setClouds(prevClouds => {
+                    const survived = [];
+                    let hitDetected = false;
+
+                    prevClouds.forEach(cloud => {
+                        const xOverlap = (cloud.x < 15) && (cloud.x + 15 > 5);
+                        const planeTop = planeY - 4;
+                        const planeBottom = planeY + 4;
+                        const cloudTop = cloud.y;
+                        const cloudBottom = cloud.y + 12;
+
+                        const yOverlap = (planeBottom > cloudTop) && (planeTop < cloudBottom);
+
+                        if (xOverlap && yOverlap && !hitDetected) {
+                            handleHit(cloud);
+                            hitDetected = true;
+                        } else {
+                            survived.push(cloud);
+                        }
+                    });
+                    
+                    return hitDetected ? survived : prevClouds;
+                });
+            };
+
+            const handleHit = (cloud) => {
+                if (cloud.isCorrect) {
+                    setScore(s => s + 100);
+                    setCoins(c => c + 10);
+                    playSfx('coin');
+                    setClouds([]); 
+                    setTargetWord(null); 
+                    setTimeout(() => nextQuestion(), 100);
+                } else {
+                    playHitSfx();
+                    setLives(prev => {
+                        const newLives = prev - 1;
+                        if (newLives <= 0) endGame();
+                        return newLives;
+                    });
+                }
             };
 
             const endGame = () => {
                 setGameState('gameover');
-                playSound('runner', 'gameover');
-                if (score > highScore) {
-                    setHighScore(score);
-                    localStorage.setItem('flappy_high_score', score);
-                }
+                cancelAnimationFrame(gameLoopRef.current);
             };
-
-            const gameLoop = (time) => {
-                if (gameState !== 'playing') return;
-
-                const deltaTime = time - lastTimeRef.current;
-                lastTimeRef.current = time;
-
-                if (gameState === 'ready') {
-                    // Hover effect
-                    birdYRef.current = 300 + Math.sin(time / 300) * 10;
-                    setBirdY(birdYRef.current);
-                    requestRef.current = requestAnimationFrame(gameLoop);
-                    return;
-                }
-
-                // Physics
-                birdVelRef.current += GRAVITY;
-                birdYRef.current += birdVelRef.current;
-
-                // Ceiling/Floor Collision
-                if (birdYRef.current < 0) { birdYRef.current = 0; birdVelRef.current = 0; }
-                if (birdYRef.current > GAME_HEIGHT - 30) {
-                    endGame();
-                    return;
-                }
-
-                // Update State for Render
-                setBirdY(birdYRef.current);
-                setBirdVelocity(birdVelRef.current);
-                setBirdRotation(Math.min(Math.max(birdVelRef.current * 3, -25), 90));
-
-                // Pipes Logic
-                spawnTimerRef.current += deltaTime;
-                if (spawnTimerRef.current > PIPE_SPAWN_RATE) {
-                    spawnTimerRef.current = 0;
-                    if (currentWord) spawnPipe(currentWord);
-                }
-
-                setPipes(prevPipes => {
-                    const nextPipes = prevPipes.map(p => ({ ...p, x: p.x - PIPE_SPEED })).filter(p => p.x > -300);
-
-                    // Collision Check
-                    nextPipes.forEach(p => {
-                        // Check Pass
-                        if (!p.passed && p.x + 100 < BIRD_X) {
-                            p.passed = true;
-                            // Just passed safely? No, must collide with option
-                        }
-
-                        // Check Collision Box
-                        // Pipe Width: 200px? Let's say 150.
-                        // Bird is at BIRD_X (80).
-                        if (p.x < BIRD_X + 30 && p.x + 150 > BIRD_X) {
-                            // Inside X Range
-                            const birdCenterY = birdYRef.current + 15;
-                            const midPoint = GAME_HEIGHT / 2;
-
-                            // Top Box: 0 to midPoint - gap/2
-                            // Bottom Box: midPoint + gap/2 to GAME_HEIGHT
-                            // Actually design: Two big boxes with a small gap? 
-                            // Or split screen: Top Half vs Bottom Half.
-
-                            // Implementation: Top Half is Option A. Bottom Half is Option B.
-                            // If Bird Y < MidPoint => Chose Top.
-
-                            if (p.processed) return;
-
-                            if (birdCenterY < midPoint) {
-                                // Chose Top
-                                if (p.isTopCorrect) {
-                                    // Correct!
-                                    setScore(s => s + 1);
-                                    playSound('quiz', 'correct');
-                                    p.processed = true;
-                                    // New Word
-                                    const w = pickNewWord();
-                                    // Clear remaining pipes? Or just keep going? 
-                                    // Flappy is continuous.
-                                    // Update currentWord for NEXT pipe.
-                                } else {
-                                    endGame();
-                                }
-                            } else {
-                                // Chose Bottom
-                                if (!p.isTopCorrect) {
-                                    // Correct!
-                                    setScore(s => s + 1);
-                                    playSound('quiz', 'correct');
-                                    p.processed = true;
-                                    pickNewWord();
-                                } else {
-                                    endGame();
-                                }
-                            }
-                        }
-                    });
-
-                    return nextPipes;
-                });
-
-                requestRef.current = requestAnimationFrame(gameLoop);
-            };
-
-            React.useEffect(() => {
-                if (gameState === 'playing' || gameState === 'ready') {
-                    lastTimeRef.current = performance.now();
-                    requestRef.current = requestAnimationFrame(gameLoop);
-                }
-                return () => CancelAnimationFrame(requestRef.current);
-            }, [gameState]);
-
-            // Fallback cancel
-            function CancelAnimationFrame(id) {
-                if (id) window.cancelAnimationFrame(id);
-            }
 
             return (
-                <div
-                    className="relative w-full max-w-lg mx-auto bg-sky-300 overflow-hidden shadow-2xl rounded-xl border-4 border-slate-800"
-                    style={{ height: GAME_HEIGHT }}
-                    onClick={jump}
-                >
-                    {/* Background Clouds */}
-                    <div className="absolute top-10 left-10 text-white opacity-50 text-6xl"><i className="fas fa-cloud"></i></div>
-                    <div className="absolute top-20 right-20 text-white opacity-40 text-4xl"><i className="fas fa-cloud"></i></div>
-                    <div className="absolute bottom-10 left-1/2 text-white opacity-30 text-8xl"><i className="fas fa-cloud"></i></div>
-
-                    {/* HUD */}
-                    <div className="absolute top-4 left-4 z-20 bg-white/90 px-4 py-2 rounded-xl border-2 border-slate-800 shadow-md">
-                        <div className="text-xs font-bold text-slate-500">SCORE</div>
-                        <div className="text-2xl font-black text-indigo-600">{score}</div>
-                    </div>
-                    <div className="absolute top-4 right-4 z-20 bg-yellow-400 px-3 py-1 rounded-lg border-2 border-black font-black text-xs shadow-sm">
-                        HI: {highScore}
-                    </div>
-
-                    {/* Current Problem */}
-                    {currentWord && (
-                        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-indigo-600 text-white px-6 py-2 rounded-full border-2 border-white shadow-lg animate-bounce">
-                            <div className="text-xs font-bold text-indigo-200 uppercase">Meaning of:</div>
-                            <div className="text-xl font-black">{currentWord.word}</div>
+                <div className="relative w-full h-[80vh] overflow-hidden bg-gradient-to-b from-sky-300 to-sky-100 rounded-xl shadow-inner border-4 border-sky-400 select-none">
+                    {/* Header HUD */}
+                    <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-20 pointer-events-none">
+                        <div className="flex gap-2">
+                            {[...Array(lives)].map((_, i) => (
+                                <i key={i} className="fas fa-heart text-red-500 text-2xl drop-shadow-md animate-pulse"></i>
+                            ))}
                         </div>
-                    )}
+                        
+                        {gameState === 'playing' && question && (
+                            <div className="bg-white/90 px-6 py-2 rounded-2xl shadow-xl border-4 border-blue-400">
+                                <h2 className="text-xl font-black text-slate-800 uppercase tracking-wider">{question}</h2>
+                            </div>
+                        )}
 
-                    {/* Ready Hint */}
-                    {gameState === 'ready' && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center animate-pulse">
-                            <i className="fas fa-hand-pointer text-4xl text-white drop-shadow-md mb-2"></i>
-                            <div className="text-2xl font-black text-white drop-shadow-md">TAP TO FLY</div>
+                        <div className="text-2xl font-bold text-white drop-shadow-md">
+                            Score: {score}
+                        </div>
+                    </div>
+
+                    {/* Menu Screen */}
+                    {gameState === 'menu' && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
+                            <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm animate-bounce-in">
+                                <div className="mb-6 text-6xl text-blue-500"><i className="fas fa-plane-departure"></i></div>
+                                <h1 className="text-3xl font-black text-slate-800 mb-2">Word Pilot</h1>
+                                <p className="text-slate-500 mb-6 text-sm">Bay vào đám mây có nghĩa đúng!</p>
+                                <button 
+                                    onClick={startGame}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 active:scale-95"
+                                >
+                                    CẤT CÁNH
+                                </button>
+                            </div>
                         </div>
                     )}
 
                     {/* Game Over Screen */}
                     {gameState === 'gameover' && (
-                        <div className="absolute inset-0 z-30 bg-black/70 flex flex-col items-center justify-center animate-fadeIn">
-                            <h2 className="text-4xl font-black text-white mb-2 text-shadow-lg">GAME OVER</h2>
-                            <div className="bg-white p-6 rounded-2xl text-center mb-6 border-4 border-indigo-600 shadow-2xl">
-                                <div className="text-slate-500 font-bold mb-1">SCORE</div>
-                                <div className="text-5xl font-black text-indigo-900 mb-4">{score}</div>
-                                <div className="flex gap-4">
-                                    <button onClick={() => { resetGame(); setGameState('ready'); }} className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition">
-                                        <i className="fas fa-redo mr-2"></i>RETRY
-                                    </button>
-                                    {/* Menu button handled by parent UI switch usually, but let's add helper */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-red-900/80 backdrop-blur-sm">
+                            <div className="text-white text-center">
+                                <h2 className="text-4xl font-black mb-4">GAME OVER</h2>
+                                <p className="text-xl opacity-80 mb-8">Score: {score}</p>
+                                <button 
+                                    onClick={startGame}
+                                    className="bg-white text-red-600 text-lg font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100"
+                                >
+                                    Chơi Lại
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Game World */}
+                    {gameState === 'playing' && (
+                        <>
+                            {/* Plane */}
+                            <div 
+                                className="absolute w-20 h-10 left-[10%] transition-transform duration-75"
+                                style={{ 
+                                    top: `${planeY}%`,
+                                    transform: `translateY(-50%) rotate(${keysPressed.current['ArrowUp'] ? -15 : keysPressed.current['ArrowDown'] ? 15 : 0}deg)`
+                                }}
+                            >
+                                <div className="w-full h-full relative">
+                                    <div className="absolute top-1/2 left-0 w-full h-3 bg-red-500 rounded-full shadow-sm"></div>
+                                    <div className="absolute top-0 left-1/3 w-6 h-10 bg-red-600 skew-x-12 rounded-sm shadow-sm"></div>
+                                    <div className="absolute top-[40%] right-0 w-2 h-5 bg-yellow-400 animate-spin-slow rounded-full opacity-50"></div> 
+                                    <div className="absolute -left-2 top-1/3 w-3 h-5 bg-slate-700 rounded-sm"></div>
                                 </div>
                             </div>
-                        </div>
+
+                            {/* Clouds */}
+                            {clouds.map(cloud => (
+                                <div 
+                                    key={cloud.id}
+                                    className="absolute flex items-center justify-center px-4 py-3 transition-transform"
+                                    style={{ 
+                                        left: `${cloud.x}%`, 
+                                        top: `${cloud.y}%`,
+                                        width: '18%', 
+                                    }}
+                                >
+                                    <div className="relative w-full">
+                                        <div className="absolute inset-0 bg-white rounded-full opacity-90 shadow-md transform scale-110"></div>
+                                        <div className="absolute -top-3 left-2 w-8 h-8 bg-white rounded-full"></div>
+                                        <div className="absolute -top-5 left-1/2 w-12 h-12 bg-white rounded-full -translate-x-1/2"></div>
+                                        <div className="absolute -top-2 right-2 w-8 h-8 bg-white rounded-full"></div>
+                                        
+                                        <div className="relative z-10 text-center text-slate-700 font-bold text-xs leading-tight p-1">
+                                            {cloud.content}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
                     )}
-
-                    {/* Start Screen */}
-                    {gameState === 'start' && (
-                        <div className="absolute inset-0 z-30 bg-black/40 flex flex-col items-center justify-center backdrop-blur-sm">
-                            <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-black shadow-xl mb-6 animate-bounce">
-                                <i className="fas fa-dove text-5xl text-white"></i>
-                            </div>
-                            <h1 className="text-5xl font-black text-white drop-shadow-lg mb-2 stroke-black">VOCAB BIRD</h1>
-                            <p className="text-white font-bold mb-8 text-lg bg-black/20 px-4 py-1 rounded-full">Fly through the correct meaning!</p>
-                            <button onClick={() => setGameState('ready')} className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-full font-black text-2xl shadow-xl border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1 transition animate-pulse">
-                                START
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Bird */}
-                    <div
-                        className="absolute z-10 w-10 h-10 bg-yellow-400 rounded-full border-2 border-black flex items-center justify-center shadow-lg transition-transform"
-                        style={{
-                            top: birdY,
-                            left: BIRD_X,
-                            transform: `rotate(${birdRotation}deg)`
-                        }}
-                    >
-                        <div className="absolute right-2 top-2 w-3 h-3 bg-white rounded-full"><div className="absolute right-0 top-1 w-1 h-1 bg-black rounded-full"></div></div>
-                        <div className="absolute -right-2 top-4 w-4 h-3 bg-orange-500 rounded-r-lg border border-black"></div>
-                        <div className="absolute -left-1 top-4 w-4 h-3 bg-white rounded-full border border-black transform -rotate-12"></div>
-                    </div>
-
-                    {/* Pipes (Gates) */}
-                    {pipes.map(p => (
-                        <React.Fragment key={p.id}>
-                            {/* Top Gate */}
-                            <div
-                                className={`absolute w-40 flex items-center justify-center p-2 text-center border-4 border-slate-800 rounded-xl shadow-lg transition-opacity ${p.processed ? 'opacity-50 scale-95' : ''}`}
-                                style={{
-                                    top: 50,
-                                    height: GAME_HEIGHT / 2 - 60,
-                                    left: p.x,
-                                    backgroundColor: '#f1f5f9'
-                                }}
-                            >
-                                <div className="font-bold text-slate-800 text-sm leading-tight">{p.topText}</div>
-                            </div>
-
-                            {/* Bottom Gate */}
-                            <div
-                                className={`absolute w-40 flex items-center justify-center p-2 text-center border-4 border-slate-800 rounded-xl shadow-lg transition-opacity ${p.processed ? 'opacity-50 scale-95' : ''}`}
-                                style={{
-                                    top: GAME_HEIGHT / 2 + 10,
-                                    height: GAME_HEIGHT / 2 - 60,
-                                    left: p.x,
-                                    backgroundColor: '#f1f5f9'
-                                }}
-                            >
-                                <div className="font-bold text-slate-800 text-sm leading-tight">{p.bottomText}</div>
-                            </div>
-
-                            {/* Divider Line */}
-                            <div className="absolute h-1 bg-slate-800/20 w-full" style={{ top: GAME_HEIGHT / 2 }}></div>
-                        </React.Fragment>
-                    ))}
-
-                    {/* Ground */}
-                    <div className="absolute bottom-0 w-full h-4 bg-green-500 border-t-4 border-slate-800"></div>
                 </div>
             );
         };
@@ -6944,7 +6881,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
                         {view === 'quiz' && <QuizView allData={toeicData} setCoins={setCoins} user={user} speakWord={speakWord} learnedWords={learnedWords} markAsEasy={markAsEasy} markAsHard={markAsHard} />}
                         {view === 'runner' && <RunnerGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} equippedSkin={equippedSkin} view={view} config={gameConfig.runner} />}
-                        {view === 'flappy' && <FlappyGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} config={gameConfig.flappy} />}
+                        {view === 'flappy' && <AirplaneGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} config={gameConfig.flappy} />}
                         {view === 'archery' && <ArcheryGameView allData={toeicData} coins={coins} setCoins={setCoins} user={user} />}
                         {view === 'shop' && <ShopView coins={coins} setCoins={setCoins} unlockedSkins={unlockedSkins} setUnlockedSkins={setUnlockedSkins} equippedSkin={equippedSkin} setEquipSkin={setEquipSkin} buyingItem={buyingItem} setBuyingItem={setBuyingItem} />}
                         {view === 'memory' && <MemoryGameView allData={toeicData} setCoins={setCoins} user={user} coins={coins} />}
@@ -6956,7 +6893,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             <button onClick={() => { setView('flashcard'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flashcard' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-clone text-lg mb-1"></i> <span className="text-[9px] font-bold">Thẻ nhớ</span> </button>
                             <button onClick={() => { setView('quiz'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'quiz' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-question-circle text-lg mb-1"></i> <span className="text-[9px] font-bold">Quiz</span> </button>
                             <button onClick={() => { setView('runner'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'runner' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-crosshairs text-lg mb-1"></i> <span className="text-[9px] font-bold">Bắn Vịt</span> </button>
-                            <button onClick={() => { setView('flappy'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flappy' ? 'text-sky-500 bg-sky-50 dark:bg-sky-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-dove text-lg mb-1"></i> <span className="text-[9px] font-bold">Bird</span> </button>
+                            <button onClick={() => { setView('flappy'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'flappy' ? 'text-sky-500 bg-sky-50 dark:bg-sky-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-plane text-lg mb-1"></i> <span className="text-[9px] font-bold">Máy bay</span> </button>
                             <button onClick={() => { setView('archery'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'archery' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-rocket text-lg mb-1"></i> <span className="text-[9px] font-bold">Space Def</span> </button>
                             <button onClick={() => { setView('memory'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'memory' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-gamepad text-lg mb-1"></i> <span className="text-[9px] font-bold">Memory</span> </button>
                             <button onClick={() => { setView('shop'); setCustomReviewList(null); playSound('general', 'click'); }} className={`flex flex-col items-center p-2 rounded-xl w-12 transition ${view === 'shop' ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}> <i className="fas fa-store text-lg mb-1"></i> <span className="text-[9px] font-bold">Shop</span> </button>
