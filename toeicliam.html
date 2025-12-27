@@ -36,6 +36,100 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 
+    <!-- 🔒 ANTI-DEVTOOLS PROTECTION -->
+    <script>
+        (function() {
+            // === 1. Chặn phím tắt ===
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I (DevTools)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+J (Console)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+C (Inspect Element)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+U (View Source)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+S (Save)
+                if (e.ctrlKey && e.keyCode === 83) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // === 2. Chặn chuột phải ===
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // === 3. Detect DevTools mở ===
+            var devtools = { open: false, orientation: null };
+            var threshold = 160;
+            
+            var emitEvent = function(isOpen) {
+                if (isOpen && !devtools.open) {
+                    // DevTools vừa mở - có thể thêm action ở đây
+                    console.clear();
+                    console.log('%c⚠️ CẢNH BÁO!', 'color: red; font-size: 50px; font-weight: bold;');
+                    console.log('%cĐây là tính năng dành cho nhà phát triển.', 'font-size: 18px;');
+                    console.log('%cNếu ai đó bảo bạn paste code ở đây, đó là LỪA ĐẢO!', 'color: red; font-size: 16px;');
+                }
+                devtools.open = isOpen;
+            };
+
+            setInterval(function() {
+                var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+                var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+                
+                if (widthThreshold || heightThreshold) {
+                    emitEvent(true);
+                } else {
+                    emitEvent(false);
+                }
+            }, 500);
+
+            // === 4. Disable console methods (optional) ===
+            // Uncomment nếu muốn tắt hoàn toàn console
+            /*
+            var noop = function() {};
+            ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace'].forEach(function(method) {
+                console[method] = noop;
+            });
+            */
+
+            // === 5. Chặn kéo thả ảnh ===
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // === 6. Chặn select text (optional - uncomment nếu cần) ===
+            /*
+            document.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            */
+        })();
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
 
@@ -7234,12 +7328,166 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         // Only show if invite is fresh (last 2 mins)
                         if (Date.now() - data.createdAt < 120000) {
                             setIncomingInvitation(data);
-                            playSound('notification', 'invite'); // 🔔 Âm thanh lời mời PvP
+                            playSound('notification', 'invite');
+                            // 🔔 Browser Notification cho lời mời PvP
+                            sendBrowserNotification('🎮 Lời mời đấu!', {
+                                body: `${data.fromName || 'Ai đó'} mời bạn chơi Memory Game!`,
+                                icon: '🎮',
+                                tag: 'invite-' + data.roomId
+                            });
                         }
                     }
                 });
                 return () => unsubscribe();
             }, [user]);
+
+            // 🔔 BROWSER NOTIFICATION SYSTEM
+            // Xin quyền notification khi user đăng nhập
+            React.useEffect(() => {
+                if (user && 'Notification' in window) {
+                    if (Notification.permission === 'default') {
+                        // Hiện popup xin quyền
+                        Notification.requestPermission();
+                    }
+                }
+            }, [user]);
+
+            // Function gửi Browser Notification
+            const sendBrowserNotification = (title, options = {}) => {
+                if (!('Notification' in window)) return;
+                if (Notification.permission !== 'granted') return;
+                if (document.hasFocus()) return; // Không gửi nếu đang focus vào app
+                
+                try {
+                    const notification = new Notification(title, {
+                        body: options.body || '',
+                        icon: options.icon || '📚',
+                        badge: '🎓',
+                        tag: options.tag || 'toeic-notification',
+                        requireInteraction: options.requireInteraction || false,
+                        silent: false,
+                    });
+                    
+                    // Click vào notification -> focus vào app
+                    notification.onclick = function() {
+                        window.focus();
+                        notification.close();
+                    };
+                    
+                    // Tự đóng sau 10 giây
+                    setTimeout(() => notification.close(), 10000);
+                } catch (e) {
+                    console.warn('Notification error:', e);
+                }
+            };
+
+            // Fetch Notifications & Assignments for User
+            // Track previous unread count for sound trigger
+            const prevUnreadRef = React.useRef(0);
+            
+            React.useEffect(() => {
+                if (!user || !db) return;
+                
+                // Listen to admin notifications
+                const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
+                const unsubNotif = notifRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
+                    const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Filter: show all if target is 'all', or specific to this user
+                    const relevantNotifs = notifs.filter(n => n.target === 'all' || n.target === user.uid);
+                    setUserNotifications(relevantNotifs);
+                    
+                    // Calculate unread
+                    const readIds = JSON.parse(localStorage.getItem('toeic_read_notifications') || '[]');
+                    const newUnread = relevantNotifs.filter(n => !readIds.includes(n.id)).length;
+                    
+                    // 🔔 Gửi Browser Notification + Sound nếu có thông báo mới
+                    if (newUnread > prevUnreadRef.current && prevUnreadRef.current >= 0) {
+                        const latestNotif = relevantNotifs.find(n => !readIds.includes(n.id));
+                        if (latestNotif) {
+                            // Play sound
+                            const soundType = latestNotif.type || 'system';
+                            playSound('notification', soundType);
+                            
+                            // 🔔 GỬI BROWSER NOTIFICATION
+                            const notifIcons = {
+                                reminder: '⏰',
+                                assignment: '📚',
+                                achievement: '🏆',
+                                warning: '⚠️',
+                                system: '📢'
+                            };
+                            const notifTitles = {
+                                reminder: '⏰ Nhắc nhở học tập!',
+                                assignment: '📚 Bài tập mới!',
+                                achievement: '🏆 Chúc mừng!',
+                                warning: '⚠️ Thông báo quan trọng!',
+                                system: '📢 TOEIC LIAM'
+                            };
+                            
+                            sendBrowserNotification(notifTitles[latestNotif.type] || notifTitles.system, {
+                                body: latestNotif.text,
+                                icon: notifIcons[latestNotif.type] || '📢',
+                                tag: 'notif-' + latestNotif.id,
+                                requireInteraction: latestNotif.type === 'assignment' || latestNotif.type === 'warning'
+                            });
+                        }
+                    }
+                    prevUnreadRef.current = newUnread;
+                    setUnreadCount(newUnread);
+                });
+                
+                // Listen to assignments
+                const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
+                const unsubAssign = assignRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
+                    const assigns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Filter: show all if target is 'all', or specific to this user
+                    const relevantAssigns = assigns.filter(a => a.target === 'all' || a.target === user.uid);
+                    
+                    // 🔔 Browser Notification + Sound cho bài tập mới
+                    const readAssignIds = JSON.parse(localStorage.getItem('toeic_read_assignments') || '[]');
+                    const newAssigns = relevantAssigns.filter(a => !readAssignIds.includes(a.id));
+                    if (newAssigns.length > 0 && userAssignments.length > 0 && newAssigns.length > relevantAssigns.length - userAssignments.length) {
+                        playSound('notification', 'assignment');
+                        
+                        // 🔔 GỬI BROWSER NOTIFICATION cho bài tập
+                        const latestAssign = newAssigns[0];
+                        sendBrowserNotification('📚 Bài tập mới từ Admin!', {
+                            body: `${latestAssign.title} - ${latestAssign.wordCount} từ cần học`,
+                            icon: '📚',
+                            tag: 'assign-' + latestAssign.id,
+                            requireInteraction: true
+                        });
+                    }
+                    
+                    setUserAssignments(relevantAssigns);
+                });
+                
+                // Update user progress periodically
+                const updateProgress = () => {
+                    const progressRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_progress').doc(user.uid);
+                    progressRef.set({
+                        learnedWords: [...learnedWords],
+                        difficultWords: [...difficultWords],
+                        lastActive: Date.now(),
+                        streak: parseInt(localStorage.getItem('toeic_streak') || '0'),
+                    }, { merge: true }).catch(() => {});
+                };
+                updateProgress();
+                const progressInterval = setInterval(updateProgress, 60000);
+                
+                return () => {
+                    unsubNotif();
+                    unsubAssign();
+                    clearInterval(progressInterval);
+                };
+            }, [user, learnedWords, difficultWords]);
+
+            // Mark notifications as read
+            const markNotificationsAsRead = () => {
+                const readIds = userNotifications.map(n => n.id);
+                localStorage.setItem('toeic_read_notifications', JSON.stringify(readIds));
+                setUnreadCount(0);
+            };
 
             const acceptInvitation = async () => {
                 if (!incomingInvitation || !db) return;
