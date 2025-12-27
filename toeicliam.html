@@ -2734,16 +2734,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     id={`word-${item.id}`}
                     className={`relative group transition-all duration-300 rounded-[2rem] p-[2px] ${isHighlighted ? 'z-20 scale-105' : 'z-0 hover:z-10'}`}
                 >
-                    {/* Simple Border/Shadow for Heexo Clean Look */}
-                    <div className={`absolute inset-0 rounded-[2rem] transition-all duration-300 ${isHighlighted ? 'bg-orange-100 dark:bg-orange-900/20' : 'bg-transparent'}`}></div>
 
-                    <div className={`relative h-full bg-white dark:bg-slate-900 rounded-[2rem] p-8 lg:p-10 overflow-hidden transition-all duration-300 border border-slate-100 dark:border-slate-800 ${isHighlighted ? 'shadow-[0_20px_40px_rgba(251,146,60,0.15)] ring-1 ring-orange-200' : 'shadow-sm hover:shadow-xl hover:-translate-y-1'}`}>
-                        {/* Heexo Decorative Accent */}
-                        <div className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none">
-                            <svg viewBox="0 0 100 100" className="w-full h-full text-orange-500 fill-current">
-                                <path d="M 0 0 C 30 10 70 10 100 0 L 100 100 C 70 90 30 90 0 100 Z" />
-                            </svg>
-                        </div>
+
+                    {/* Claude-style Minimalist Card */}
+                    <div className={`relative h-full bg-white dark:bg-[#252525] rounded-xl p-6 transition-all duration-200 border ${isHighlighted ? 'border-orange-300 dark:border-orange-700 shadow-md ring-1 ring-orange-200/50' : 'border-stone-200 dark:border-stone-700 shadow-sm hover:border-orange-300 dark:hover:border-orange-700'}`}>
+
                         {/* Status Indicators (Top Corners) */}
                         <div className="absolute top-0 right-0 p-5 flex gap-2 z-10">
                             {isDifficult && <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_10px_#f43f5e] animate-pulse"></div>}
@@ -2753,24 +2748,24 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         {/* Content */}
                         <div className="relative z-10 flex flex-col h-full cursor-pointer" onClick={() => toggleDetails(item.id)}>
                             <div className="flex items-center gap-2 mb-4">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-2 font-sans">
                                     {item.topic}
                                 </span>
                             </div>
 
-                            <div className="flex items-end justify-between gap-2 mb-2">
-                                <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 leading-none tracking-tight">
+                            <div className="flex items-end justify-between gap-2 mb-3">
+                                <h3 className="text-2xl font-serif font-bold text-stone-800 dark:text-stone-100 leading-tight">
                                     {item.word}
                                 </h3>
-                                <SpeakerButton text={item.word} topic={item.topic} className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50 dark:bg-slate-800 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400" />
+                                <SpeakerButton text={item.word} topic={item.topic} className="scale-90 text-stone-400 hover:text-orange-600 transition-colors" />
                             </div>
 
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mb-6">
+                            <p className="text-sm text-stone-500 dark:text-stone-400 font-mono mb-4">
                                 {item.ipa}
                             </p>
 
-                            <div className="mt-auto pt-5 border-t border-slate-100 dark:border-slate-800">
-                                <p className="font-semibold text-lg text-slate-700 dark:text-slate-200 line-clamp-2 leading-relaxed">
+                            <div className="mt-auto pt-4 border-t border-stone-100 dark:border-stone-800">
+                                <p className="font-serif text-base text-stone-700 dark:text-stone-300 leading-relaxed">
                                     {item.meaning}
                                 </p>
                             </div>
@@ -7699,21 +7694,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             return (
                 <div className="min-h-screen relative overflow-x-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
                     {/* Animated Gradient Background */}
-                    {/* Animated Gradient Background - Heexo Style (Warm/Clean) */}
-                    <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-orange-50 via-stone-50 to-amber-50 dark:from-stone-950 dark:via-stone-900 dark:to-orange-950/20 animate-gradient-xy"></div>
-                    {/* Subtle warm glow blobs */}
-                    <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-orange-200/20 dark:bg-orange-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-                    <div className="fixed bottom-0 left-0 w-[600px] h-[600px] bg-yellow-200/20 dark:bg-yellow-500/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
+                    {/* Claude / Anthropic Theme Background */}
+                    <div className="fixed inset-0 z-[-1] bg-[#f2f0e9] dark:bg-[#1a1a1a] transition-colors duration-300"></div>
+                    {/* Subtle grain/paper texture overlay */}
+                    <div className="fixed inset-0 z-[-1] opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]"></div>
 
-                    {/* Navbar */}
-                    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border-b border-indigo-100/50 dark:border-slate-800/50 h-16 transition-all">
-                        <div className="max-w-6xl mx-auto px-4 h-full flex justify-between items-center">
-                            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('list')}>
-                                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-900 dark:text-white font-black text-2xl">
-                                    <i className="fas fa-cube"></i>
-                                </div>
-                                <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight hidden sm:block">
-                                    TOEIC Master
+                    {/* Navbar - Minimalist Text */}
+                    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f2f0e9]/80 dark:bg-[#1a1a1a]/80 backdrop-blur-md border-b border-stone-200/50 dark:border-stone-800/50 h-16 transition-all">
+                        <div className="max-w-4xl mx-auto px-6 h-full flex justify-between items-center">
+                            <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setView('list')}>
+                                <h1 className="text-xl font-serif font-bold text-stone-800 dark:text-stone-200 tracking-tight">
+                                    Claude<span className="font-normal opacity-70 italic">Toeic</span>
                                 </h1>
                             </div>
 
