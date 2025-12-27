@@ -2734,10 +2734,10 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     id={`word-${item.id}`}
                     className={`relative group transition-all duration-300 rounded-[2rem] p-[2px] ${isHighlighted ? 'z-20 scale-105' : 'z-0 hover:z-10'}`}
                 >
-                    {/* Glowing Border Gradient */}
-                    <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${isHighlighted ? 'from-amber-400 to-orange-500 opacity-100' : isLearned ? 'from-emerald-400 to-teal-500 opacity-40 group-hover:opacity-100' : isDifficult ? 'from-rose-400 to-pink-500 opacity-40 group-hover:opacity-100' : 'from-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100'} blur-md transition-all duration-500`}></div>
+                    {/* Glowing Border Gradient - Softer */}
+                    <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${isHighlighted ? 'from-amber-300 to-orange-400 opacity-80' : isLearned ? 'from-emerald-300 to-teal-400 opacity-30 group-hover:opacity-80' : isDifficult ? 'from-rose-300 to-pink-400 opacity-30 group-hover:opacity-80' : 'from-indigo-400/20 to-purple-400/20 opacity-0 group-hover:opacity-60'} blur-md transition-all duration-500`}></div>
 
-                    <div className={`relative h-full bg-white dark:bg-slate-900 rounded-[2rem] p-6 lg:p-7 overflow-hidden transition-all duration-300 border border-slate-100 dark:border-slate-800 ${isHighlighted ? 'shadow-[0_20px_50px_rgba(251,191,36,0.3)]' : 'shadow-sm hover:shadow-xl'}`}>
+                    <div className={`relative h-full bg-white/90 dark:bg-slate-900/95 backdrop-blur-sm rounded-[2rem] p-6 lg:p-7 overflow-hidden transition-all duration-300 border border-slate-200/60 dark:border-slate-700/60 ${isHighlighted ? 'shadow-[0_10px_30px_rgba(251,191,36,0.15)] ring-1 ring-amber-400/30' : 'shadow-sm hover:shadow-lg dark:shadow-slate-950/50'}`}>
                         {/* Status Indicators (Top Corners) */}
                         <div className="absolute top-0 right-0 p-5 flex gap-2 z-10">
                             {isDifficult && <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_10px_#f43f5e] animate-pulse"></div>}
@@ -2764,7 +2764,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             </p>
 
                             <div className="mt-auto pt-5 border-t border-slate-100 dark:border-slate-800">
-                                <p className="font-semibold text-lg text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                                <p className="font-semibold text-lg text-slate-700 dark:text-slate-200 line-clamp-2 leading-relaxed">
                                     {item.meaning}
                                 </p>
                             </div>
@@ -2784,7 +2784,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                             onClick={(e) => { e.stopPropagation(); toggleDetails(item.id); }}
                         >
                             <div
-                                className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 w-full max-w-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 relative animate-slideInUp max-h-[90vh] overflow-y-auto"
+                                className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[2rem] p-8 w-full max-w-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100/50 dark:border-slate-800/50 relative animate-slideInUp max-h-[90vh] overflow-y-auto"
                                 onClick={e => e.stopPropagation()}
                             >
                                 {/* Close Button */}
@@ -2807,7 +2807,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                         </div>
 
                                         <div className="mb-8">
-                                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{item.word}</h2>
+                                            <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-slate-100 mb-2 tracking-tight">{item.word}</h2>
                                             <div className="flex items-center gap-3">
                                                 <span className="font-mono text-lg text-slate-500 dark:text-slate-400">{item.ipa}</span>
                                                 <SpeakerButton text={item.word} topic={item.topic} className="w-8 h-8 rounded-full !bg-indigo-600 !text-white hover:!bg-indigo-700 border-none shadow-lg shadow-indigo-500/30" />
@@ -2830,11 +2830,11 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <div className="md:w-7/12 space-y-8">
                                         {/* Meaning */}
                                         <div>
-                                            <h3 className="text-2xl font-bold text-slate-800 dark:text-white leading-tight mb-4">{item.meaning}</h3>
+                                            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 leading-tight mb-4">{item.meaning}</h3>
 
                                             {/* Example */}
                                             <div className="p-5 bg-gradient-to-br from-slate-50 to-indigo-50/50 dark:from-slate-800 dark:to-slate-800/50 rounded-2xl border-l-4 border-indigo-500">
-                                                <p className="italic text-slate-700 dark:text-slate-300 text-lg font-serif">"{item.example}"</p>
+                                                <p className="italic text-slate-600 dark:text-slate-300 text-lg font-serif">"{item.example}"</p>
                                             </div>
                                         </div>
 
