@@ -278,6 +278,22 @@
             animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
+        /* Toast Notification Animation */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
         .animate-coinPop {
             animation: coinPop 0.3s ease-out;
         }
@@ -900,6 +916,62 @@
         const db = app ? firebase.firestore() : null;
 
         const appId = 'toeic-master-live-v1';
+
+        // ============================================
+        // TOAST NOTIFICATION SYSTEM
+        // ============================================
+        const ToastContext = React.createContext();
+        
+        const ToastProvider = ({ children }) => {
+            const [toasts, setToasts] = React.useState([]);
+            
+            const showToast = React.useCallback((message, type = 'info', duration = 3000) => {
+                const id = Date.now() + Math.random();
+                setToasts(prev => [...prev, { id, message, type }]);
+                setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                }, duration);
+            }, []);
+            
+            const toast = React.useMemo(() => ({
+                success: (msg, duration) => showToast(msg, 'success', duration),
+                error: (msg, duration) => showToast(msg, 'error', duration),
+                info: (msg, duration) => showToast(msg, 'info', duration),
+                warning: (msg, duration) => showToast(msg, 'warning', duration),
+            }), [showToast]);
+            
+            return (
+                <ToastContext.Provider value={toast}>
+                    {children}
+                    <div className="fixed top-4 right-4 z-[9999] space-y-3 pointer-events-none">
+                        {toasts.map(t => (
+                            <div 
+                                key={t.id} 
+                                className={`
+                                    pointer-events-auto px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-xl 
+                                    flex items-center gap-3 min-w-[280px] max-w-[400px]
+                                    animate-slideInRight border
+                                    ${t.type === 'success' ? 'bg-emerald-500/90 border-emerald-400/50 text-white' : ''}
+                                    ${t.type === 'error' ? 'bg-red-500/90 border-red-400/50 text-white' : ''}
+                                    ${t.type === 'info' ? 'bg-blue-500/90 border-blue-400/50 text-white' : ''}
+                                    ${t.type === 'warning' ? 'bg-amber-500/90 border-amber-400/50 text-white' : ''}
+                                `}
+                            >
+                                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                                    {t.type === 'success' && <i className="fas fa-check text-lg"></i>}
+                                    {t.type === 'error' && <i className="fas fa-times text-lg"></i>}
+                                    {t.type === 'info' && <i className="fas fa-info text-lg"></i>}
+                                    {t.type === 'warning' && <i className="fas fa-exclamation text-lg"></i>}
+                                </div>
+                                <span className="font-semibold text-sm leading-tight">{t.message}</span>
+                            </div>
+                        ))}
+                    </div>
+                </ToastContext.Provider>
+            );
+        };
+        
+        const useToast = () => React.useContext(ToastContext);
 
         // --- DATA (Added cross-reference words for testing) ---
         const rawDataString = `
@@ -2785,6 +2857,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         const FlashcardView = ({ allData, learnedWords, difficultWords, learnedTimestamps, markAsEasy, markAsHard, customReviewList, jumpToWord }) => {
+            const toast = useToast();
             const [isSetup, setIsSetup] = React.useState(!customReviewList);
             const [selectedTopics, setSelectedTopics] = React.useState([]);
 
@@ -2864,7 +2937,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }
 
                 if (pool.length === 0) {
-                    alert("Không có từ vựng nào phù hợp với lựa chọn của bạn!");
+                    toast.warning("Không có từ vựng nào phù hợp với lựa chọn của bạn!");
                     return;
                 }
 
@@ -2904,7 +2977,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                         setSlideAnimation('');
                     } else {
                         playSound('flashcard', 'complete');
-                        alert("Đã hoàn thành bộ thẻ!");
+                        toast.success("🎉 Đã hoàn thành bộ thẻ!");
                         if (!customReviewList) setIsSetup(true);
                         else window.location.reload();
                     }
@@ -3052,6 +3125,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // QUIZ VIEW (Premium Game Show Style)
         // ============================================
         const QuizView = ({ allData, setCoins, user, speakWord, learnedWords, markAsEasy, markAsHard }) => {
+            const toast = useToast();
             const [isSetup, setIsSetup] = React.useState(true);
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
@@ -3079,7 +3153,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (!queue || queue.length === 0) {
                     playSound('quiz', 'complete');
                     playSound('quiz', 'complete'); // Double tap for effect
-                    alert("Đã hoàn thành phiên ôn tập! Bạn đã trả lời hết câu hỏi có sẵn.");
+                    toast.success("🎉 Đã hoàn thành phiên ôn tập!");
                     setIsSetup(true);
                     return;
                 }
@@ -3114,7 +3188,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }
 
                 if (pool.length === 0) {
-                    alert("Không có dữ liệu cho chủ đề đã chọn!");
+                    toast.warning("Không có dữ liệu cho chủ đề đã chọn!");
                     return;
                 }
 
@@ -3350,6 +3424,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const gameLoopRef = React.useRef(null);
             const keysPressed = React.useRef({});
             const scoreRef = React.useRef(0); // Ref for accurate tracking in loop
+            const pendingCoinsRef = React.useRef(0); // Track coins to add without setState during render
 
             // Audio effects
             const playSfx = (type) => {
@@ -3515,7 +3590,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
 
                 if (cloud.isCorrect) {
                     setScore(s => s + 100);
-                    setCoins(c => c + 15);
+                    pendingCoinsRef.current += 15; // Queue coin update instead of direct setState
                     playSfx('coin');
                     setClouds([]);
                     setTargetWord(null);
@@ -3530,6 +3605,17 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     });
                 }
             };
+
+            // Process pending coin updates safely outside render cycle
+            React.useEffect(() => {
+                const interval = setInterval(() => {
+                    if (pendingCoinsRef.current > 0) {
+                        setCoins(c => c + pendingCoinsRef.current);
+                        pendingCoinsRef.current = 0;
+                    }
+                }, 100);
+                return () => clearInterval(interval);
+            }, [setCoins]);
 
             const endGame = () => {
                 setGameState('gameover');
@@ -3720,6 +3806,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // RUNNER GAME VIEW (Premium UI Version)
         // ============================================
         const RunnerGameView = ({ allData, coins, setCoins, user, equippedSkin = 'skin_default', view, config }) => {
+            const toast = useToast();
             const [gameState, setGameState] = React.useState('setup'); // setup, countdown, playing, gameover
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
@@ -3862,7 +3949,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (selectedTopics.length > 0) pool = allData.filter(i => selectedTopics.includes(i.topic));
 
                 if (pool.length < 4) {
-                    alert("Cần ít nhất 4 từ để chơi! Vui lòng chọn thêm chủ đề.");
+                    toast.warning("Cần ít nhất 4 từ để chơi! Vui lòng chọn thêm chủ đề.");
                     return;
                 }
 
@@ -4341,6 +4428,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // ARCHERY GAME - Typing Vocabulary Game
         // ============================================
         const ArcheryGameView = ({ allData, coins, setCoins, user }) => {
+            const toast = useToast();
             const [gameState, setGameState] = React.useState('setup'); // setup, playing, shooting, gameover
             const [selectedTopics, setSelectedTopics] = React.useState([]);
             const uniqueTopics = React.useMemo(() => [...new Set(allData.map(i => i.topic))], [allData]);
@@ -4415,7 +4503,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 if (selectedTopics.length > 0) pool = allData.filter(i => selectedTopics.includes(i.topic));
 
                 if (pool.length < 1) {
-                    alert("Cần ít nhất 1 từ để chơi!");
+                    toast.warning("Cần ít nhất 1 từ để chơi!");
                     return;
                 }
 
@@ -5215,6 +5303,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         const MemoryGameView = ({ allData, setCoins, user, coins }) => {
+            const toast = useToast();
             const [gameMode, setGameMode] = React.useState(null);
             const [cards, setCards] = React.useState([]);
             const [flippedIndices, setFlippedIndices] = React.useState([]);
@@ -5430,9 +5519,9 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             };
 
             const createRoom = async () => {
-                if (!user || !db) return alert("Vui lòng đăng nhập!");
+                if (!user || !db) { toast.warning("Vui lòng đăng nhập!"); return; }
                 const requiredCoins = 200 * betMultiplier;
-                if (coins < requiredCoins) return alert(`Bạn cần ít nhất ${requiredCoins} xu để cược x${betMultiplier}!`);
+                if (coins < requiredCoins) { toast.warning(`Bạn cần ít nhất ${requiredCoins} xu để cược x${betMultiplier}!`); return; }
                 try {
                     const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -5449,28 +5538,28 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(newRoomId);
                     await roomRef.set({ hostId: user.uid, guestId: null, status: 'waiting', board: cardSet, flipped: [], matched: [], turn: user.uid, scores: { host: 0, guest: 0 }, processing: false, createdAt: new Date().toISOString(), multiplier: betMultiplier });
                     setRoomId(newRoomId); setIsHost(true); setOnlineStatus('waiting'); setHasPaid(false);
-                } catch (error) { console.error("Lỗi tạo phòng:", error); alert("Lỗi tạo phòng. Hãy kiểm tra mạng."); }
+                } catch (error) { console.error("Lỗi tạo phòng:", error); toast.error("Lỗi tạo phòng. Hãy kiểm tra mạng."); }
             };
 
             const [isJoining, setIsJoining] = React.useState(false);
 
             const joinRoom = async () => {
-                if (!user || !db) return alert("Vui lòng đăng nhập!");
-                if (coins < 200) return alert("Bạn cần ít nhất 200 xu để cược!");
-                if (!inputRoomId) return alert("Vui lòng nhập mã phòng!");
+                if (!user || !db) { toast.warning("Vui lòng đăng nhập!"); return; }
+                if (coins < 200) { toast.warning("Bạn cần ít nhất 200 xu để cược!"); return; }
+                if (!inputRoomId) { toast.warning("Vui lòng nhập mã phòng!"); return; }
                 if (isJoining) return; // Prevent double click
 
                 setIsJoining(true);
                 try {
                     const roomRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('rooms').doc(inputRoomId);
                     const doc = await roomRef.get();
-                    if (!doc.exists) { setIsJoining(false); return alert("Phòng không tồn tại!"); }
+                    if (!doc.exists) { setIsJoining(false); toast.error("Phòng không tồn tại!"); return; }
                     const roomData = doc.data();
                     const multiplier = roomData.multiplier || 1;
-                    if (coins < 200 * multiplier) { setIsJoining(false); return alert(`Bạn không đủ ${200 * multiplier} xu để vào phòng cược x${multiplier} này!`); }
+                    if (coins < 200 * multiplier) { setIsJoining(false); toast.warning(`Bạn không đủ ${200 * multiplier} xu để vào phòng cược x${multiplier} này!`); return; }
 
-                    if (roomData.hostId === user.uid) { setIsJoining(false); return alert("Bạn không thể tự vào phòng của chính mình!"); }
-                    if (roomData.status !== 'waiting') { setIsJoining(false); return alert("Phòng đang chơi hoặc đã đầy!"); }
+                    if (roomData.hostId === user.uid) { setIsJoining(false); toast.error("Bạn không thể tự vào phòng của chính mình!"); return; }
+                    if (roomData.status !== 'waiting') { setIsJoining(false); toast.error("Phòng đang chơi hoặc đã đầy!"); return; }
 
                     // Load cards TRƯỚC khi update room để giảm delay
                     if (roomData.board) {
@@ -5495,7 +5584,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 } catch (error) {
                     console.error("Lỗi vào phòng:", error);
                     setIsJoining(false);
-                    alert("Lỗi kết nối phòng.");
+                    toast.error("Lỗi kết nối phòng.");
                 }
             };
 
@@ -5510,7 +5599,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     multiplier: multiplier,
                     createdAt: Date.now()
                 });
-                alert("Đã gửi lời mời!");
+                toast.success("Đã gửi lời mời!");
             };
 
             const handleRematch = async () => {
@@ -6018,6 +6107,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         // SHOP VIEW - Cửa Hàng
         // ============================================
         const ShopView = ({ coins, setCoins, unlockedSkins, setUnlockedSkins, equippedSkin, setEquipSkin, buyingItem, setBuyingItem }) => {
+            const toast = useToast();
             // Helper for stats
             const getSkinStats = () => {
                 const skin = SHOP_ITEMS.find(i => i.id === equippedSkin) || SHOP_ITEMS[0];
@@ -6027,7 +6117,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const handleBuy = (item) => {
                 if (coins < item.price) {
                     playSound('general', 'error');
-                    alert("Bạn không đủ Coin!");
+                    toast.error("Bạn không đủ Coin!");
                     return;
                 }
                 setBuyingItem(item.id);
@@ -6036,6 +6126,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                     setUnlockedSkins(prev => [...prev, item.id]);
                     setBuyingItem(null);
                     playSound('general', 'levelup'); // Purchase sound
+                    toast.success(`Đã mua ${item.name}!`);
                 }, 500);
             };
 
@@ -6153,64 +6244,116 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         // ============================================
-        // ADMIN SETTINGS MODAL
+        // ADMIN SETTINGS MODAL (UPGRADED)
         // ============================================
         const AdminSettingsModal = ({ isOpen, onClose, config, setConfig, coins, setCoins }) => {
+            const toast = useToast();
             const [localConfig, setLocalConfig] = React.useState(config);
             const [password, setPassword] = React.useState('');
             const [isAuthenticated, setIsAuthenticated] = React.useState(false);
             const [coinAdjust, setCoinAdjust] = React.useState(100);
+            const [activeTab, setActiveTab] = React.useState('users'); // users, notifications, assignments, analytics, config
 
             // System-wide user management
             const [allUsers, setAllUsers] = React.useState([]);
             const [selectedUserId, setSelectedUserId] = React.useState(null);
             const [loadingUsers, setLoadingUsers] = React.useState(false);
+            
+            // Notifications
+            const [notificationText, setNotificationText] = React.useState('');
+            const [notificationType, setNotificationType] = React.useState('reminder'); // reminder, achievement, warning
+            const [notificationTarget, setNotificationTarget] = React.useState('all'); // all, specific user id
+            const [sentNotifications, setSentNotifications] = React.useState([]);
+            
+            // Assignments
+            const [assignmentTitle, setAssignmentTitle] = React.useState('');
+            const [assignmentTopics, setAssignmentTopics] = React.useState([]);
+            const [assignmentWordCount, setAssignmentWordCount] = React.useState(20);
+            const [assignmentDeadline, setAssignmentDeadline] = React.useState('');
+            const [assignmentTarget, setAssignmentTarget] = React.useState('all');
+            const [assignments, setAssignments] = React.useState([]);
+            
+            // Analytics
+            const [userProgress, setUserProgress] = React.useState({});
+            const [selectedUserForDetails, setSelectedUserForDetails] = React.useState(null);
+
+            const uniqueTopics = React.useMemo(() => {
+                const topics = toeicData.map(i => i.topic);
+                return [...new Set(topics)];
+            }, []);
 
             React.useEffect(() => {
                 setLocalConfig(config);
             }, [config, isOpen]);
 
-            // Fetch all users from Firebase when authenticated
+            // Fetch all users and data from Firebase when authenticated
             React.useEffect(() => {
                 if (isAuthenticated && db) {
-                    setLoadingUsers(true);
-                    const leaderboardRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
-                    leaderboardRef.orderBy('coins', 'desc').limit(50).get().then(snapshot => {
-                        const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        setAllUsers(users);
-                        setLoadingUsers(false);
-                    }).catch(err => {
-                        console.error('Failed to fetch users:', err);
-                        setLoadingUsers(false);
-                    });
+                    fetchAllData();
                 }
             }, [isAuthenticated]);
+
+            const fetchAllData = async () => {
+                if (!db) return;
+                
+                setLoadingUsers(true);
+                try {
+                    // Fetch users
+                    const leaderboardRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
+                    const usersSnapshot = await leaderboardRef.orderBy('coins', 'desc').limit(100).get();
+                    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setAllUsers(users);
+                    
+                    // Fetch notifications
+                    const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
+                    const notifSnapshot = await notifRef.orderBy('createdAt', 'desc').limit(20).get();
+                    const notifs = notifSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setSentNotifications(notifs);
+                    
+                    // Fetch assignments
+                    const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
+                    const assignSnapshot = await assignRef.orderBy('createdAt', 'desc').limit(20).get();
+                    const assigns = assignSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setAssignments(assigns);
+                    
+                    // Fetch user progress
+                    const progressRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_progress');
+                    const progressSnapshot = await progressRef.get();
+                    const progress = {};
+                    progressSnapshot.docs.forEach(doc => {
+                        progress[doc.id] = doc.data();
+                    });
+                    setUserProgress(progress);
+                    
+                } catch (err) {
+                    console.error('Failed to fetch data:', err);
+                    toast.error('Lỗi tải dữ liệu!');
+                }
+                setLoadingUsers(false);
+            };
 
             if (!isOpen) return null;
 
             const handleLogin = async () => {
-                // Secure authentication
                 const k = [89, 87, 82, 116, 97, 87, 52, 120, 79, 84, 65, 49].map(c => String.fromCharCode(c)).join('');
                 if (password === atob(k)) {
                     setIsAuthenticated(true);
+                    toast.success('Đăng nhập Admin thành công!');
                 } else {
-                    alert('Sai mật khẩu!');
+                    toast.error('Sai mật khẩu!');
                 }
             };
 
             const handleChange = (section, key, value) => {
                 setLocalConfig(prev => ({
                     ...prev,
-                    [section]: {
-                        ...prev[section],
-                        [key]: parseFloat(value)
-                    }
+                    [section]: { ...prev[section], [key]: parseFloat(value) }
                 }));
             };
 
             const handleSave = () => {
                 setConfig(localConfig);
-                alert('Đã lưu cấu hình!');
+                toast.success('Đã lưu cấu hình!');
                 onClose();
             };
 
@@ -6221,230 +6364,614 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 }
             };
 
-            // Adjust coins for any user on the system
+            // Adjust coins for any user
             const adjustUserCoins = async (userId, amount, isAdd) => {
-                if (!db || !userId) {
-                    alert('Không thể kết nối Firebase!');
-                    return;
-                }
-
+                if (!db || !userId) { toast.error('Không thể kết nối Firebase!'); return; }
                 const userRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').doc(userId);
-
                 try {
                     const doc = await userRef.get();
                     if (doc.exists) {
                         const currentCoins = doc.data().coins || 0;
                         const newCoins = isAdd ? currentCoins + amount : Math.max(0, currentCoins - amount);
                         await userRef.update({ coins: newCoins });
-
-                        // Update local state
                         setAllUsers(prev => prev.map(u => u.id === userId ? { ...u, coins: newCoins } : u));
-                        alert(`Đã ${isAdd ? 'cộng' : 'trừ'} ${amount} xu cho user!`);
+                        toast.success(`Đã ${isAdd ? 'cộng' : 'trừ'} ${amount} xu!`);
                     }
                 } catch (err) {
-                    console.error('Coin update error:', err);
-                    alert('Lỗi cập nhật xu: ' + err.message);
+                    toast.error('Lỗi cập nhật xu!');
                 }
             };
 
+            // Send notification
+            const sendNotification = async () => {
+                if (!db || !notificationText.trim()) { toast.warning('Vui lòng nhập nội dung thông báo!'); return; }
+                
+                try {
+                    const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
+                    const newNotif = {
+                        text: notificationText,
+                        type: notificationType,
+                        target: notificationTarget,
+                        createdAt: Date.now(),
+                        read: []
+                    };
+                    await notifRef.add(newNotif);
+                    
+                    // Also add to user's personal notifications if specific user
+                    if (notificationTarget !== 'all') {
+                        const userNotifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_notifications').doc(notificationTarget);
+                        await userNotifRef.set({
+                            notifications: firebase.firestore.FieldValue.arrayUnion({
+                                ...newNotif,
+                                id: Date.now()
+                            })
+                        }, { merge: true });
+                    }
+                    
+                    setSentNotifications(prev => [{ ...newNotif, id: Date.now() }, ...prev]);
+                    setNotificationText('');
+                    toast.success('Đã gửi thông báo!');
+                } catch (err) {
+                    toast.error('Lỗi gửi thông báo!');
+                }
+            };
+
+            // Create assignment
+            const createAssignment = async () => {
+                if (!db || !assignmentTitle.trim()) { toast.warning('Vui lòng nhập tiêu đề bài tập!'); return; }
+                if (assignmentTopics.length === 0) { toast.warning('Vui lòng chọn ít nhất 1 chủ đề!'); return; }
+                
+                try {
+                    const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
+                    
+                    // Get random words from selected topics
+                    const wordsFromTopics = toeicData.filter(w => assignmentTopics.includes(w.topic));
+                    const shuffled = [...wordsFromTopics].sort(() => Math.random() - 0.5);
+                    const selectedWords = shuffled.slice(0, assignmentWordCount).map(w => w.id);
+                    
+                    const newAssignment = {
+                        title: assignmentTitle,
+                        topics: assignmentTopics,
+                        wordIds: selectedWords,
+                        wordCount: assignmentWordCount,
+                        deadline: assignmentDeadline || null,
+                        target: assignmentTarget,
+                        createdAt: Date.now(),
+                        completedBy: []
+                    };
+                    
+                    await assignRef.add(newAssignment);
+                    setAssignments(prev => [{ ...newAssignment, id: Date.now() }, ...prev]);
+                    setAssignmentTitle('');
+                    setAssignmentTopics([]);
+                    toast.success('Đã tạo bài tập!');
+                } catch (err) {
+                    toast.error('Lỗi tạo bài tập!');
+                }
+            };
+
+            // Delete assignment
+            const deleteAssignment = async (assignId) => {
+                if (!db || !confirm('Xóa bài tập này?')) return;
+                try {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments').doc(assignId).delete();
+                    setAssignments(prev => prev.filter(a => a.id !== assignId));
+                    toast.success('Đã xóa bài tập!');
+                } catch (err) {
+                    toast.error('Lỗi xóa bài tập!');
+                }
+            };
+
+            // Get user stats
+            const getUserStats = (userId) => {
+                const progress = userProgress[userId] || {};
+                return {
+                    learnedCount: progress.learnedWords?.length || 0,
+                    difficultCount: progress.difficultWords?.length || 0,
+                    totalQuizzes: progress.totalQuizzes || 0,
+                    avgScore: progress.avgScore || 0,
+                    lastActive: progress.lastActive || null,
+                    streak: progress.streak || 0
+                };
+            };
+
+            const tabs = [
+                { id: 'users', icon: 'fa-users', label: 'Người dùng' },
+                { id: 'notifications', icon: 'fa-bell', label: 'Thông báo' },
+                { id: 'assignments', icon: 'fa-tasks', label: 'Bài tập' },
+                { id: 'analytics', icon: 'fa-chart-bar', label: 'Thống kê' },
+                { id: 'config', icon: 'fa-cogs', label: 'Cấu hình' },
+            ];
+
             return (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" style={{ animation: 'fadeIn 0.2s ease-out' }}>
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-700 max-h-[90vh] flex flex-col overflow-hidden animate-slideInUp">
-                        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-indigo-500 to-purple-600">
-                            <h2 className="text-xl font-black text-white flex items-center gap-2"><i className="fas fa-cogs"></i>Admin Dashboard</h2>
-                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition admin-btn">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl border border-slate-700 max-h-[90vh] flex flex-col overflow-hidden animate-slideInUp">
+                        {/* Header */}
+                        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+                            <h2 className="text-xl font-black text-white flex items-center gap-2">
+                                <i className="fas fa-shield-alt"></i> Admin Dashboard
+                            </h2>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
                                 <i className="fas fa-times text-white"></i>
                             </button>
                         </div>
 
-                        <div className="p-5 overflow-y-auto custom-scrollbar">
-                            {!isAuthenticated ? (
-                                <div className="flex flex-col gap-4">
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">Vui lòng nhập mật khẩu quản trị viên.</p>
-                                    <input
-                                        type="password"
-                                        placeholder="Mật khẩu..."
-                                        className="p-3 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                                    />
-                                    <button onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg">Đăng Nhập</button>
+                        {!isAuthenticated ? (
+                            <div className="p-8 flex flex-col gap-4">
+                                <div className="text-center mb-4">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                        <i className="fas fa-lock text-3xl text-white"></i>
+                                    </div>
+                                    <p className="text-slate-500 dark:text-slate-400">Nhập mật khẩu để truy cập Admin Dashboard</p>
                                 </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    {/* Flappy Bird Config */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-sky-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-dove mr-2"></i>Chim Từ Vựng</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Tốc độ ống</label>
-                                                <input type="number" step="0.1" value={localConfig.flappy.pipeSpeed} onChange={e => handleChange('flappy', 'pipeSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Trọng lực</label>
-                                                <input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Lực nhảy (số âm)</label>
-                                                <input type="number" step="1" value={localConfig.flappy.jumpStrength} onChange={e => handleChange('flappy', 'jumpStrength', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Tần suất ống (ms)</label>
-                                                <input type="number" step="100" value={localConfig.flappy.pipeSpawnRate} onChange={e => handleChange('flappy', 'pipeSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                        </div>
+                                <input
+                                    type="password"
+                                    placeholder="Mật khẩu..."
+                                    className="p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 dark:bg-slate-900 focus:border-indigo-500 outline-none font-bold text-center text-lg"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                                />
+                                <button onClick={handleLogin} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 rounded-xl transition shadow-lg">
+                                    <i className="fas fa-sign-in-alt mr-2"></i> Đăng Nhập
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-1 overflow-hidden">
+                                {/* Sidebar */}
+                                <div className="w-48 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 p-3 flex flex-col gap-1">
+                                    {tabs.map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                                                activeTab === tab.id 
+                                                    ? 'bg-indigo-600 text-white shadow-lg' 
+                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            <i className={`fas ${tab.icon}`}></i>
+                                            <span>{tab.label}</span>
+                                        </button>
+                                    ))}
+                                    
+                                    <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
+                                        <button onClick={fetchAllData} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs text-slate-500 hover:text-indigo-600 transition">
+                                            <i className="fas fa-sync-alt"></i> Làm mới
+                                        </button>
                                     </div>
+                                </div>
 
-                                    {/* Runner Config */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-green-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-crosshairs mr-2"></i>Bắn Vịt</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Tốc độ vịt</label>
-                                                <input type="number" step="1" value={localConfig.runner.duckSpeed} onChange={e => handleChange('runner', 'duckSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                {/* Content */}
+                                <div className="flex-1 p-5 overflow-y-auto custom-scrollbar">
+                                    {/* USERS TAB */}
+                                    {activeTab === 'users' && (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+                                                    <i className="fas fa-users text-indigo-500"></i> Quản lý Người dùng ({allUsers.length})
+                                                </h3>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="number"
+                                                        value={coinAdjust}
+                                                        onChange={e => setCoinAdjust(parseInt(e.target.value) || 0)}
+                                                        className="w-24 p-2 rounded-lg border dark:bg-slate-800 font-mono text-center text-sm"
+                                                        placeholder="Xu..."
+                                                    />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Tần suất vịt (ms)</label>
-                                                <input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
+                                            
+                                            {loadingUsers ? (
+                                                <div className="text-center py-8"><i className="fas fa-spinner animate-spin text-2xl text-indigo-500"></i></div>
+                                            ) : (
+                                                <div className="grid gap-2 max-h-[500px] overflow-y-auto">
+                                                    {allUsers.map((user, idx) => {
+                                                        const stats = getUserStats(user.id);
+                                                        return (
+                                                            <div key={user.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-300 transition group">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="relative">
+                                                                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="" className="w-12 h-12 rounded-full border-2 border-slate-200" />
+                                                                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${stats.lastActive && Date.now() - stats.lastActive < 86400000 ? 'bg-green-500' : 'bg-slate-400'}`}></div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold text-slate-800 dark:text-white">{user.displayName || 'Ẩn danh'}</div>
+                                                                        <div className="flex items-center gap-3 text-xs text-slate-500">
+                                                                            <span><i className="fas fa-coins text-yellow-500 mr-1"></i>{user.coins?.toLocaleString() || 0}</span>
+                                                                            <span><i className="fas fa-book text-blue-500 mr-1"></i>{stats.learnedCount} từ</span>
+                                                                            <span><i className="fas fa-fire text-orange-500 mr-1"></i>{stats.streak} ngày</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+                                                                    <button onClick={() => adjustUserCoins(user.id, coinAdjust, true)} className="w-8 h-8 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs" title="Cộng xu">
+                                                                        <i className="fas fa-plus"></i>
+                                                                    </button>
+                                                                    <button onClick={() => adjustUserCoins(user.id, coinAdjust, false)} className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs" title="Trừ xu">
+                                                                        <i className="fas fa-minus"></i>
+                                                                    </button>
+                                                                    <button onClick={() => { setSelectedUserForDetails(user); setActiveTab('analytics'); }} className="w-8 h-8 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs" title="Xem chi tiết">
+                                                                        <i className="fas fa-chart-line"></i>
+                                                                    </button>
+                                                                    <button onClick={() => { setNotificationTarget(user.id); setActiveTab('notifications'); }} className="w-8 h-8 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs" title="Gửi thông báo">
+                                                                        <i className="fas fa-bell"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
+                                    )}
 
-                                    {/* Memory Config */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-purple-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-brain mr-2"></i>Ghép Thẻ</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Thời gian lật (s)</label>
-                                                <input type="number" step="0.1" value={localConfig.memory?.flipDuration || 0.6} onChange={e => handleChange('memory', 'flipDuration', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
+                                    {/* NOTIFICATIONS TAB */}
+                                    {activeTab === 'notifications' && (
+                                        <div className="space-y-6">
+                                            <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+                                                <i className="fas fa-bell text-purple-500"></i> Gửi Thông báo
+                                            </h3>
+                                            
+                                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-5 rounded-2xl border border-purple-200 dark:border-purple-800">
+                                                <div className="grid gap-4">
+                                                    {/* Target */}
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Gửi đến</label>
+                                                        <select 
+                                                            value={notificationTarget} 
+                                                            onChange={e => setNotificationTarget(e.target.value)}
+                                                            className="w-full p-3 rounded-xl border dark:bg-slate-800 font-bold"
+                                                        >
+                                                            <option value="all">📢 Tất cả người dùng</option>
+                                                            {allUsers.map(u => (
+                                                                <option key={u.id} value={u.id}>👤 {u.displayName || 'User'}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    {/* Type */}
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Loại thông báo</label>
+                                                        <div className="flex gap-2">
+                                                            {[
+                                                                { id: 'reminder', icon: 'fa-clock', label: 'Nhắc nhở', color: 'blue' },
+                                                                { id: 'achievement', icon: 'fa-trophy', label: 'Thành tích', color: 'yellow' },
+                                                                { id: 'warning', icon: 'fa-exclamation-triangle', label: 'Cảnh báo', color: 'red' },
+                                                                { id: 'assignment', icon: 'fa-tasks', label: 'Bài tập', color: 'green' },
+                                                            ].map(type => (
+                                                                <button
+                                                                    key={type.id}
+                                                                    onClick={() => setNotificationType(type.id)}
+                                                                    className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
+                                                                        notificationType === type.id 
+                                                                            ? `bg-${type.color}-500 text-white` 
+                                                                            : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border'
+                                                                    }`}
+                                                                >
+                                                                    <i className={`fas ${type.icon}`}></i> {type.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Content */}
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Nội dung</label>
+                                                        <textarea
+                                                            value={notificationText}
+                                                            onChange={e => setNotificationText(e.target.value)}
+                                                            className="w-full p-4 rounded-xl border dark:bg-slate-800 resize-none h-24"
+                                                            placeholder="Nhập nội dung thông báo..."
+                                                        />
+                                                    </div>
+                                                    
+                                                    <button onClick={sendNotification} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                                                        <i className="fas fa-paper-plane"></i> Gửi Thông báo
+                                                    </button>
+                                                </div>
                                             </div>
+                                            
+                                            {/* Sent notifications history */}
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500">Kích thước lưới</label>
-                                                <input type="number" step="1" min="2" max="6" value={localConfig.memory?.gridSize || 4} onChange={e => handleChange('memory', 'gridSize', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Quiz Config */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-orange-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-question-circle mr-2"></i>Trắc Nghiệm</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Thời gian/câu (s)</label>
-                                                <input type="number" step="1" min="5" max="60" value={localConfig.quiz?.timePerQuestion || 15} onChange={e => handleChange('quiz', 'timePerQuestion', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Xu/câu đúng</label>
-                                                <input type="number" step="1" min="1" max="50" value={localConfig.quiz?.coinsPerCorrect || 5} onChange={e => handleChange('quiz', 'coinsPerCorrect', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* General Config */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                        <h3 className="font-bold text-lg mb-3 text-yellow-500 border-b border-slate-200 dark:border-slate-700 pb-2"><i className="fas fa-cog mr-2"></i>Cài Đặt Chung</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500">Xu khởi đầu</label>
-                                                <input type="number" step="100" min="0" value={localConfig.general?.startingCoins || 500} onChange={e => handleChange('general', 'startingCoins', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-sm" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Coin Management */}
-                                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-4 rounded-xl border-2 border-yellow-300 dark:border-yellow-700">
-                                        <h3 className="font-bold text-lg mb-3 text-yellow-600 dark:text-yellow-400 border-b border-yellow-200 dark:border-yellow-700 pb-2 flex items-center gap-2">
-                                            <i className="fas fa-coins"></i> Quản lý Xu
-                                        </h3>
-                                        <div className="text-center mb-4">
-                                            <div className="text-xs text-slate-500 dark:text-slate-400">Số xu hiện tại</div>
-                                            <div className="text-3xl font-black text-yellow-600 dark:text-yellow-400">{coins?.toLocaleString() || 0}</div>
-                                        </div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <input
-                                                type="number"
-                                                step="100"
-                                                min="1"
-                                                value={coinAdjust}
-                                                onChange={e => setCoinAdjust(parseInt(e.target.value) || 0)}
-                                                className="flex-1 p-2 rounded-lg border dark:bg-slate-800 font-mono text-center text-lg font-bold"
-                                                placeholder="Số xu..."
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <button
-                                                onClick={() => {
-                                                    setCoins(prev => prev + coinAdjust);
-                                                    alert(`Đã cộng ${coinAdjust} xu!`);
-                                                }}
-                                                className="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg"
-                                            >
-                                                <i className="fas fa-plus"></i> Cộng Xu
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setCoins(prev => Math.max(0, prev - coinAdjust));
-                                                    alert(`Đã trừ ${coinAdjust} xu!`);
-                                                }}
-                                                className="bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg"
-                                            >
-                                                <i className="fas fa-minus"></i> Trừ Xu
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* System-wide User Management */}
-                                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 rounded-xl border-2 border-indigo-300 dark:border-indigo-700">
-                                        <h3 className="font-bold text-lg mb-3 text-indigo-600 dark:text-indigo-400 border-b border-indigo-200 dark:border-indigo-700 pb-2 flex items-center gap-2">
-                                            <i className="fas fa-users"></i> Quản lý Xu Hệ Thống
-                                        </h3>
-
-                                        {loadingUsers ? (
-                                            <div className="text-center py-4 text-slate-500"><i className="fas fa-spinner animate-spin mr-2"></i>Đang tải...</div>
-                                        ) : allUsers.length === 0 ? (
-                                            <div className="text-center py-4 text-slate-400 text-sm">Không có người dùng hoặc chưa kết nối Firebase</div>
-                                        ) : (
-                                            <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
-                                                {allUsers.map((user, idx) => (
-                                                    <div key={user.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 user-row" style={{ animationDelay: `${idx * 50}ms` }}>
-                                                        <div className="flex items-center gap-2">
-                                                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="" className="w-8 h-8 rounded-full" />
-                                                            <div>
-                                                                <div className="font-bold text-sm text-slate-800 dark:text-white truncate max-w-[100px]">{user.displayName || 'User'}</div>
-                                                                <div className="text-xs text-yellow-600 font-bold">{user.coins?.toLocaleString() || 0} xu</div>
+                                                <h4 className="font-bold text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2">
+                                                    <i className="fas fa-history"></i> Lịch sử gửi
+                                                </h4>
+                                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                                    {sentNotifications.map(notif => (
+                                                        <div key={notif.id} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                                notif.type === 'reminder' ? 'bg-blue-100 text-blue-600' :
+                                                                notif.type === 'achievement' ? 'bg-yellow-100 text-yellow-600' :
+                                                                notif.type === 'warning' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                                                            }`}>
+                                                                <i className={`fas ${notif.type === 'reminder' ? 'fa-clock' : notif.type === 'achievement' ? 'fa-trophy' : notif.type === 'warning' ? 'fa-exclamation-triangle' : 'fa-tasks'} text-sm`}></i>
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm text-slate-700 dark:text-slate-200">{notif.text}</p>
+                                                                <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
+                                                                    <span>{notif.target === 'all' ? '📢 Tất cả' : '👤 Cá nhân'}</span>
+                                                                    <span>•</span>
+                                                                    <span>{new Date(notif.createdAt).toLocaleDateString('vi-VN')}</span>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <button
-                                                                onClick={() => adjustUserCoins(user.id, coinAdjust, true)}
-                                                                className="w-8 h-8 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition"
-                                                                title="Cộng xu"
-                                                            >
-                                                                <i className="fas fa-plus"></i>
-                                                            </button>
-                                                            <button
-                                                                onClick={() => adjustUserCoins(user.id, coinAdjust, false)}
-                                                                className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition"
-                                                                title="Trừ xu"
-                                                            >
-                                                                <i className="fas fa-minus"></i>
-                                                            </button>
+                                                    ))}
+                                                    {sentNotifications.length === 0 && (
+                                                        <p className="text-center text-slate-400 py-4">Chưa có thông báo nào</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ASSIGNMENTS TAB */}
+                                    {activeTab === 'assignments' && (
+                                        <div className="space-y-6">
+                                            <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+                                                <i className="fas fa-tasks text-green-500"></i> Giao Bài tập
+                                            </h3>
+                                            
+                                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-5 rounded-2xl border border-green-200 dark:border-green-800">
+                                                <div className="grid gap-4">
+                                                    {/* Title */}
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Tiêu đề bài tập</label>
+                                                        <input
+                                                            type="text"
+                                                            value={assignmentTitle}
+                                                            onChange={e => setAssignmentTitle(e.target.value)}
+                                                            className="w-full p-3 rounded-xl border dark:bg-slate-800"
+                                                            placeholder="VD: Ôn tập từ vựng Marketing..."
+                                                        />
+                                                    </div>
+                                                    
+                                                    {/* Topics */}
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Chọn chủ đề ({assignmentTopics.length} đã chọn)</label>
+                                                        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-white dark:bg-slate-800 rounded-xl border">
+                                                            {uniqueTopics.map(topic => (
+                                                                <button
+                                                                    key={topic}
+                                                                    onClick={() => setAssignmentTopics(prev => 
+                                                                        prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
+                                                                    )}
+                                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition ${
+                                                                        assignmentTopics.includes(topic)
+                                                                            ? 'bg-green-500 text-white'
+                                                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                                                                    }`}
+                                                                >
+                                                                    {topic}
+                                                                </button>
+                                                            ))}
                                                         </div>
+                                                    </div>
+                                                    
+                                                    {/* Word count & Deadline */}
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 mb-2 block">Số từ</label>
+                                                            <input
+                                                                type="number"
+                                                                min="5"
+                                                                max="100"
+                                                                value={assignmentWordCount}
+                                                                onChange={e => setAssignmentWordCount(parseInt(e.target.value) || 20)}
+                                                                className="w-full p-3 rounded-xl border dark:bg-slate-800"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 mb-2 block">Hạn nộp</label>
+                                                            <input
+                                                                type="date"
+                                                                value={assignmentDeadline}
+                                                                onChange={e => setAssignmentDeadline(e.target.value)}
+                                                                className="w-full p-3 rounded-xl border dark:bg-slate-800"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Target */}
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Giao cho</label>
+                                                        <select 
+                                                            value={assignmentTarget} 
+                                                            onChange={e => setAssignmentTarget(e.target.value)}
+                                                            className="w-full p-3 rounded-xl border dark:bg-slate-800"
+                                                        >
+                                                            <option value="all">📢 Tất cả người dùng</option>
+                                                            {allUsers.map(u => (
+                                                                <option key={u.id} value={u.id}>👤 {u.displayName || 'User'}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <button onClick={createAssignment} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                                                        <i className="fas fa-plus"></i> Tạo Bài tập
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Existing assignments */}
+                                            <div>
+                                                <h4 className="font-bold text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2">
+                                                    <i className="fas fa-list"></i> Bài tập đã giao ({assignments.length})
+                                                </h4>
+                                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                                    {assignments.map(assign => (
+                                                        <div key={assign.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                            <div className="flex items-start justify-between">
+                                                                <div>
+                                                                    <h5 className="font-bold text-slate-800 dark:text-white">{assign.title}</h5>
+                                                                    <div className="flex flex-wrap gap-1 mt-2">
+                                                                        {assign.topics?.map(t => (
+                                                                            <span key={t} className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">{t}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                                                                        <span><i className="fas fa-book mr-1"></i>{assign.wordCount} từ</span>
+                                                                        {assign.deadline && <span><i className="fas fa-calendar mr-1"></i>{assign.deadline}</span>}
+                                                                        <span><i className="fas fa-check-circle mr-1 text-green-500"></i>{assign.completedBy?.length || 0} hoàn thành</span>
+                                                                    </div>
+                                                                </div>
+                                                                <button onClick={() => deleteAssignment(assign.id)} className="text-red-500 hover:text-red-700 p-2">
+                                                                    <i className="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {assignments.length === 0 && (
+                                                        <p className="text-center text-slate-400 py-4">Chưa có bài tập nào</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ANALYTICS TAB */}
+                                    {activeTab === 'analytics' && (
+                                        <div className="space-y-6">
+                                            <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+                                                <i className="fas fa-chart-bar text-orange-500"></i> Thống kê Học tập
+                                            </h3>
+                                            
+                                            {/* Overview Cards */}
+                                            <div className="grid grid-cols-4 gap-4">
+                                                {[
+                                                    { label: 'Tổng Users', value: allUsers.length, icon: 'fa-users', color: 'indigo' },
+                                                    { label: 'Hoạt động hôm nay', value: allUsers.filter(u => getUserStats(u.id).lastActive && Date.now() - getUserStats(u.id).lastActive < 86400000).length, icon: 'fa-clock', color: 'green' },
+                                                    { label: 'Tổng từ đã học', value: Object.values(userProgress).reduce((acc, p) => acc + (p.learnedWords?.length || 0), 0), icon: 'fa-book', color: 'blue' },
+                                                    { label: 'Bài tập hoàn thành', value: assignments.reduce((acc, a) => acc + (a.completedBy?.length || 0), 0), icon: 'fa-check-circle', color: 'emerald' },
+                                                ].map((stat, idx) => (
+                                                    <div key={idx} className={`bg-${stat.color}-50 dark:bg-${stat.color}-900/20 p-4 rounded-xl border border-${stat.color}-200 dark:border-${stat.color}-800`}>
+                                                        <div className={`w-10 h-10 bg-${stat.color}-500 rounded-xl flex items-center justify-center text-white mb-2`}>
+                                                            <i className={`fas ${stat.icon}`}></i>
+                                                        </div>
+                                                        <div className="text-2xl font-black text-slate-800 dark:text-white">{stat.value}</div>
+                                                        <div className="text-xs text-slate-500">{stat.label}</div>
                                                     </div>
                                                 ))}
                                             </div>
-                                        )}
-                                        <div className="mt-3 text-xs text-center text-slate-400">Số xu cộng/trừ: <span className="font-bold text-indigo-500">{coinAdjust}</span> (dùng ô nhập ở trên)</div>
-                                    </div>
+                                            
+                                            {/* User Progress Table */}
+                                            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                                <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                                                    <h4 className="font-bold text-slate-700 dark:text-slate-200">Chi tiết tiến độ học</h4>
+                                                </div>
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full">
+                                                        <thead>
+                                                            <tr className="bg-slate-50 dark:bg-slate-900 text-xs text-slate-500 uppercase">
+                                                                <th className="px-4 py-3 text-left">Người dùng</th>
+                                                                <th className="px-4 py-3 text-center">Từ đã học</th>
+                                                                <th className="px-4 py-3 text-center">Từ khó</th>
+                                                                <th className="px-4 py-3 text-center">Streak</th>
+                                                                <th className="px-4 py-3 text-center">Hoạt động</th>
+                                                                <th className="px-4 py-3 text-center">Xu</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {allUsers.slice(0, 20).map(user => {
+                                                                const stats = getUserStats(user.id);
+                                                                const isActive = stats.lastActive && Date.now() - stats.lastActive < 86400000;
+                                                                return (
+                                                                    <tr key={user.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                                                        <td className="px-4 py-3">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="" className="w-8 h-8 rounded-full" />
+                                                                                <span className="font-bold text-sm text-slate-700 dark:text-slate-200">{user.displayName || 'Ẩn danh'}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-center">
+                                                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{stats.learnedCount}</span>
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-center">
+                                                                            <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">{stats.difficultCount}</span>
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-center">
+                                                                            <span className="text-orange-500 font-bold">🔥 {stats.streak}</span>
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-center">
+                                                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                                                {isActive ? 'Online' : 'Offline'}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-center">
+                                                                            <span className="text-yellow-600 font-bold">{user.coins?.toLocaleString() || 0}</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
-                                    <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                        <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition admin-btn">Reset Default</button>
-                                        <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 rounded-xl font-bold transition shadow-lg admin-btn">Lưu Cấu Hình</button>
-                                    </div>
+                                    {/* CONFIG TAB */}
+                                    {activeTab === 'config' && (
+                                        <div className="space-y-4">
+                                            <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2 mb-4">
+                                                <i className="fas fa-cogs text-slate-500"></i> Cấu hình Game
+                                            </h3>
+                                            
+                                            {/* Existing config sections - compressed */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {/* Flappy */}
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
+                                                    <h4 className="font-bold text-sky-500 mb-3"><i className="fas fa-dove mr-2"></i>Chim Từ Vựng</h4>
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div><label className="text-xs text-slate-500">Tốc độ ống</label><input type="number" step="0.1" value={localConfig.flappy.pipeSpeed} onChange={e => handleChange('flappy', 'pipeSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                        <div><label className="text-xs text-slate-500">Trọng lực</label><input type="number" step="0.1" value={localConfig.flappy.gravity} onChange={e => handleChange('flappy', 'gravity', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Runner */}
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
+                                                    <h4 className="font-bold text-green-500 mb-3"><i className="fas fa-crosshairs mr-2"></i>Bắn Vịt</h4>
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div><label className="text-xs text-slate-500">Tốc độ vịt</label><input type="number" step="1" value={localConfig.runner.duckSpeed} onChange={e => handleChange('runner', 'duckSpeed', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                        <div><label className="text-xs text-slate-500">Tần suất</label><input type="number" step="100" value={localConfig.runner.obstacleSpawnRate} onChange={e => handleChange('runner', 'obstacleSpawnRate', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Quiz */}
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
+                                                    <h4 className="font-bold text-orange-500 mb-3"><i className="fas fa-question-circle mr-2"></i>Trắc Nghiệm</h4>
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div><label className="text-xs text-slate-500">Thời gian/câu</label><input type="number" step="1" value={localConfig.quiz?.timePerQuestion || 15} onChange={e => handleChange('quiz', 'timePerQuestion', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                        <div><label className="text-xs text-slate-500">Xu/đúng</label><input type="number" step="1" value={localConfig.quiz?.coinsPerCorrect || 5} onChange={e => handleChange('quiz', 'coinsPerCorrect', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* General */}
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border">
+                                                    <h4 className="font-bold text-yellow-500 mb-3"><i className="fas fa-cog mr-2"></i>Chung</h4>
+                                                    <div><label className="text-xs text-slate-500">Xu khởi đầu</label><input type="number" step="100" value={localConfig.general?.startingCoins || 500} onChange={e => handleChange('general', 'startingCoins', e.target.value)} className="w-full p-2 rounded-lg border dark:bg-slate-800 font-mono text-xs" /></div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Local Coin Management */}
+                                            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-4 rounded-xl border-2 border-yellow-300">
+                                                <h4 className="font-bold text-yellow-600 mb-3"><i className="fas fa-coins mr-2"></i>Xu của bạn: {coins?.toLocaleString() || 0}</h4>
+                                                <div className="flex gap-2">
+                                                    <input type="number" value={coinAdjust} onChange={e => setCoinAdjust(parseInt(e.target.value) || 0)} className="flex-1 p-2 rounded-lg border dark:bg-slate-800 font-mono" />
+                                                    <button onClick={() => { setCoins(prev => prev + coinAdjust); toast.success(`+${coinAdjust} xu!`); }} className="px-4 py-2 bg-green-500 text-white rounded-lg font-bold"><i className="fas fa-plus"></i></button>
+                                                    <button onClick={() => { setCoins(prev => Math.max(0, prev - coinAdjust)); toast.success(`-${coinAdjust} xu!`); }} className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold"><i className="fas fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex gap-3 pt-4 border-t">
+                                                <button onClick={handleReset} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition">Reset Default</button>
+                                                <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-bold shadow-lg">Lưu Cấu Hình</button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -6500,6 +7027,12 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
             const [unlockedSkins, setUnlockedSkins] = React.useState(() => safeJSON('toeic_unlocked_skins', ['skin_default']));
             const [equippedSkin, setEquipSkin] = React.useState(() => localStorage.getItem('toeic_equipped_skin') || 'skin_default');
             const [buyingItem, setBuyingItem] = React.useState(null);
+            
+            // Notifications & Assignments for User
+            const [userNotifications, setUserNotifications] = React.useState([]);
+            const [userAssignments, setUserAssignments] = React.useState([]);
+            const [showNotificationPanel, setShowNotificationPanel] = React.useState(false);
+            const [unreadCount, setUnreadCount] = React.useState(0);
 
             const handleGoogleLogin = async () => {
                 playSound('general', 'click');
@@ -6667,6 +7200,60 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                 });
                 return () => unsubscribe();
             }, [user]);
+
+            // Fetch Notifications & Assignments for User
+            React.useEffect(() => {
+                if (!user || !db) return;
+                
+                // Listen to admin notifications
+                const notifRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('admin_notifications');
+                const unsubNotif = notifRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
+                    const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Filter: show all if target is 'all', or specific to this user
+                    const relevantNotifs = notifs.filter(n => n.target === 'all' || n.target === user.uid);
+                    setUserNotifications(relevantNotifs);
+                    
+                    // Calculate unread
+                    const readIds = JSON.parse(localStorage.getItem('toeic_read_notifications') || '[]');
+                    const unread = relevantNotifs.filter(n => !readIds.includes(n.id)).length;
+                    setUnreadCount(unread);
+                });
+                
+                // Listen to assignments
+                const assignRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('assignments');
+                const unsubAssign = assignRef.orderBy('createdAt', 'desc').limit(10).onSnapshot(snapshot => {
+                    const assigns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Filter: show all if target is 'all', or specific to this user
+                    const relevantAssigns = assigns.filter(a => a.target === 'all' || a.target === user.uid);
+                    setUserAssignments(relevantAssigns);
+                });
+                
+                // Update user progress periodically
+                const updateProgress = () => {
+                    const progressRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('user_progress').doc(user.uid);
+                    progressRef.set({
+                        learnedWords: [...learnedWords],
+                        difficultWords: [...difficultWords],
+                        lastActive: Date.now(),
+                        streak: parseInt(localStorage.getItem('toeic_streak') || '0'),
+                    }, { merge: true }).catch(() => {});
+                };
+                updateProgress();
+                const progressInterval = setInterval(updateProgress, 60000);
+                
+                return () => {
+                    unsubNotif();
+                    unsubAssign();
+                    clearInterval(progressInterval);
+                };
+            }, [user, learnedWords, difficultWords]);
+
+            // Mark notifications as read
+            const markNotificationsAsRead = () => {
+                const readIds = userNotifications.map(n => n.id);
+                localStorage.setItem('toeic_read_notifications', JSON.stringify(readIds));
+                setUnreadCount(0);
+            };
 
             const acceptInvitation = async () => {
                 if (!incomingInvitation || !db) return;
@@ -6841,6 +7428,87 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
                                     <i id="music-icon" className={`fas ${SoundManager.musicEnabled ? 'fa-music' : 'fa-slash'}`}></i>
                                 </button>
 
+                                {/* Notification Bell */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => { setShowNotificationPanel(!showNotificationPanel); if (!showNotificationPanel) markNotificationsAsRead(); }}
+                                        className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition relative"
+                                    >
+                                        <i className="fas fa-bell"></i>
+                                        {unreadCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+                                    
+                                    {/* Notification Panel Dropdown */}
+                                    {showNotificationPanel && (
+                                        <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[60] animate-fadeIn">
+                                            <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex justify-between items-center">
+                                                <h3 className="font-bold flex items-center gap-2"><i className="fas fa-bell"></i> Thông báo</h3>
+                                                <button onClick={() => setShowNotificationPanel(false)} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30">
+                                                    <i className="fas fa-times text-xs"></i>
+                                                </button>
+                                            </div>
+                                            <div className="max-h-80 overflow-y-auto">
+                                                {userNotifications.length === 0 && userAssignments.length === 0 ? (
+                                                    <div className="p-8 text-center text-slate-400">
+                                                        <i className="fas fa-inbox text-3xl mb-2"></i>
+                                                        <p className="text-sm">Không có thông báo</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                                                        {/* Assignments first */}
+                                                        {userAssignments.map(assign => (
+                                                            <div key={assign.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer" onClick={() => { setShowNotificationPanel(false); setView('flashcard'); }}>
+                                                                <div className="flex items-start gap-3">
+                                                                    <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center flex-shrink-0">
+                                                                        <i className="fas fa-tasks"></i>
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate">{assign.title}</h4>
+                                                                        <p className="text-xs text-slate-500 mt-1">{assign.wordCount} từ cần học</p>
+                                                                        {assign.deadline && (
+                                                                            <p className="text-xs text-orange-500 font-bold mt-1">
+                                                                                <i className="fas fa-clock mr-1"></i>Hạn: {assign.deadline}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        
+                                                        {/* Notifications */}
+                                                        {userNotifications.map(notif => (
+                                                            <div key={notif.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                                                                <div className="flex items-start gap-3">
+                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                                                        notif.type === 'reminder' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' :
+                                                                        notif.type === 'achievement' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' :
+                                                                        notif.type === 'warning' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' :
+                                                                        'bg-purple-100 dark:bg-purple-900/30 text-purple-600'
+                                                                    }`}>
+                                                                        <i className={`fas ${
+                                                                            notif.type === 'reminder' ? 'fa-clock' :
+                                                                            notif.type === 'achievement' ? 'fa-trophy' :
+                                                                            notif.type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info'
+                                                                        }`}></i>
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="text-sm text-slate-700 dark:text-slate-200">{notif.text}</p>
+                                                                        <p className="text-xs text-slate-400 mt-1">{new Date(notif.createdAt).toLocaleDateString('vi-VN')}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <button
                                     onClick={() => setIsLeaderboardOpen(true)}
                                     className="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 px-4 py-2 rounded-full text-xs font-bold border border-yellow-200 dark:border-yellow-900/50 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition shadow-sm"
@@ -6981,7 +7649,7 @@ Entertainment|Viewer|/ˈvjuːə/|Người xem chương trình truyền hình|Mil
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(<ToastProvider><App /></ToastProvider>);
     </script>
 </body>
 
